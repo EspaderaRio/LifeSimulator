@@ -23,17 +23,31 @@
         <p id="event-description">Start your business journey and make your mark.</p>
         <div id="choices"></div>
       </section>
-
-      <section id="business-display">
-        <h3>Your Businesses</h3>
-        <div id="owned-businesses" class="business-grid"></div>
-      </section>
     </main>
 
     <footer>
       <button id="next-event">Next Event</button>
-      <button id="buy-business">Buy Business</button>
+      <button id="open-business-tab">Business Market</button>
+      <button id="open-luxury-tab">Luxury Items</button>
     </footer>
+  </div>
+
+  <!-- Business Modal -->
+  <div id="businessModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>🏢 Business Market</h2>
+      <div id="business-choices"></div>
+      <button class="close-btn" id="close-business">Close</button>
+    </div>
+  </div>
+
+  <!-- Luxury Modal -->
+  <div id="luxuryModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>💎 Luxury Items</h2>
+      <div id="luxury-choices"></div>
+      <button class="close-btn" id="close-luxury">Close</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
