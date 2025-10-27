@@ -1,36 +1,50 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BusinessLife Simulator</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BusinessLife Simulator — Prototype</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-wrapper">
-    <header>
+  <div class="app">
+    <header class="topbar">
       <h1>BusinessLife Simulator</h1>
+      <div class="profile">
+        <div id="avatar" class="avatar" title="Your avatar"></div>
+      </div>
     </header>
 
-    <section id="stats">
-      <div class="stat"><span>Year:</span> <span id="year">1</span></div>
-      <div class="stat"><span>Money:</span> $<span id="money">1000</span></div>
-      <div class="stat"><span>Reputation:</span> <span id="reputation">50</span></div>
-      <div class="stat"><span>Stress:</span> <span id="stress">10</span></div>
+    <section class="stats" aria-live="polite">
+      <div class="stat"><div class="label">Year</div><div id="year">1</div></div>
+      <div class="stat"><div class="label">Net Worth</div><div id="money">$1,000</div></div>
+      <div class="stat"><div class="label">Reputation</div><div id="reputation">50</div></div>
+      <div class="stat"><div class="label">Stress</div><div id="stress">10</div></div>
     </section>
 
-    <main id="event-box">
-      <p id="event-text">Welcome to <b>BusinessLife Simulator</b>! Your entrepreneurial journey begins today.</p>
+    <main class="main">
+      <div id="event-card" class="card">
+        <div id="event-illustration" class="illustration" aria-hidden="true"></div>
+        <div id="event-text" class="event-text">Welcome — build your business, make choices, and enjoy the ride.</div>
+      </div>
+
+      <div id="choices" class="choices">
+        <!-- Buttons will be populated by JS for flexibility -->
+      </div>
+      <button id="open-business-menu">🧾 Businesses</button>
+<div id="business-menu" class="hidden">
+  <h2>Available Businesses</h2>
+  <div id="business-list"></div>
+</div>
+
+
+      <div class="controls">
+        <button id="randomize-avatar" class="small">Randomize Avatar</button>
+        <button id="download-state" class="small">Download Save</button>
+      </div>
     </main>
 
-    <div id="choices">
-      <button id="choice1">Start a Lemonade Stand</button>
-      <button id="choice2">Skip Year</button>
-    </div>
-
-    <footer>
-      <p>© 2025 BusinessLife Sim | by Rio Espadera</p>
-    </footer>
+    <footer class="footer">Prototype · Built for fun · by Rio Espadera</footer>
   </div>
 
   <script src="script.js"></script>

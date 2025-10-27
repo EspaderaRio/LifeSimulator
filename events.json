@@ -1,0 +1,156 @@
+[
+  {
+    "text": "A competitor launches a new advertising campaign. How do you respond?",
+    "options": [
+      { "text": "Boost your own ads ($400)", "money": -400, "reputation": 8 },
+      { "text": "Ignore and focus on product quality", "reputation": 5, "stress": -2 },
+      { "text": "Spread a rumor (risky)", "money": 0, "reputation": -10, "stress": 3 }
+    ]
+  },
+  {
+    "text": "An investor offers $10,000 for 25% equity. Accept?",
+    "options": [
+      { "text": "Accept the offer", "money": 10000, "reputation": 15 },
+      { "text": "Decline politely", "reputation": 5 },
+      { "text": "Negotiate for 15%", "money": 6000, "reputation": 10, "stress": 3 }
+    ]
+  },
+  {
+    "text": "A scandal hits your industry. Your PR team asks for $1000 to control damage.",
+    "options": [
+      { "text": "Pay the PR team", "money": -1000, "reputation": 10 },
+      { "text": "Stay silent", "reputation": -10, "stress": 5 }
+    ]
+  },
+  {
+    "text": "Your product goes viral on social media!",
+    "options": [
+      { "text": "Invest in quick scaling ($2000)", "money": -2000, "reputation": 20 },
+      { "text": "Enjoy the free hype", "reputation": 10 },
+      { "text": "Ignore (bad move)", "reputation": -5 }
+    ]
+  },
+  {
+    "text": "Your employee requests a raise.",
+    "options": [
+      { "text": "Grant raise ($300)", "money": -300, "reputation": 5 },
+      { "text": "Deny politely", "reputation": -5, "stress": -2 },
+      { "text": "Fire and replace", "money": -1000, "reputation": -10, "stress": 3 }
+    ]
+  },
+  {
+    "text": "Your business faces a tax audit!",
+    "options": [
+      { "text": "Fully cooperate", "reputation": 10, "stress": 8 },
+      { "text": "Delay submission", "reputation": -5, "stress": 3 },
+      { "text": "Hide losses (risky)", "money": 1500, "reputation": -15, "stress": 5 }
+    ]
+  },
+  {
+    "text": "Your friend offers to join your business as a partner.",
+    "options": [
+      { "text": "Accept partnership", "money": 5000, "reputation": 10, "stress": 5 },
+      { "text": "Decline (stay solo)", "reputation": 2 },
+      { "text": "Demand full control", "reputation": -5, "stress": 3 }
+    ]
+  },
+  {
+    "text": "Your supply chain faces delays.",
+    "options": [
+      { "text": "Pay extra for express shipping ($600)", "money": -600, "reputation": 5 },
+      { "text": "Wait patiently", "reputation": -3, "stress": 4 }
+    ]
+  },
+  {
+    "text": "A tech upgrade can improve productivity by 30%.",
+    "options": [
+      { "text": "Buy upgrade ($2000)", "money": -2000, "reputation": 10, "stress": -3 },
+      { "text": "Wait next year", "reputation": -2 }
+    ]
+  },
+  {
+    "text": "An employee proposes a creative marketing idea.",
+    "options": [
+      { "text": "Implement it", "money": -500, "reputation": 10 },
+      { "text": "Reject idea", "reputation": -3, "stress": -2 },
+      { "text": "Delegate to another team", "reputation": 2, "stress": -1 }
+    ]
+  },
+  {
+    "text": "You receive an offer to buy a small local competitor for $3000.",
+    "options": [
+      { "text": "Buy them", "money": -3000, "reputation": 20 },
+      { "text": "Pass", "reputation": -2 },
+      { "text": "Negotiate lower ($2000)", "money": -2000, "reputation": 10 }
+    ]
+  },
+  {
+    "text": "A new environmental law requires you to upgrade machinery.",
+    "options": [
+      { "text": "Comply ($2500)", "money": -2500, "reputation": 15 },
+      { "text": "Delay compliance", "money": 0, "reputation": -10 },
+      { "text": "Bribe an inspector ($1000)", "money": -1000, "reputation": -20 }
+    ]
+  },
+  {
+    "text": "You are invited to a business expo.",
+    "options": [
+      { "text": "Attend ($700 travel)", "money": -700, "reputation": 12 },
+      { "text": "Send representative", "money": -300, "reputation": 5 },
+      { "text": "Skip it", "reputation": -3 }
+    ]
+  },
+  {
+    "text": "Your software crashes, losing client data!",
+    "options": [
+      { "text": "Apologize and compensate ($1000)", "money": -1000, "reputation": 10, "stress": 4 },
+      { "text": "Blame external issues", "reputation": -10 },
+      { "text": "Stay silent", "reputation": -15, "stress": 3 }
+    ]
+  },
+  {
+    "text": "A popular influencer wants to collaborate for $1500.",
+    "options": [
+      { "text": "Accept deal", "money": -1500, "reputation": 20 },
+      { "text": "Negotiate lower ($800)", "money": -800, "reputation": 10 },
+      { "text": "Reject", "reputation": -2 }
+    ]
+  },
+  {
+    "text": "Your warehouse catches minor fire damage!",
+    "options": [
+      { "text": "Repair immediately ($2000)", "money": -2000, "reputation": 8 },
+      { "text": "Delay repairs", "reputation": -8, "stress": 5 }
+    ]
+  },
+  {
+    "text": "A customer leaves a viral positive review!",
+    "options": [
+      { "text": "Thank publicly", "reputation": 10 },
+      { "text": "Offer a free product ($100)", "money": -100, "reputation": 15 },
+      { "text": "Ignore", "reputation": 0 }
+    ]
+  },
+  {
+    "text": "You get invited to give a talk about entrepreneurship.",
+    "options": [
+      { "text": "Accept invitation", "reputation": 15, "stress": 5 },
+      { "text": "Decline politely", "reputation": 5, "stress": -2 }
+    ]
+  },
+  {
+    "text": "Economic recession hits!",
+    "options": [
+      { "text": "Cut costs", "money": 0, "reputation": -5 },
+      { "text": "Apply for a government loan ($5000)", "money": 5000, "reputation": 5, "stress": 3 },
+      { "text": "Do nothing", "money": -2000, "reputation": -10 }
+    ]
+  },
+  {
+    "text": "Your business is nominated for an award!",
+    "options": [
+      { "text": "Attend ceremony ($500)", "money": -500, "reputation": 25 },
+      { "text": "Skip event", "reputation": 5 }
+    ]
+  }
+]

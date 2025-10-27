@@ -1,0 +1,17 @@
+[
+  { "name": "Lemonade Stand", "cost": 500, "profitPerYear": 200, "stressImpact": 2, "reputationImpact": 3, "image": "lemonade.svg" },
+  { "name": "Coffee Shop", "cost": 2000, "profitPerYear": 700, "stressImpact": 4, "reputationImpact": 5, "image": "coffee.svg" },
+  { "name": "Food Truck", "cost": 3000, "profitPerYear": 1200, "stressImpact": 6, "reputationImpact": 6, "image": "foodtruck.svg" },
+  { "name": "Online Store", "cost": 5000, "profitPerYear": 1800, "stressImpact": 3, "reputationImpact": 7, "image": "onlinestore.svg" },
+  { "name": "Clothing Boutique", "cost": 8000, "profitPerYear": 2500, "stressImpact": 5, "reputationImpact": 8, "image": "clothing.svg" },
+  { "name": "Small Restaurant", "cost": 10000, "profitPerYear": 3000, "stressImpact": 8, "reputationImpact": 9, "image": "restaurant.svg" },
+  { "name": "Tech Startup", "cost": 15000, "profitPerYear": 6000, "stressImpact": 10, "reputationImpact": 10, "image": "tech.svg" },
+  { "name": "Gym & Fitness Center", "cost": 12000, "profitPerYear": 4000, "stressImpact": 6, "reputationImpact": 9, "image": "gym.svg" },
+  { "name": "Logistics Company", "cost": 20000, "profitPerYear": 7000, "stressImpact": 7, "reputationImpact": 9, "image": "truck.svg" },
+  { "name": "Real Estate Firm", "cost": 35000, "profitPerYear": 12000, "stressImpact": 8, "reputationImpact": 12, "image": "realestate.svg" },
+  { "name": "Construction Company", "cost": 40000, "profitPerYear": 15000, "stressImpact": 10, "reputationImpact": 13, "image": "construction.svg" },
+  { "name": "Manufacturing Plant", "cost": 50000, "profitPerYear": 20000, "stressImpact": 10, "reputationImpact": 10, "image": "factory.svg" },
+  { "name": "Energy Company", "cost": 80000, "profitPerYear": 35000, "stressImpact": 9, "reputationImpact": 15, "image": "energy.svg" },
+  { "name": "Media Agency", "cost": 60000, "profitPerYear": 22000, "stressImpact": 7, "reputationImpact": 14, "image": "media.svg" },
+  { "name": "Bank or Investment Firm", "cost": 100000, "profitPerYear": 50000, "stressImpact": 12, "reputationImpact": 18, "image": "bank.svg" }
+]
