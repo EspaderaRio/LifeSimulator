@@ -10,23 +10,26 @@
   <div class="game-container">
     <header>
       <h1>🏙️ BusinessLife Simulator</h1>
+
+      <!-- HUD bars -->
       <div class="hud">
-  <div class="hud-bar">
-    <span>Stress</span>
-    <div class="bar stress-bar"><div class="fill" id="stress-fill"></div></div>
-  </div>
-  <div class="hud-bar">
-    <span>Happiness</span>
-    <div class="bar happiness-bar"><div class="fill" id="happiness-fill"></div></div>
-  </div>
-  <div class="hud-bar">
-    <span>Reputation</span>
-    <div class="bar reputation-bar"><div class="fill" id="reputation-fill"></div></div>
-  </div>
-</div>
+        <div class="hud-bar">
+          <span>Stress</span>
+          <div class="bar stress-bar"><div class="fill" id="stress-fill"></div></div>
+        </div>
+        <div class="hud-bar">
+          <span>Happiness</span>
+          <div class="bar happiness-bar"><div class="fill" id="happiness-fill"></div></div>
+        </div>
+        <div class="hud-bar">
+          <span>Reputation</span>
+          <div class="bar reputation-bar"><div class="fill" id="reputation-fill"></div></div>
+        </div>
+      </div>
 
       <div class="stats">
         <span id="money">$0</span>
+        <span id="reputation-text">⭐ 0</span>
         <span id="age">Age: 18</span>
       </div>
     </header>
@@ -36,6 +39,18 @@
         <h2 id="event-title">Welcome!</h2>
         <p id="event-description">Start your business journey and make your mark.</p>
         <div id="choices"></div>
+      </section>
+
+      <!-- Owned Businesses -->
+      <section id="business-display">
+        <h3>Your Businesses</h3>
+        <div id="owned-businesses" class="business-grid"></div>
+      </section>
+
+      <!-- Owned Luxury Items -->
+      <section id="luxury-display">
+        <h3>Your Luxury Items</h3>
+        <div id="owned-luxury-grid" class="luxury-grid"></div>
       </section>
     </main>
 
