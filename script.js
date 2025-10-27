@@ -10,11 +10,7 @@ let player = {
 };
 
 let businesses = [];
-let luxuryItems = [
-  { name: "Luxury House", cost: 50000, image: "house.svg", happinessImpact: 15 },
-  { name: "Sports Car", cost: 30000, image: "car.svg", happinessImpact: 10 },
-  { name: "Diamond Necklace", cost: 15000, image: "jewelry.svg", happinessImpact: 5 }
-];
+let luxuryItems = {}; // loaded from luxury.json
 
 // Elements
 const businessModal = document.getElementById("businessModal");
@@ -40,7 +36,16 @@ async function loadBusinesses() {
     console.error(err);
   }
 }
-
+// Load luxury.json
+async function loadLuxuryItems() {
+  try {
+    const res = await fetch("luxury.json");
+    if (!res.ok) throw new Error("Failed to load luxury.json");
+    luxuryItems = await res.json();
+  } catch (err) {
+    console.error(err);
+  }
+}
 // Stats & HUD
 function updateStats() {
   document.getElementById("money").textContent = `$${player.money.toLocaleString()}`;
@@ -102,28 +107,63 @@ function openBusinessTab() {
 }
 function closeBusinessTab() { businessModal.classList.add("hidden"); }
 
+// Open Luxury Modal
 function openLuxuryTab() {
   luxuryChoices.innerHTML = "";
-  const grid = document.createElement("div");
-  grid.className = "luxury-grid";
-  luxuryChoices.appendChild(grid);
+  const categoriesDiv = document.getElementById("luxury-categories");
+  categoriesDiv.innerHTML = "";
 
-  luxuryItems.forEach(l => {
-    const card = document.createElement("div");
-    card.className = "luxury-card";
-    card.innerHTML = `
-      <img src="assets/svgs/${l.image}" alt="${l.name}">
-      <p>${l.name}</p>
-      <p>$${l.cost}</p>
-      <button>Buy</button>
-    `;
-    card.querySelector("button").onclick = () => buyLuxuryVisual(l, card);
-    grid.appendChild(card);
+  // Create category buttons
+  Object.keys(luxuryItems).forEach((category, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = category;
+    if (index === 0) btn.classList.add("active"); // default first tab
+    btn.onclick = () => {
+      setActiveCategory(btn);
+      displayLuxuryCategory(category);
+    };
+    categoriesDiv.appendChild(btn);
   });
+
+  // Show first category by default
+  const firstCategory = Object.keys(luxuryItems)[0];
+  if (firstCategory) displayLuxuryCategory(firstCategory);
 
   luxuryModal.classList.remove("hidden");
 }
+
 function closeLuxuryTab() { luxuryModal.classList.add("hidden"); }
+
+function setActiveCategory(activeBtn) {
+  const buttons = document.querySelectorAll(".luxury-categories button");
+  buttons.forEach(btn => btn.classList.remove("active"));
+  activeBtn.classList.add("active");
+}
+
+// Display items for selected category
+function displayLuxuryCategory(category) {
+  const grid = document.createElement("div");
+  grid.className = "luxury-grid";
+
+  luxuryItems[category].forEach(item => {
+    const card = document.createElement("div");
+    card.className = "luxury-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${item.image}" alt="${item.name}">
+      <p>${item.name}</p>
+      <p>$${item.cost}</p>
+      ${item.happinessImpact ? `<p>Happiness: +${item.happinessImpact}</p>` : ""}
+      <button>Buy</button>
+    `;
+    card.querySelector("button").onclick = () => buyLuxuryVisual(item, card);
+    grid.appendChild(card);
+  });
+
+    // Replace old grid
+  const oldGrid = document.querySelector("#luxury-choices .luxury-grid");
+  if (oldGrid) oldGrid.remove();
+  document.getElementById("luxury-choices").appendChild(grid);
+}
 
 // Purchase functions
 function buyBusinessVisual(b) {
