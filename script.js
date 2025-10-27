@@ -3,6 +3,7 @@ let player = {
   money: 10000,
   reputation: 0,
   stress: 0,
+  happiness: 50,
   age: 18,
   ownedBusinesses: [],
   ownedLuxury: []
@@ -10,9 +11,9 @@ let player = {
 
 let businesses = [];
 let luxuryItems = [
-  { name: "Luxury House", cost: 50000, image: "house.svg" },
-  { name: "Sports Car", cost: 30000, image: "car.svg" },
-  { name: "Diamond Necklace", cost: 15000, image: "jewelry.svg" }
+  { name: "Luxury House", cost: 50000, image: "house.svg", happinessImpact: 15 },
+  { name: "Sports Car", cost: 30000, image: "car.svg", happinessImpact: 10 },
+  { name: "Diamond Necklace", cost: 15000, image: "jewelry.svg", happinessImpact: 5 }
 ];
 
 // Elements
@@ -21,6 +22,7 @@ const luxuryModal = document.getElementById("luxuryModal");
 const businessChoices = document.getElementById("business-choices");
 const luxuryChoices = document.getElementById("luxury-choices");
 const ownedBusinessGrid = document.getElementById("owned-businesses");
+const ownedLuxuryGrid = document.getElementById("owned-luxury-grid");
 
 // Event listeners
 document.getElementById("open-business-tab").addEventListener("click", openBusinessTab);
@@ -39,17 +41,24 @@ async function loadBusinesses() {
   }
 }
 
-// Stats
+// Stats & HUD
 function updateStats() {
   document.getElementById("money").textContent = `$${player.money.toLocaleString()}`;
-  document.getElementById("reputation").textContent = `⭐ ${player.reputation}`;
+  document.getElementById("reputation-text").textContent = `⭐ ${player.reputation}`;
   document.getElementById("age").textContent = `Age: ${player.age}`;
+
   displayOwnedBusinesses();
   displayOwnedLuxury();
+
+  // HUD bars
+  document.getElementById("stress-fill").style.width = `${Math.min(player.stress, 100)}%`;
+  document.getElementById("happiness-fill").style.width = `${Math.min(player.happiness, 100)}%`;
+  document.getElementById("reputation-fill").style.width = `${Math.min(player.reputation * 5, 100)}%`;
 }
 
-// Owned Businesses Dashboard
+// Owned Businesses
 function displayOwnedBusinesses() {
+  if (!ownedBusinessGrid) return;
   ownedBusinessGrid.innerHTML = "";
   player.ownedBusinesses.forEach(b => {
     const card = document.createElement("div");
@@ -57,47 +66,41 @@ function displayOwnedBusinesses() {
     card.innerHTML = `
       <img src="assets/svgs/${b.image}" alt="${b.name}">
       <p>${b.name}</p>
+      <p>Stress: +${b.stressImpact}</p>
+      <p>Reputation: +${b.reputationImpact}</p>
     `;
     ownedBusinessGrid.appendChild(card);
   });
 }
 
-// Owned Luxury Dashboard
+// Owned Luxury Items
 function displayOwnedLuxury() {
-  let luxuryGrid = document.getElementById("owned-luxury-grid");
-  if (!luxuryGrid) {
-    luxuryGrid = document.createElement("div");
-    luxuryGrid.id = "owned-luxury-grid";
-    luxuryGrid.className = "luxury-grid";
-    document.querySelector(".game-container main").appendChild(luxuryGrid);
-  }
-  luxuryGrid.innerHTML = "";
+  if (!ownedLuxuryGrid) return;
+  ownedLuxuryGrid.innerHTML = "";
   player.ownedLuxury.forEach(l => {
     const card = document.createElement("div");
     card.className = "luxury-card";
     card.innerHTML = `
       <img src="assets/svgs/${l.image}" alt="${l.name}">
       <p>${l.name}</p>
+      ${l.happinessImpact ? `<p>Happiness: +${l.happinessImpact}</p>` : ""}
     `;
-    luxuryGrid.appendChild(card);
+    ownedLuxuryGrid.appendChild(card);
   });
 }
 
-// Open/Close Functions
+// Modals
 function openBusinessTab() {
   businessChoices.innerHTML = "";
   businesses.forEach(b => {
     const btn = document.createElement("button");
     btn.textContent = `${b.name} — $${b.cost}`;
-    btn.onclick = () => buyBusiness(b);
+    btn.onclick = () => buyBusinessVisual(b);
     businessChoices.appendChild(btn);
   });
   businessModal.classList.remove("hidden");
 }
-
-function closeBusinessTab() {
-  businessModal.classList.add("hidden");
-}
+function closeBusinessTab() { businessModal.classList.add("hidden"); }
 
 function openLuxuryTab() {
   luxuryChoices.innerHTML = "";
@@ -114,44 +117,63 @@ function openLuxuryTab() {
       <p>$${l.cost}</p>
       <button>Buy</button>
     `;
-    const btn = card.querySelector("button");
-    btn.onclick = () => buyLuxuryVisual(l, card);
+    card.querySelector("button").onclick = () => buyLuxuryVisual(l, card);
     grid.appendChild(card);
   });
 
   luxuryModal.classList.remove("hidden");
 }
+function closeLuxuryTab() { luxuryModal.classList.add("hidden"); }
 
-function closeLuxuryTab() {
-  luxuryModal.classList.add("hidden");
-}
-
-// Purchase Functions
-function buyBusiness(b) {
+// Purchase functions
+function buyBusinessVisual(b) {
   if (player.money >= b.cost) {
     player.money -= b.cost;
+    player.stress += b.stressImpact;
+    player.reputation += b.reputationImpact;
     player.ownedBusinesses.push(b);
-    alert(`Purchased ${b.name}!`);
     updateStats();
-  } else {
-    alert("Not enough money!");
-  }
+    animateCardPurchase(b.image);
+    alert(`Purchased ${b.name}!`);
+  } else alert("Not enough money!");
 }
 
 function buyLuxuryVisual(item, card) {
   if (player.money >= item.cost) {
     player.money -= item.cost;
     player.ownedLuxury.push(item);
+    player.happiness += item.happinessImpact || 0;
     updateStats();
-    // animate card
     card.animate(
       [{ transform: "scale(0)" }, { transform: "scale(1)" }],
       { duration: 300, easing: "ease-out" }
     );
     alert(`Purchased ${item.name}!`);
-  } else {
-    alert("Not enough money!");
-  }
+  } else alert("Not enough money!");
+}
+
+// Purchase animation
+function animateCardPurchase(image) {
+  const sparkle = document.createElement("img");
+  sparkle.src = `assets/svgs/${image}`;
+  sparkle.style.position = "fixed";
+  sparkle.style.width = "60px";
+  sparkle.style.top = "50%";
+  sparkle.style.left = "50%";
+  sparkle.style.transform = "translate(-50%, -50%) scale(0)";
+  sparkle.style.zIndex = "200";
+  document.body.appendChild(sparkle);
+
+  sparkle.animate(
+    [
+      { transform: "translate(-50%, -50%) scale(0)" },
+      { transform: "translate(-50%, -50%) scale(1.5)" },
+      { transform: "translate(-50%, -50%) scale(1)" }
+    ],
+    { duration: 500, easing: "ease-out" }
+  );
+
+  setTimeout(() => sparkle.remove(), 600);
 }
 
 // Initialize
