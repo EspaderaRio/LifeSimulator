@@ -7,37 +7,33 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>💼 BusinessLife Simulator</h1>
+  <div class="game-container">
+    <header>
+      <h1>🏙️ BusinessLife Simulator</h1>
+      <div class="stats">
+        <span id="money">$0</span>
+        <span id="reputation">⭐ 0</span>
+        <span id="age">Age: 18</span>
+      </div>
+    </header>
 
-    <div class="stats">
-      <p>Money: <span id="money">$5,000</span></p>
-      <p>Reputation: <span id="reputation">50</span></p>
-      <p>Total Income/turn: <span id="totalIncome">$0</span></p>
-    </div>
+    <main>
+      <section id="event-section">
+        <h2 id="event-title">Welcome!</h2>
+        <p id="event-description">Start your business journey and make your mark.</p>
+        <div id="choices"></div>
+      </section>
 
-    <div id="eventArea" class="event-area">
-      <p id="eventText">Welcome to BusinessLife! Start by buying your first business.</p>
-    </div>
+      <section id="business-display">
+        <h3>Your Businesses</h3>
+        <div id="owned-businesses" class="business-grid"></div>
+      </section>
+    </main>
 
-    <div id="ownedBusinesses" class="owned-businesses">
-      <h3>🏢 Owned Businesses</h3>
-      <div id="ownedList" class="owned-list"></div>
-    </div>
-
-    <div class="controls">
-      <button id="nextEvent">Next Event</button>
-      <button id="openMarket">Open Market</button>
-    </div>
-  </div>
-
-  <!-- Marketplace Modal -->
-  <div id="marketModal" class="modal hidden">
-    <div class="modal-content">
-      <h2>🏪 Business Market</h2>
-      <div id="businessList" class="business-list"></div>
-      <button id="closeMarket" class="close-btn">Close</button>
-    </div>
+    <footer>
+      <button id="next-event">Next Event</button>
+      <button id="buy-business">Buy Business</button>
+    </footer>
   </div>
 
   <script src="script.js"></script>
