@@ -7,23 +7,30 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="game-container">
-    <h1>BusinessLife Simulator</h1>
-    <div id="stats">
-      <p><strong>Year:</strong> <span id="year">1</span></p>
-      <p><strong>Money:</strong> $<span id="money">1000</span></p>
-      <p><strong>Reputation:</strong> <span id="reputation">50</span></p>
-      <p><strong>Stress:</strong> <span id="stress">10</span></p>
-    </div>
+  <div class="app-wrapper">
+    <header>
+      <h1>BusinessLife Simulator</h1>
+    </header>
 
-    <div id="event-box">
-      <p id="event-text">Welcome to BusinessLife Simulator! Start your entrepreneurial journey.</p>
-    </div>
+    <section id="stats">
+      <div class="stat"><span>Year:</span> <span id="year">1</span></div>
+      <div class="stat"><span>Money:</span> $<span id="money">1000</span></div>
+      <div class="stat"><span>Reputation:</span> <span id="reputation">50</span></div>
+      <div class="stat"><span>Stress:</span> <span id="stress">10</span></div>
+    </section>
+
+    <main id="event-box">
+      <p id="event-text">Welcome to <b>BusinessLife Simulator</b>! Your entrepreneurial journey begins today.</p>
+    </main>
 
     <div id="choices">
-      <button id="choice1">Start a Lemonade Stand ($500)</button>
-      <button id="choice2">Save your money</button>
+      <button id="choice1">Start a Lemonade Stand</button>
+      <button id="choice2">Skip Year</button>
     </div>
+
+    <footer>
+      <p>© 2025 BusinessLife Sim | by Rio Espadera</p>
+    </footer>
   </div>
 
   <script src="script.js"></script>
