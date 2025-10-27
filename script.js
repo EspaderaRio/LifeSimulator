@@ -1,113 +1,157 @@
+// Player data
 let player = {
-  money: 1000,
+  money: 10000,
   reputation: 0,
   stress: 0,
   age: 18,
-  ownedBusinesses: []
+  ownedBusinesses: [],
+  ownedLuxury: []
 };
 
 let businesses = [];
+let luxuryItems = [
+  { name: "Luxury House", cost: 50000, image: "house.svg" },
+  { name: "Sports Car", cost: 30000, image: "car.svg" },
+  { name: "Diamond Necklace", cost: 15000, image: "jewelry.svg" }
+];
 
-const eventTitle = document.getElementById("event-title");
-const eventDesc = document.getElementById("event-description");
-const choices = document.getElementById("choices");
+// Elements
+const businessModal = document.getElementById("businessModal");
+const luxuryModal = document.getElementById("luxuryModal");
+const businessChoices = document.getElementById("business-choices");
+const luxuryChoices = document.getElementById("luxury-choices");
+const ownedBusinessGrid = document.getElementById("owned-businesses");
 
-document.getElementById("next-event").addEventListener("click", nextTurn);
-document.getElementById("buy-business").addEventListener("click", openBusinessMenu);
+// Event listeners
+document.getElementById("open-business-tab").addEventListener("click", openBusinessTab);
+document.getElementById("close-business").addEventListener("click", closeBusinessTab);
+document.getElementById("open-luxury-tab").addEventListener("click", openLuxuryTab);
+document.getElementById("close-luxury").addEventListener("click", closeLuxuryTab);
 
+// Load businesses.json
 async function loadBusinesses() {
   try {
     const res = await fetch("businesses.json");
-    if (!res.ok) throw new Error("Could not load businesses.json");
+    if (!res.ok) throw new Error("Failed to load businesses.json");
     businesses = await res.json();
   } catch (err) {
     console.error(err);
   }
 }
 
+// Stats
 function updateStats() {
   document.getElementById("money").textContent = `$${player.money.toLocaleString()}`;
   document.getElementById("reputation").textContent = `⭐ ${player.reputation}`;
   document.getElementById("age").textContent = `Age: ${player.age}`;
+  displayOwnedBusinesses();
+  displayOwnedLuxury();
 }
 
-function nextTurn() {
-  // Age progresses
-  player.age += 1;
-
-  // Calculate total yearly profit
-  let totalProfit = 0;
+// Owned Businesses Dashboard
+function displayOwnedBusinesses() {
+  ownedBusinessGrid.innerHTML = "";
   player.ownedBusinesses.forEach(b => {
-    totalProfit += b.profitPerYear;
+    const card = document.createElement("div");
+    card.className = "business-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${b.image}" alt="${b.name}">
+      <p>${b.name}</p>
+    `;
+    ownedBusinessGrid.appendChild(card);
   });
-  player.money += totalProfit;
-
-  // Trigger a random life or business event
-  randomEvent();
-
-  // Stress recovery logic
-  if (player.stress > 0) player.stress -= 1;
-
-  updateStats();
 }
 
-function randomEvent() {
-  const events = [
-    { title: "Market Boom", desc: "The economy surges! You gain extra profit.", effect: () => player.money += 500 },
-    { title: "Competition Rises", desc: "A rival business affects your sales slightly.", effect: () => player.money -= 300 },
-    { title: "Networking Success", desc: "You meet influential people — reputation up!", effect: () => player.reputation += 2 },
-    { title: "Burnout", desc: "Stress builds up from managing too much.", effect: () => player.stress += 3 },
-  ];
-
-  const e = events[Math.floor(Math.random() * events.length)];
-  e.effect();
-  eventTitle.textContent = e.title;
-  eventDesc.textContent = e.desc;
+// Owned Luxury Dashboard
+function displayOwnedLuxury() {
+  let luxuryGrid = document.getElementById("owned-luxury-grid");
+  if (!luxuryGrid) {
+    luxuryGrid = document.createElement("div");
+    luxuryGrid.id = "owned-luxury-grid";
+    luxuryGrid.className = "luxury-grid";
+    document.querySelector(".game-container main").appendChild(luxuryGrid);
+  }
+  luxuryGrid.innerHTML = "";
+  player.ownedLuxury.forEach(l => {
+    const card = document.createElement("div");
+    card.className = "luxury-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${l.image}" alt="${l.name}">
+      <p>${l.name}</p>
+    `;
+    luxuryGrid.appendChild(card);
+  });
 }
 
-function openBusinessMenu() {
-  choices.innerHTML = "";
-  eventTitle.textContent = "Buy a Business";
-  eventDesc.textContent = "Each business affects money, stress, and reputation.";
-
+// Open/Close Functions
+function openBusinessTab() {
+  businessChoices.innerHTML = "";
   businesses.forEach(b => {
-    const alreadyOwned = player.ownedBusinesses.find(x => x.name === b.name);
-    if (!alreadyOwned) {
-      const btn = document.createElement("button");
-      btn.textContent = `${b.name} — $${b.cost}`;
-      btn.onclick = () => buyBusiness(b);
-      choices.appendChild(btn);
-    }
+    const btn = document.createElement("button");
+    btn.textContent = `${b.name} — $${b.cost}`;
+    btn.onclick = () => buyBusiness(b);
+    businessChoices.appendChild(btn);
   });
+  businessModal.classList.remove("hidden");
 }
 
+function closeBusinessTab() {
+  businessModal.classList.add("hidden");
+}
+
+function openLuxuryTab() {
+  luxuryChoices.innerHTML = "";
+  const grid = document.createElement("div");
+  grid.className = "luxury-grid";
+  luxuryChoices.appendChild(grid);
+
+  luxuryItems.forEach(l => {
+    const card = document.createElement("div");
+    card.className = "luxury-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${l.image}" alt="${l.name}">
+      <p>${l.name}</p>
+      <p>$${l.cost}</p>
+      <button>Buy</button>
+    `;
+    const btn = card.querySelector("button");
+    btn.onclick = () => buyLuxuryVisual(l, card);
+    grid.appendChild(card);
+  });
+
+  luxuryModal.classList.remove("hidden");
+}
+
+function closeLuxuryTab() {
+  luxuryModal.classList.add("hidden");
+}
+
+// Purchase Functions
 function buyBusiness(b) {
   if (player.money >= b.cost) {
     player.money -= b.cost;
-    player.reputation += b.reputationImpact;
-    player.stress += b.stressImpact;
     player.ownedBusinesses.push(b);
-    addBusinessCard(b);
-
-    eventTitle.textContent = `Purchased ${b.name}!`;
-    eventDesc.textContent = `You gain $${b.profitPerYear}/year. Stress +${b.stressImpact}, Reputation +${b.reputationImpact}.`;
+    alert(`Purchased ${b.name}!`);
+    updateStats();
   } else {
-    eventTitle.textContent = "Not Enough Funds!";
-    eventDesc.textContent = "You need more money to buy this business.";
+    alert("Not enough money!");
   }
-  updateStats();
 }
 
-function addBusinessCard(b) {
-  const grid = document.getElementById("owned-businesses");
-  const card = document.createElement("div");
-  card.className = "business-card";
-  card.innerHTML = `
-    <img src="assets/svgs/${b.image}" alt="${b.name}">
-    <p>${b.name}</p>
-  `;
-  grid.appendChild(card);
-  card.animate([{ transform: "scale(0)" }, { transform: "scale(1)" }], { duration: 300, easing: "ease-out" });
+function buyLuxuryVisual(item, card) {
+  if (player.money >= item.cost) {
+    player.money -= item.cost;
+    player.ownedLuxury.push(item);
+    updateStats();
+    // animate card
+    card.animate(
+      [{ transform: "scale(0)" }, { transform: "scale(1)" }],
+      { duration: 300, easing: "ease-out" }
+    );
+    alert(`Purchased ${item.name}!`);
+  } else {
+    alert("Not enough money!");
+  }
 }
 
 // Initialize
