@@ -97,31 +97,58 @@ function displayOwnedLuxury() {
 // Modals
 function openBusinessTab() {
   businessChoices.innerHTML = "";
+
   businesses.forEach(b => {
-    const btn = document.createElement("button");
-    btn.textContent = `${b.name} — $${b.cost}`;
+    // Create card
+    const card = document.createElement("div");
+    card.className = "business-card";
+
+    card.innerHTML = `
+      <img src="assets/svgs/${b.image}" alt="${b.name}">
+      <p>${b.name}</p>
+      <p>Cost: $${b.cost}</p>
+      <p>Stress: +${b.stressImpact}</p>
+      <p>Reputation: +${b.reputationImpact}</p>
+      <button>Buy</button>
+    `;
+
+    // Buy button
+    const btn = card.querySelector("button");
     btn.onclick = () => buyBusinessVisual(b);
-    businessChoices.appendChild(btn);
+
+    businessChoices.appendChild(card);
   });
+
   businessModal.classList.remove("hidden");
 }
+
 function closeBusinessTab() { businessModal.classList.add("hidden"); }
 
-// Open Luxury Modal
 function openLuxuryTab() {
   luxuryChoices.innerHTML = "";
   const categoriesDiv = document.getElementById("luxury-categories");
   categoriesDiv.innerHTML = "";
 
-  // Create category buttons
   Object.keys(luxuryItems).forEach((category, index) => {
     const btn = document.createElement("button");
-    btn.textContent = category;
-    if (index === 0) btn.classList.add("active"); // default first tab
+
+    // Icon from JSON
+    const icon = document.createElement("img");
+    icon.src = `assets/svgs/${luxuryItems[category].icon}`;
+    icon.alt = category;
+    icon.style.width = "20px";
+    icon.style.height = "20px";
+    icon.style.marginRight = "5px";
+    btn.appendChild(icon);
+
+    btn.appendChild(document.createTextNode(category));
+
+    if (index === 0) btn.classList.add("active");
     btn.onclick = () => {
       setActiveCategory(btn);
       displayLuxuryCategory(category);
     };
+
     categoriesDiv.appendChild(btn);
   });
 
@@ -141,11 +168,12 @@ function setActiveCategory(activeBtn) {
 }
 
 // Display items for selected category
+// Update displayLuxuryCategory to pull items from JSON
 function displayLuxuryCategory(category) {
   const grid = document.createElement("div");
   grid.className = "luxury-grid";
 
-  luxuryItems[category].forEach(item => {
+  luxuryItems[category].items.forEach(item => {
     const card = document.createElement("div");
     card.className = "luxury-card";
     card.innerHTML = `
@@ -159,10 +187,9 @@ function displayLuxuryCategory(category) {
     grid.appendChild(card);
   });
 
-    // Replace old grid
   const oldGrid = document.querySelector("#luxury-choices .luxury-grid");
   if (oldGrid) oldGrid.remove();
-  document.getElementById("luxury-choices").appendChild(grid);
+  luxuryChoices.appendChild(grid);
 }
 
 // Purchase functions
@@ -192,6 +219,7 @@ function buyLuxuryVisual(item, card) {
   } else alert("Not enough money!");
 }
 
+
 // Purchase animation
 function animateCardPurchase(image) {
   const sparkle = document.createElement("img");
@@ -214,6 +242,45 @@ function animateCardPurchase(image) {
   );
 
   setTimeout(() => sparkle.remove(), 600);
+}
+
+document.getElementById("advance-month").addEventListener("click", () => advanceTime("month"));
+document.getElementById("advance-year").addEventListener("click", () => advanceTime("year"));
+
+function advanceTime(type) {
+  let monthsPassed = 1;
+  if (!player.month) player.month = 1;
+
+  if (type === "month") {
+    player.month++;
+    if (player.month > 12) {
+      player.month = 1;
+      player.age++;
+    }
+  } else if (type === "year") {
+    player.age++;
+    monthsPassed = 12;
+  }
+
+  // Add income & stress/reputation effects
+  let totalIncome = 0;
+  player.ownedBusinesses.forEach(b => {
+    totalIncome += (b.profitPerYear / 12) * monthsPassed;
+    player.stress += (b.stressImpact / 12) * monthsPassed;
+    player.reputation += (b.reputationImpact / 12) * monthsPassed;
+  });
+
+  player.money += Math.round(totalIncome);
+
+  // Happiness decrease if stress high
+  if (player.stress > 70) player.happiness -= monthsPassed * 2;
+
+  // Clamp values
+  player.stress = Math.min(Math.max(player.stress, 0), 100);
+  player.happiness = Math.min(Math.max(player.happiness, 0), 100);
+
+  updateStats();
+  alert(`Time advanced! Age: ${player.age}, Money: $${player.money}`);
 }
 
 // Initialize
