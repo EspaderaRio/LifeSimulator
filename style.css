@@ -63,13 +63,13 @@ header {
   border-radius: 10px;
 }
 
-.business-grid {
+.business-grid, .luxury-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
 }
 
-.business-card {
+.business-card, .luxury-card {
   background: #2e2e4d;
   border-radius: 10px;
   text-align: center;
@@ -77,15 +77,15 @@ header {
   transition: transform 0.3s ease;
 }
 
-.business-card:hover {
-  transform: translateY(-5px);
-}
-
-.business-card img {
+.business-card img, .luxury-card img {
   width: 70px;
   height: 70px;
   margin-bottom: 5px;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+}
+
+.business-card:hover, .luxury-card:hover {
+  transform: translateY(-5px);
 }
 
 footer {
