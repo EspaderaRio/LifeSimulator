@@ -1,0 +1,26 @@
+{
+  "Houses": {
+    "icon": "house_icon.svg",
+    "items": [
+      { "name": "Luxury Mansion", "cost": 120000, "happinessImpact": 25, "image": "house_mansion.svg" },
+      { "name": "Beach Villa", "cost": 90000, "happinessImpact": 20, "image": "house_villa.svg" },
+      { "name": "City Penthouse", "cost": 75000, "happinessImpact": 18, "image": "house_penthouse.svg" }
+    ]
+  },
+  "Transportation": {
+    "icon": "car_icon.svg",
+    "items": [
+      { "name": "Sports Car", "cost": 40000, "happinessImpact": 10, "image": "car_sports.svg" },
+      { "name": "Private Jet", "cost": 250000, "happinessImpact": 35, "image": "plane_private.svg" },
+      { "name": "Yacht", "cost": 180000, "happinessImpact": 30, "image": "ship_yacht.svg" }
+    ]
+  },
+  "Jewelry": {
+    "icon": "jewelry_icon.svg",
+    "items": [
+      { "name": "Diamond Necklace", "cost": 15000, "happinessImpact": 5, "image": "jewelry_diamond.svg" },
+      { "name": "Gold Watch", "cost": 12000, "happinessImpact": 4, "image": "jewelry_watch.svg" },
+      { "name": "Emerald Ring", "cost": 10000, "happinessImpact": 3, "image": "jewelry_ring.svg" }
+    ]
+  }
+}
