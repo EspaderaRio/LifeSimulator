@@ -1,50 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BusinessLife Simulator — Prototype</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BusinessLife Simulator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
-      <h1>BusinessLife Simulator</h1>
-      <div class="profile">
-        <div id="avatar" class="avatar" title="Your avatar"></div>
-      </div>
-    </header>
+  <div class="container">
+    <h1>💼 BusinessLife Simulator</h1>
 
-    <section class="stats" aria-live="polite">
-      <div class="stat"><div class="label">Year</div><div id="year">1</div></div>
-      <div class="stat"><div class="label">Net Worth</div><div id="money">$1,000</div></div>
-      <div class="stat"><div class="label">Reputation</div><div id="reputation">50</div></div>
-      <div class="stat"><div class="label">Stress</div><div id="stress">10</div></div>
-    </section>
+    <div class="stats">
+      <p>Money: <span id="money">$5000</span></p>
+      <p>Reputation: <span id="reputation">50</span></p>
+    </div>
 
-    <main class="main">
-      <div id="event-card" class="card">
-        <div id="event-illustration" class="illustration" aria-hidden="true"></div>
-        <div id="event-text" class="event-text">Welcome — build your business, make choices, and enjoy the ride.</div>
-      </div>
+    <div id="eventArea" class="event-area">
+      <p id="eventText">Welcome to BusinessLife! Start by buying your first business.</p>
+    </div>
 
-      <div id="choices" class="choices">
-        <!-- Buttons will be populated by JS for flexibility -->
-      </div>
-      <button id="open-business-menu">🧾 Businesses</button>
-<div id="business-menu" class="hidden">
-  <h2>Available Businesses</h2>
-  <div id="business-list"></div>
-</div>
+    <div class="business-display">
+      <img id="businessImage" src="" alt="" class="hidden" />
+      <p id="businessName"></p>
+    </div>
 
+    <div class="controls">
+      <button id="nextEvent">Next Event</button>
+      <button id="openMarket">Open Market</button>
+    </div>
+  </div>
 
-      <div class="controls">
-        <button id="randomize-avatar" class="small">Randomize Avatar</button>
-        <button id="download-state" class="small">Download Save</button>
-      </div>
-    </main>
-
-    <footer class="footer">Prototype · Built for fun · by Rio Espadera</footer>
+  <!-- Marketplace Modal -->
+  <div id="marketModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>🏪 Business Market</h2>
+      <div id="businessList" class="business-list"></div>
+      <button id="closeMarket" class="close-btn">Close</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
