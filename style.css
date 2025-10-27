@@ -91,6 +91,11 @@ header h1 {
   transform: scale(1.05);
   transform: translateY(-5px);
 }
+
+.business-card p{
+  color:black;
+  font-style: italic;
+}
 .luxury-categories {
   display: flex;
   gap: 10px;
