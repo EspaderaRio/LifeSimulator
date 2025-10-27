@@ -76,6 +76,29 @@ header h1 {
 .business-card:hover, .luxury-card:hover {
   transform: translateY(-5px);
 }
+.luxury-categories {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.luxury-categories button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #555577;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.luxury-categories button.active {
+  background: #3498db;
+}
+
+.luxury-categories button:hover {
+  background: #666699;
+}
 
 footer button {
   margin-right: 10px;
