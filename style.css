@@ -108,6 +108,39 @@ button:hover {
 .business-card:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+.owned-businesses {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.owned-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.5rem;
+}
+
+.owned-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+  border-radius: 8px;
+  text-align: center;
+  animation: slideIn 0.5s ease;
+}
+
+.owned-card img {
+  width: 60px;
+  height: 60px;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.9); }
