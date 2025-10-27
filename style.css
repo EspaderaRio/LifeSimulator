@@ -1,148 +1,110 @@
 body {
-  background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-  color: #fff;
   font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #1e1e2f, #3b3b58);
+  color: #fff;
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
 }
 
-.container {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
+.game-container {
+  width: 90%;
+  max-width: 800px;
+  margin-top: 30px;
+  background: #2a2a40;
   border-radius: 20px;
-  width: 400px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+}
+
+header {
   text-align: center;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
 }
 
 .stats {
-  margin-bottom: 1rem;
-}
-
-button {
-  background-color: #2ecc71;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  margin: 5px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover {
-  background-color: #27ae60;
-}
-
-.event-area {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 1rem;
-  border-radius: 10px;
-  min-height: 80px;
-  margin-bottom: 1rem;
-}
-
-.business-display {
-  margin: 1rem 0;
-}
-
-.business-display img {
-  width: 150px;
-  height: auto;
-  animation: fadeIn 0.8s ease;
-}
-
-.hidden {
-  display: none;
-}
-
-/* Modal Styles */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(15, 15, 15, 0.8);
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-around;
+  background: #1f1f33;
+  border-radius: 10px;
+  padding: 10px;
 }
 
-.modal-content {
-  background: #1f2a38;
-  padding: 2rem;
-  border-radius: 15px;
-  width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
+#event-section {
+  background: #353553;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
 }
 
-.close-btn {
-  background-color: #e74c3c;
+#choices button {
+  display: block;
+  margin: 8px 0;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #4e4ee8;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-.business-list {
+#choices button:hover {
+  transform: scale(1.05);
+  background: #6f6ff9;
+}
+
+#business-display {
+  background: #1f1f33;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.business-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
 }
 
 .business-card {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
+  background: #2e2e4d;
   border-radius: 10px;
   text-align: center;
-  transition: 0.3s;
-}
-
-.business-card img {
-  width: 80px;
-  height: 80px;
+  padding: 10px;
+  transition: transform 0.3s ease;
 }
 
 .business-card:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-.owned-businesses {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 1rem;
-  border-radius: 10px;
-  margin-top: 1rem;
-  text-align: left;
-  max-height: 200px;
-  overflow-y: auto;
+  transform: translateY(-5px);
 }
 
-.owned-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 0.5rem;
+.business-card img {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 5px;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
 }
 
-.owned-card {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.5rem;
-  border-radius: 8px;
+footer {
   text-align: center;
-  animation: slideIn 0.5s ease;
+  margin-top: 15px;
 }
 
-.owned-card img {
-  width: 60px;
-  height: 60px;
+footer button {
+  margin: 5px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #4e4ee8;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
+footer button:hover {
+  background: #6f6ff9;
 }
