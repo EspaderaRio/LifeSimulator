@@ -119,6 +119,20 @@ header h1 {
 .luxury-categories button:hover {
   background: #666699;
 }
+.life-card {
+  display: inline-block;
+  width: 150px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  text-align: center;
+  background: #f9f9f9;
+  margin: 5px;
+}
+.life-card img {
+  width: 60px;
+  height: 60px;
+}
 
 footer button {
   margin-right: 10px;
