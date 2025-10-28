@@ -133,7 +133,10 @@ header h1 {
   width: 60px;
   height: 60px;
 }
-
+.life-card p {
+  color: black;
+}
+  
 footer button {
   margin-right: 10px;
   padding: 10px 15px;
