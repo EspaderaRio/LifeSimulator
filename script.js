@@ -124,26 +124,31 @@ function openBusinessTab() {
 
 function closeBusinessTab() { businessModal.classList.add("hidden"); }
 
+// Open Luxury Tab
 function openLuxuryTab() {
   luxuryChoices.innerHTML = "";
   const categoriesDiv = document.getElementById("luxury-categories");
   categoriesDiv.innerHTML = "";
 
   Object.keys(luxuryItems).forEach((category, index) => {
+    const catData = luxuryItems[category];
+
     const btn = document.createElement("button");
+    btn.className = "luxury-category-btn";
 
-    // Icon from JSON
+    // Category Icon (from JSON)
     const icon = document.createElement("img");
-    icon.src = `assets/svgs/${luxuryItems[category].icon}`;
+    icon.src = `assets/svgs/${catData.icon}`;
     icon.alt = category;
-    icon.style.width = "20px";
-    icon.style.height = "20px";
-    icon.style.marginRight = "5px";
-    btn.appendChild(icon);
+    icon.style.width = "24px";
+    icon.style.height = "24px";
+    icon.style.marginRight = "6px";
 
+    btn.appendChild(icon);
     btn.appendChild(document.createTextNode(category));
 
     if (index === 0) btn.classList.add("active");
+
     btn.onclick = () => {
       setActiveCategory(btn);
       displayLuxuryCategory(category);
@@ -158,7 +163,6 @@ function openLuxuryTab() {
 
   luxuryModal.classList.remove("hidden");
 }
-
 function closeLuxuryTab() { luxuryModal.classList.add("hidden"); }
 
 function setActiveCategory(activeBtn) {
@@ -168,18 +172,18 @@ function setActiveCategory(activeBtn) {
 }
 
 // Display items for selected category
-// Update displayLuxuryCategory to pull items from JSON
 function displayLuxuryCategory(category) {
   const grid = document.createElement("div");
   grid.className = "luxury-grid";
 
-  luxuryItems[category].items.forEach(item => {
+  const items = luxuryItems[category].items || [];
+  items.forEach(item => {
     const card = document.createElement("div");
     card.className = "luxury-card";
     card.innerHTML = `
       <img src="assets/svgs/${item.image}" alt="${item.name}">
       <p>${item.name}</p>
-      <p>$${item.cost}</p>
+      <p>Cost: $${item.cost.toLocaleString()}</p>
       ${item.happinessImpact ? `<p>Happiness: +${item.happinessImpact}</p>` : ""}
       <button>Buy</button>
     `;
