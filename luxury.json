@@ -1,33 +1,37 @@
 {
   "Cars": {
-    "icon": "car.svg",
+    "icon": "cars.svg",
     "items": [
-      { "name": "Sports Car", "cost": 30000, "happinessImpact": 10, "image": "car.svg" },
-      { "name": "Luxury SUV", "cost": 50000, "happinessImpact": 12, "image": "suv.svg" }
+      { "name": "Sports Car", "cost": 80000, "happinessImpact": 10, "image": "sports_car.svg" },
+      { "name": "Luxury SUV", "cost": 120000, "happinessImpact": 15, "image": "suv.svg" }
     ]
   },
   "Planes": {
     "icon": "plane.svg",
     "items": [
-      { "name": "Private Jet", "cost": 200000, "happinessImpact": 25, "image": "jet.svg" }
-    ]
-  },
-  "Yachts": {
-    "icon": "yacht.svg",
-    "items": [
-      { "name": "Luxury Yacht", "cost": 150000, "happinessImpact": 20, "image": "yacht.svg" }
+      { "name": "Private Jet", "cost": 5000000, "happinessImpact": 30, "image": "private_jet.svg" },
+      { "name": "Helicopter", "cost": 1500000, "happinessImpact": 20, "image": "helicopter.svg" }
     ]
   },
   "Houses": {
     "icon": "house.svg",
     "items": [
-      { "name": "Beach Villa", "cost": 120000, "happinessImpact": 18, "image": "villa.svg" }
+      { "name": "Beach House", "cost": 900000, "happinessImpact": 25, "image": "beach_house.svg" },
+      { "name": "Penthouse", "cost": 1500000, "happinessImpact": 30, "image": "penthouse.svg" }
     ]
   },
   "Jewelry": {
     "icon": "jewelry.svg",
     "items": [
-      { "name": "Diamond Necklace", "cost": 15000, "happinessImpact": 8, "image": "necklace.svg" }
+      { "name": "Diamond Ring", "cost": 50000, "happinessImpact": 8, "image": "ring.svg" },
+      { "name": "Luxury Watch", "cost": 120000, "happinessImpact": 10, "image": "watch.svg" }
+    ]
+  },
+  "Yachts": {
+    "icon": "yacht.svg",
+    "items": [
+      { "name": "Luxury Yacht", "cost": 2500000, "happinessImpact": 40, "image": "yacht.svg" },
+      { "name": "Mini Cruiser", "cost": 750000, "happinessImpact": 20, "image": "mini_cruiser.svg" }
     ]
   }
 }
