@@ -219,6 +219,86 @@ function buyLuxuryVisual(item, card) {
   } else alert("Not enough money!");
 }
 
+const lifeModal = document.getElementById("lifeModal");
+const lifeChoices = document.getElementById("life-choices");
+
+document.getElementById("open-life-tab").addEventListener("click", openLifeTab);
+document.getElementById("close-life").addEventListener("click", closeLifeTab);
+
+function openLifeTab() {
+  lifeChoices.innerHTML = "";
+  const actions = [
+    {
+      name: "Vacation Trip",
+      cost: 2000,
+      stressChange: -20,
+      happinessChange: +25,
+      reputationChange: +3,
+      image: "vacation.svg"
+    },
+    {
+      name: "Family Time",
+      cost: 500,
+      stressChange: -15,
+      happinessChange: +20,
+      reputationChange: 0,
+      image: "family.svg"
+    },
+    {
+      name: "Charity Donation",
+      cost: 1500,
+      stressChange: -5,
+      happinessChange: +10,
+      reputationChange: +10,
+      image: "charity.svg"
+    },
+    {
+      name: "Spa Day",
+      cost: 800,
+      stressChange: -25,
+      happinessChange: +15,
+      reputationChange: 0,
+      image: "spa.svg"
+    }
+  ];
+
+  actions.forEach(a => {
+    const card = document.createElement("div");
+    card.className = "life-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${a.image}" alt="${a.name}">
+      <p>${a.name}</p>
+      <p>Cost: $${a.cost}</p>
+      <p>Stress: ${a.stressChange}</p>
+      <p>Happiness: +${a.happinessChange}</p>
+      <p>Reputation: +${a.reputationChange}</p>
+      <button>Do Activity</button>
+    `;
+    card.querySelector("button").onclick = () => doLifeAction(a, card);
+    lifeChoices.appendChild(card);
+  });
+
+  lifeModal.classList.remove("hidden");
+}
+
+function closeLifeTab() {
+  lifeModal.classList.add("hidden");
+}
+
+function doLifeAction(a, card) {
+  if (player.money >= a.cost) {
+    player.money -= a.cost;
+    player.stress = Math.max(0, player.stress + a.stressChange);
+    player.happiness = Math.min(100, player.happiness + a.happinessChange);
+    player.reputation += a.reputationChange;
+    updateStats();
+    card.animate([{ transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 300 });
+    alert(`You enjoyed ${a.name}!`);
+  } else {
+    alert("Not enough money!");
+  }
+}
+
 
 // Purchase animation
 function animateCardPurchase(image) {
