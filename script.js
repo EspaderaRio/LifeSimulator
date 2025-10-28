@@ -10,7 +10,7 @@ let player = {
 };
 
 let businesses = [];
-let luxuryItems = {}; // loaded from luxury.json
+let luxuryItems = []; // loaded from luxury.json
 
 // Elements
 const businessModal = document.getElementById("businessModal");
