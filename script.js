@@ -190,7 +190,6 @@ btn.onclick = () => {
   displayLuxuryCategory(category);
 };
 categoriesDiv.appendChild(btn);
-```
 
 });
 
