@@ -173,7 +173,16 @@ header h1 {
   margin-top: 20px;
   border-radius: 15px;
 }
-
+/* Character display styling */
+#playerCharacter {
+  width: 180px;        /* Adjust size here (try 150–200px) */
+  height: auto;        /* Keeps proportions correct */
+  display: block;
+  margin: 0 auto;      /* Centers the image */
+  border-radius: 12px; /* Optional — soft rounded corners */
+  object-fit: contain; /* Ensures full outfit shows, no cropping */
+  image-rendering: auto;
+}
   
 footer button {
   margin-right: 10px;
