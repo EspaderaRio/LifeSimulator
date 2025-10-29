@@ -175,7 +175,7 @@ btn.className = "luxury-category-btn";
 
 
 const icon = document.createElement("img");
-icon.src = 'assets/svgs/${catData.icon || "default.svg"}`;
+icon.src = 'assets/svgs/${catData.icon || "default.svg"}';
 icon.alt = category;
 icon.style.width = "24px";
 icon.style.height = "24px";
