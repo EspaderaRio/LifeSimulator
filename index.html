@@ -36,6 +36,11 @@
     </header>
 
     <main>
+      <section>
+      <div id="player-character-display">
+  <img id="playerCharacter" src="" alt="Your Character">
+</div>
+      </section>
       <section id="event-section">
         <h2 id="event-title">Welcome!</h2>
         <p id="event-description">Start your business journey and make your mark.</p>
@@ -95,6 +100,32 @@
   <button id="close-luxury">Close</button>
      </div>
 </div>
+  <!-- Character Modal -->
+<div id="characterModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>🧍 Character Customization</h2>
+
+    <!-- Gender Selection -->
+    <div class="gender-select">
+      <h3>Select Gender</h3>
+      <button class="gender-btn" data-gender="female">Female</button>
+      <button class="gender-btn" data-gender="male">Male</button>
+    </div>
+
+    <!-- Outfit Options -->
+    <div id="outfit-selection" class="outfit-grid hidden">
+      <h3>Select Outfit</h3>
+      <div id="outfit-options"></div>
+    </div>
+
+    <div class="character-preview">
+      <img id="character-preview-img" src="" alt="Character Preview" />
+    </div>
+
+    <button class="close-btn" id="close-character">Close</button>
+  </div>
+</div>
+
 
 
 
