@@ -92,10 +92,35 @@ header h1 {
   transform: translateY(-5px);
 }
 
-.business-card p{
+.business-card p {
   color:black;
   font-style: italic;
 }
+
+.manage-business-card {
+  background: #1c1c1c;
+  padding: 12px;
+  margin: 10px;
+  border-radius: 10px;
+  text-align: center;
+}
+.manage-business-card img {
+  width: 64px;
+  height: 64px;
+}
+.business-actions button {
+  margin: 4px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #3b82f6;
+  color: white;
+}
+.business-actions button:hover {
+  opacity: 0.85;
+}
+
 .luxury-categories {
   display: flex;
   gap: 10px;
