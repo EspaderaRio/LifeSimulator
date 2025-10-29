@@ -29,6 +29,81 @@ const lifeChoices = document.getElementById("life-choices");
 const ownedBusinessGrid = document.getElementById("owned-businesses");
 const ownedLuxuryGrid = document.getElementById("owned-luxury-grid");
 
+// === CHARACTER CUSTOMIZATION ===
+const characterModal = document.getElementById("characterModal");
+const openCharacterTab = document.getElementById("open-character-tab");
+const closeCharacter = document.getElementById("close-character");
+const outfitSelection = document.getElementById("outfit-selection");
+const outfitOptions = document.getElementById("outfit-options");
+const characterPreview = document.getElementById("character-preview-img");
+
+let playerGender = localStorage.getItem("playerGender") || null;
+let playerOutfit = localStorage.getItem("playerOutfit") || null;
+
+// Outfit data
+const characterOutfits = {
+  female: [
+    { id: "polo", src: "assets/female/polo.png" },
+    { id: "dress", src: "assets/female/dress.png" },
+    { id: "suit", src: "assets/female/suit.png" },
+    { id: "suit", src: "assets/female/princess.png" }
+  ],
+  male: [
+    { id: "tshirt", src: "assets/male/polo.png" },
+    { id: "hoodie", src: "assets/male/tshirt.png" },
+    { id: "suit", src: "assets/male/suit.png" },
+    { id: "suit", src: "assets/male/prince.png" }
+  ]
+};
+
+// Open and close modal
+openCharacterTab.onclick = () => {
+  characterModal.classList.remove("hidden");
+};
+
+closeCharacter.onclick = () => {
+  characterModal.classList.add("hidden");
+};
+
+// Gender selection
+document.querySelectorAll(".gender-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const gender = btn.dataset.gender;
+    playerGender = gender;
+    localStorage.setItem("playerGender", gender);
+    showOutfits(gender);
+  });
+});
+
+// Display outfits for selected gender
+function showOutfits(gender) {
+  outfitSelection.classList.remove("hidden");
+  outfitOptions.innerHTML = "";
+
+  characterOutfits[gender].forEach(outfit => {
+    const img = document.createElement("img");
+    img.src = outfit.src;
+    img.alt = outfit.id;
+    img.onclick = () => selectOutfit(outfit.id, outfit.src);
+    outfitOptions.appendChild(img);
+  });
+}
+
+// Select outfit
+function selectOutfit(id, src) {
+  playerOutfit = id;
+  localStorage.setItem("playerOutfit", id);
+  localStorage.setItem("playerOutfitSrc", src);
+  characterPreview.src = src;
+}
+
+const playerCharacter = document.getElementById("playerCharacter");
+const savedOutfitSrc = localStorage.getItem("playerOutfitSrc");
+
+if (savedOutfitSrc) {
+  playerCharacter.src = savedOutfitSrc;
+}
+
 // ===================== UTILITY FUNCTIONS ===================== //
 function clampStats() {
 player.stress = Math.min(Math.max(player.stress, 0), 100);
