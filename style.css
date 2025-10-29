@@ -108,18 +108,30 @@ header h1 {
   width: 64px;
   height: 64px;
 }
+
+.business-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
 .business-actions button {
-  margin: 4px;
+  font-size: 13px;
+  background: #3b82f6;
+  color: white;
   padding: 6px 10px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background: #3b82f6;
-  color: white;
+  transition: background 0.2s;
 }
+
 .business-actions button:hover {
-  opacity: 0.85;
+  background: #2563eb;
 }
+
 
 .luxury-categories {
   display: flex;
