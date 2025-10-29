@@ -94,8 +94,29 @@ function selectOutfit(id, src) {
   playerOutfit = id;
   localStorage.setItem("playerOutfit", id);
   localStorage.setItem("playerOutfitSrc", src);
+
+  // Update character preview in customization tab
   characterPreview.src = src;
+
+  // Instantly change the actual in-game character image
+  const playerCharacter = document.getElementById("playerCharacter");
+  if (playerCharacter) {
+    playerCharacter.src = src;
+  }
+
+  // Optional: subtle animation for feedback
+  playerCharacter?.animate(
+    [
+      { transform: "scale(0.9)", opacity: 0.8 },
+      { transform: "scale(1.05)", opacity: 1 },
+      { transform: "scale(1)", opacity: 1 }
+    ],
+    { duration: 400, easing: "ease-in-out" }
+  );
+
+  showToast(`Outfit changed to ${id}!`);
 }
+
 
 const playerCharacter = document.getElementById("playerCharacter");
 const savedOutfitSrc = localStorage.getItem("playerOutfitSrc");
