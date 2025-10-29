@@ -173,7 +173,7 @@ const catData = luxuryItems[category];
 const btn = document.createElement("button");
 btn.className = "luxury-category-btn";
 
-```
+
 const icon = document.createElement("img");
 icon.src = 'assets/svgs/${catData.icon || "default.svg"}`;
 icon.alt = category;
