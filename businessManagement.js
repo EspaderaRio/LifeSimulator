@@ -1,9 +1,7 @@
 /* ============================================================
- BUSINESS MANAGEMENT SYSTEM
- Works with script.js and businesses.json
+ BUSINESS MANAGEMENT SYSTEM (with visible action values)
 ============================================================ */
 
-// ====== Modal and Button Setup ======
 const manageBusinessBtn = document.getElementById("open-manage-businesses");
 const businessManageModal = document.getElementById("businessManageModal");
 const closeBusinessManage = document.getElementById("close-manage-business");
@@ -36,9 +34,13 @@ function displayManagedBusinesses() {
   }
 
   player.ownedBusinesses.forEach((b, i) => {
-    // Add upgrade and manager fields if missing
     if (!b.level) b.level = 1;
     if (b.hasManager === undefined) b.hasManager = false;
+
+    const upgradeCost = Math.round(b.cost * 0.5 * b.level);
+    const managerCost = Math.round(b.cost * 0.25);
+    const sellValue = Math.round((b.cost * b.level) * 0.75);
+    const collectValue = Math.round(b.profitPerYear / 12 * b.level);
 
     const card = document.createElement("div");
     card.className = "manage-business-card";
@@ -49,10 +51,10 @@ function displayManagedBusinesses() {
       <p>Profit per Year: $${Math.round(b.profitPerYear * b.level).toLocaleString()}</p>
       <p>Has Manager: ${b.hasManager ? "✅ Yes" : "❌ No"}</p>
       <div class="business-actions">
-        <button class="collect-btn">Collect Profit</button>
-        <button class="upgrade-btn">Upgrade</button>
-        <button class="manager-btn">Hire Manager</button>
-        <button class="sell-btn">Sell</button>
+        <button class="collect-btn">Collect +$${collectValue.toLocaleString()}</button>
+        <button class="upgrade-btn">Upgrade ($${upgradeCost.toLocaleString()})</button>
+        <button class="manager-btn">Hire Manager ($${managerCost.toLocaleString()})</button>
+        <button class="sell-btn">Sell +$${sellValue.toLocaleString()}</button>
       </div>
     `;
 
@@ -66,13 +68,14 @@ function displayManagedBusinesses() {
   });
 }
 
-// ====== Actions ======
+// ====== ACTIONS ======
 function collectBusinessProfit(business) {
   const monthlyProfit = business.profitPerYear / 12 * (business.level || 1);
   player.money += monthlyProfit;
   player.stress += 2;
   showToast(`Collected $${Math.round(monthlyProfit).toLocaleString()} from ${business.name}.`);
   updateStats();
+  displayManagedBusinesses();
 }
 
 function upgradeBusiness(business) {
