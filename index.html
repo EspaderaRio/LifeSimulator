@@ -63,8 +63,9 @@
     <footer>
   <button id="next-event">Next Event</button>
   <button id="open-business-tab">🏢 Businesses</button>
+  <button id="open-manage-businesses">Manage Businesses</button>
   <button id="open-luxury-tab">💎 Luxury</button>
-   <button id="open-life-tab">🌴 Personal Life</button>
+  <button id="open-life-tab">🌴 Personal Life</button>
   <button id="open-character-tab">🧍 Character</button>
   <button id="advance-month">➕ Month</button>
   <button id="advance-year">📆 Year</button>
@@ -80,8 +81,6 @@
   </div>
 </div>
 
-
-
   <!-- Business Modal -->
   <div id="businessModal" class="modal hidden">
     <div class="modal-content">
@@ -90,6 +89,15 @@
       <button class="close-btn" id="close-business">Close</button>
     </div>
   </div>
+
+  <!-- Manage Business Modal -->
+<div id="businessManageModal" class="modal hidden">
+  <div class="modal-content">
+    <span id="close-manage-business" class="close">&times;</span>
+    <h2>Manage Your Businesses</h2>
+    <div id="manage-business-list" class="manage-business-list"></div>
+  </div>
+</div>
 
 
   <div id="luxuryModal" class="modal hidden">
@@ -126,9 +134,7 @@
   </div>
 </div>
 
-
-
-
   <script src="script.js"></script>
+  <script src="businessManagement.js"></script>
 </body>
 </html>
