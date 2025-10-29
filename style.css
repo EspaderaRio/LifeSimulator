@@ -141,6 +141,39 @@ header h1 {
 .life-card p {
   color: black;
 }
+.gender-select button {
+  background: #2196f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.gender-select button:hover {
+  background: #1565c0;
+}
+
+.outfit-grid img {
+  width: 120px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  margin: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.outfit-grid img:hover {
+  border-color: #2196f3;
+}
+
+.character-preview img {
+  width: 200px;
+  margin-top: 20px;
+  border-radius: 15px;
+}
+
   
 footer button {
   margin-right: 10px;
@@ -175,6 +208,7 @@ footer button {
   overflow-y: auto;
   position: relative;
 }
+
 
 .toast {
   position: fixed;
