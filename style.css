@@ -119,6 +119,11 @@ header h1 {
 .luxury-categories button:hover {
   background: #666699;
 }
+.luxury-card p {
+  color: black;
+  font-style: italic;
+  font-weight: bold;
+}
 .life-card {
   display: inline-block;
   width: 150px;
