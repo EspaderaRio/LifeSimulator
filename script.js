@@ -14,9 +14,18 @@ ownedBusinesses: [],
 ownedLuxury: []
 };
 
+function setGameBackground(imageName) {
+  document.body.style.backgroundImage = `url('assets/svgs/${imageName}')`;
+  document.body.style.backgroundSize = "cover";
+  document.body.style.backgroundPosition = "center";
+  document.body.style.backgroundRepeat = "no-repeat";
+}
+
+
 // ===================== GLOBAL VARIABLES ===================== //
 let businesses = [];
 let luxuryItems = {};
+
 
 const businessModal = document.getElementById("businessModal");
 const luxuryModal = document.getElementById("luxuryModal");
@@ -334,6 +343,12 @@ return showToast("Not enough money!");
 
 player.money -= item.cost;
 player.ownedLuxury.push(item);
+
+  // If bought item is a House, set as background
+if (item.category === "Houses") {
+  player.selectedHouse = item;
+  setGameBackground(item.image);
+}
 
 const gain = item.happinessImpact || 0;
 player.happiness = Math.min(100, player.happiness + gain);
