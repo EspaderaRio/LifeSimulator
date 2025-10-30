@@ -111,29 +111,34 @@ header h1 {
 }
 
 #open-manage-businesses {
-  display: block;
-  margin: 15px auto 0;
-  padding: 10px 18px;
-  font-size: 16px;
-  font-weight: 600;
+  display: inline-block;
+  background: linear-gradient(135deg, #0078d7, #00a8ff);
   color: white;
-  background: linear-gradient(135deg, #4CAF50, #2E7D32);
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: all 0.25s ease;
+  margin-top: 10px;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 #open-manage-businesses:hover {
-  background: linear-gradient(135deg, #43A047, #1B5E20);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #00a8ff, #0078d7);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.35);
 }
 
 #open-manage-businesses:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #0064b7, #0088d7);
+}
+
+#business-display {
+  text-align: center;
+  padding-bottom: 10px;
 }
 
 .business-actions {
