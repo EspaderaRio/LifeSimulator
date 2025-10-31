@@ -105,11 +105,24 @@ function closeModal(modalElement) {
 }
 
 const menuToggle = document.getElementById('menu-toggle');
-const controlButtons = document.getElementById('control-buttons');
+const controlModal = document.getElementById('control-modal');
+const closeModal = document.getElementById('close-modal');
 
 menuToggle.addEventListener('click', () => {
-  controlButtons.classList.toggle('hidden');
+  openModal(controlModal);
 });
+
+closeModal.addEventListener('click', () => {
+  closeModal(controlModal);
+});
+
+// Optional: close modal if clicking outside the modal content
+controlModal.addEventListener('click', (e) => {
+  if (e.target === controlModal) {
+    closeModal(controlModal);
+  }
+});
+
 
 // Open and close modal
 openCharacterTab.onclick = () => {
