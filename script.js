@@ -599,55 +599,92 @@ function generateFamily() {
 
 // ===================== LIFE RESET & SURRENDER ===================== //
 document.getElementById("surrender-life").addEventListener("click", () => {
-  if (confirm("Are you sure you want to surrender your life? This cannot be undone.")) {
-    handleGameOver();
+  if (confirm("Are you sure you want to surrender your life? This will erase all progress and your character.")) {
+    surrenderLife();
   }
 });
 
 document.getElementById("restart-life").addEventListener("click", () => {
-  if (confirm("Restart a new life from birth? All progress will be lost.")) {
+  if (confirm("Restart life with the same character? Your stats and possessions will reset.")) {
     restartLife();
   }
 });
 
-function handleGameOver() {
-  showToast("💀 You have surrendered your life...");
-  player.happiness = 0;
-  player.stress = 100;
-  player.reputation = 0;
-  player.money = 0;
-  setGameBackground("heaven.svg"); // optional: add a symbolic image
-  localStorage.removeItem("selectedHouse");
+function surrenderLife() {
+  // Fade to black
+  const fade = document.createElement("div");
+  fade.className = "fade-overlay";
+  fade.style.cssText = `
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: black;
+    opacity: 0;
+    transition: opacity 1s;
+    z-index: 9999;
+  `;
+  document.body.appendChild(fade);
+  requestAnimationFrame(() => (fade.style.opacity = 1));
+
   setTimeout(() => {
-    alert("Your life has ended. You can start a new one anytime.");
+    // Completely clear everything
+    localStorage.clear();
+
+    // Reset variables
+    player = null;
+    family = null;
+
+    setGameBackground("heaven.svg");
+    showToast("💀 You have surrendered your life...");
+    
+    setTimeout(() => {
+      alert("Your existence has ended. Begin anew anytime.");
+      fade.remove();
+      // Optionally reload to reset the game UI
+      location.reload();
+    }, 1000);
   }, 1000);
 }
 
 function restartLife() {
-  // Reset player data
-  player = {
-    money: 10000,
-    reputation: 0,
-    stress: 0,
-    happiness: 50,
-    age: 0,
-    month: 1,
-    ownedBusinesses: [],
-    ownedLuxury: []
-  };
+  // Fade to white
+  const fade = document.createElement("div");
+  fade.className = "fade-overlay";
+  fade.style.cssText = `
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: white;
+    opacity: 0;
+    transition: opacity 1s;
+    z-index: 9999;
+  `;
+  document.body.appendChild(fade);
+  requestAnimationFrame(() => (fade.style.opacity = 1));
 
-  // Reset family, outfit, and house
-  family = { surname: "", father: {}, mother: {}, siblings: [] };
-  generateFamily();
-  localStorage.removeItem("playerOutfitSrc");
-  localStorage.removeItem("playerOutfit");
-  localStorage.removeItem("playerGender");
-  localStorage.removeItem("selectedHouse");
+  setTimeout(() => {
+    // Keep character, outfit, and background
+    const keptCharacter = localStorage.getItem("playerOutfitSrc");
+    const keptHouse = localStorage.getItem("selectedHouse");
 
-  setGameBackground("birth.svg"); // optional newborn background
-  updateStats();
-  showToast("A new life begins!");
+    // Reset life stats but keep same identity
+    player.money = 10000;
+    player.happiness = 50;
+    player.stress = 0;
+    player.reputation = 0;
+    player.age = 18;
+    player.month = 1;
+    player.ownedBusinesses = [];
+    player.ownedLuxury = [];
+
+    // Refresh visuals
+    if (keptCharacter) document.getElementById("playerCharacter").src = keptCharacter;
+    if (keptHouse) setGameBackground(keptHouse);
+
+    updateStats();
+    showToast("🌅 A new chapter of your life begins!");
+    fade.remove();
+  }, 1200);
 }
+
 
 
 // ===================== INITIALIZE GAME ===================== //
