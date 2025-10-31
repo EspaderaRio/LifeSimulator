@@ -446,6 +446,11 @@ footer button:active {
   background: linear-gradient(135deg, #007a4d, #00a86b);
 }
 
+#restart-life img, #surrender-life img {
+  width: 24px;
+}
+
+
 
 
 
