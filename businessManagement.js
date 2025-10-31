@@ -116,7 +116,7 @@ card.querySelector(".research-btn").onclick = () => researchBusiness(b);
 card.querySelector(".sell-btn").onclick = () => sellBusiness(b);
 
 manageBusinessList.appendChild(card);
-```
+
 
 });
 }
