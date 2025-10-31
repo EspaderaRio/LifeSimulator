@@ -597,6 +597,58 @@ function generateFamily() {
   console.log("Generated family:", family);
 }
 
+// ===================== LIFE RESET & SURRENDER ===================== //
+document.getElementById("surrender-life").addEventListener("click", () => {
+  if (confirm("Are you sure you want to surrender your life? This cannot be undone.")) {
+    handleGameOver();
+  }
+});
+
+document.getElementById("restart-life").addEventListener("click", () => {
+  if (confirm("Restart a new life from birth? All progress will be lost.")) {
+    restartLife();
+  }
+});
+
+function handleGameOver() {
+  showToast("💀 You have surrendered your life...");
+  player.happiness = 0;
+  player.stress = 100;
+  player.reputation = 0;
+  player.money = 0;
+  setGameBackground("heaven.svg"); // optional: add a symbolic image
+  localStorage.removeItem("selectedHouse");
+  setTimeout(() => {
+    alert("Your life has ended. You can start a new one anytime.");
+  }, 1000);
+}
+
+function restartLife() {
+  // Reset player data
+  player = {
+    money: 10000,
+    reputation: 0,
+    stress: 0,
+    happiness: 50,
+    age: 0,
+    month: 1,
+    ownedBusinesses: [],
+    ownedLuxury: []
+  };
+
+  // Reset family, outfit, and house
+  family = { surname: "", father: {}, mother: {}, siblings: [] };
+  generateFamily();
+  localStorage.removeItem("playerOutfitSrc");
+  localStorage.removeItem("playerOutfit");
+  localStorage.removeItem("playerGender");
+  localStorage.removeItem("selectedHouse");
+
+  setGameBackground("birth.svg"); // optional newborn background
+  updateStats();
+  showToast("A new life begins!");
+}
+
 
 // ===================== INITIALIZE GAME ===================== //
 (async function init() {
