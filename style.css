@@ -416,11 +416,13 @@ footer button:active {
 }
 
 .modal-content {
+  position: relative;
   background: #fff;
   border-radius: 10px;
   padding: 20px;
   width: 600px;
   max-height: 80vh;
+  margin: 50px auto;
   overflow-y: auto;
   text-align: center;
   box-shadow: 0 5px 20px rgba(0,0,0,0.3);
@@ -472,15 +474,34 @@ footer button:active {
   100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
 }
 
-.close-btn {
-  margin-top: 15px;
-  background-color: #e74c3c;
-  color: white;
-  padding: 10px 15px;
+
+
+/* Close button */
+.close-btn, #close-luxury {
+  position: absolute; /* position relative to .modal-content */
+  top: 10px;
+  right: 10px;
+  background: transparent;
   border: none;
-  border-radius: 10px;
   cursor: pointer;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
 }
+
+.close-btn:hover {
+  transform: scale(1.2); /* hover effect */
+}
+
+.close-btn img, #close-luxury img {
+  width: 24px;
+  height: 24px;
+}
+
 .hidden {
   display: none;
 }
