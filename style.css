@@ -22,6 +22,7 @@ header h1 {
   margin-bottom: 10px;
 }
 
+
 .hud-bar {
   flex-direction: column;
   flex: 1;
@@ -334,7 +335,7 @@ footer {
 }
 
 footer button {
-   flex: 1;
+  flex: 1;
   margin: 0 5px;
   font-size: 20px; /* adjust icon size */
   padding: 8px 0;
@@ -344,9 +345,14 @@ footer button {
   cursor: pointer;
   transition: transform 0.2s, background 0.2s;
 }
+footer button img {
+  width: 32px;        /* icon size */
+  height: 32px;
+  object-fit: contain; /* keeps proportions */
+}
 
 footer button:hover {
-   background: #e0e0e0;
+  background: #e0e0e0;
   transform: translateY(-2px);
 }
 
