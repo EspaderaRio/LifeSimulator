@@ -106,13 +106,14 @@ function closeModal(modalElement) {
 
 const menuToggle = document.getElementById('menu-toggle');
 const controlModal = document.getElementById('control-modal');
+const closeControl = document.getElementById('close-modal');
 
 
 menuToggle.addEventListener('click', () => {
   openModal(controlModal);
 });
 
-closeModal.addEventListener('click', () => {
+closeControl.addEventListener('click', () => {
   closeModal(controlModal);
 });
 
