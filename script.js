@@ -4,17 +4,16 @@ BUSINESSLIFE SIMULATOR (Optimized v2)
 
 // ===================== PLAYER DATA ===================== //
 let player = {
-money: 10000,
-reputation: 0,
-stress: 0,
-happiness: 50,
-age: 18,
-month: 1,
-ownedBusinesses: [],
-ownedLuxury: []
+  money: 10000,
+  reputation: 0,
+  stress: 0,
+  happiness: 50,
+  age: 18,
+  month: 1,
+  ownedBusinesses: [],
+  ownedLuxury: []
 };
 
-// ===================== FAMILY DATA ===================== //
 let family = {
   surname: "",
   father: {},
@@ -22,6 +21,7 @@ let family = {
   siblings: []
 };
 
+// ===================== BACKGROUND & CHARACTER ===================== //
 function setGameBackground(imageName) {
   const bgDiv = document.getElementById("player-character-bg");
   if (bgDiv) {
@@ -31,6 +31,36 @@ function setGameBackground(imageName) {
     bgDiv.style.backgroundRepeat = "no-repeat";
     bgDiv.style.transition = "background-image 0.8s ease-in-out";
   }
+}
+
+const playerCharacter = document.getElementById("playerCharacter");
+const savedOutfitSrc = localStorage.getItem("playerOutfitSrc");
+
+// === Default character if none chosen === //
+if (savedOutfitSrc) {
+  playerCharacter.src = savedOutfitSrc;
+} else {
+  playerCharacter.src = "assets/default.png"; // NEW default character
+}
+
+// ===================== LOAD / SAVE PROGRESS ===================== //
+function saveProgress() { // NEW
+  localStorage.setItem("playerData", JSON.stringify(player));
+  localStorage.setItem("familyData", JSON.stringify(family));
+}
+
+function loadProgress() { // NEW
+  const savedPlayer = localStorage.getItem("playerData");
+  const savedFamily = localStorage.getItem("familyData");
+
+  if (savedPlayer) player = JSON.parse(savedPlayer);
+  if (savedFamily) family = JSON.parse(savedFamily);
+}
+
+function clearProgress() { // NEW
+  localStorage.removeItem("playerData");
+  localStorage.removeItem("familyData");
+  localStorage.removeItem("selectedHouse");
 }
 
 
@@ -194,34 +224,36 @@ setTimeout(() => sparkle.remove(), 600);
 }
 
 // ===================== HUD UPDATE ===================== //
+// ===================== UPDATE STATS ===================== //
 function updateStats() {
-clampStats();
+  clampStats();
+  document.getElementById("money").textContent = `$${player.money.toLocaleString()}`;
+  document.getElementById("reputation-text").textContent = `⭐ ${player.reputation}`;
+  document.getElementById("age").textContent = `Age: ${player.age}`;
+  document.getElementById("month").textContent = `Month: ${player.month}`;
 
-document.getElementById("money").textContent = `$${player.money.toLocaleString()}`;
-document.getElementById("reputation-text").textContent = `⭐ ${player.reputation}`;
-document.getElementById("age").textContent = `Age: ${player.age}`;
-document.getElementById("month").textContent = `Month: ${player.month}`;
+  const happinessFill = document.getElementById("happiness-fill");
+  const stressFill = document.getElementById("stress-fill");
+  const repFill = document.getElementById("reputation-fill");
 
-const happinessFill = document.getElementById("happiness-fill");
-const stressFill = document.getElementById("stress-fill");
-const repFill = document.getElementById("reputation-fill");
+  happinessFill.style.width = `${player.happiness}%`;
+  stressFill.style.width = `${player.stress}%`;
+  repFill.style.width = `${player.reputation}%`;
 
-happinessFill.style.width = `${player.happiness}%`;
-stressFill.style.width = `${player.stress}%`;
-repFill.style.width = `${player.reputation}%`;
+  happinessFill.style.backgroundColor =
+    player.happiness > 70 ? "#4CAF50" :
+    player.happiness > 40 ? "#FFC107" : "#E53935";
 
-happinessFill.style.backgroundColor =
-player.happiness > 70 ? "#4CAF50" :
-player.happiness > 40 ? "#FFC107" : "#E53935";
+  stressFill.style.backgroundColor =
+    player.stress > 70 ? "#E53935" :
+    player.stress > 40 ? "#FFC107" : "#4CAF50";
 
-stressFill.style.backgroundColor =
-player.stress > 70 ? "#E53935" :
-player.stress > 40 ? "#FFC107" : "#4CAF50";
+  displayOwnedBusinesses();
+  displayOwnedLuxury();
 
-displayOwnedBusinesses();
-displayOwnedLuxury();
+  // Always save after update
+  saveProgress(); // NEW
 }
-
 // ===================== BUSINESS HANDLERS ===================== //
 async function loadBusinesses() {
 try {
@@ -597,7 +629,7 @@ function generateFamily() {
   console.log("Generated family:", family);
 }
 
-// ===================== LIFE RESET & SURRENDER ===================== //
+// ===================== GAME OVER & LIFE RESET ===================== //
 document.getElementById("surrender-life").addEventListener("click", () => {
   if (confirm("Are you sure you want to surrender your life? This cannot be undone.")) {
     handleGameOver();
@@ -611,42 +643,89 @@ document.getElementById("restart-life").addEventListener("click", () => {
 });
 
 function handleGameOver() {
-  showToast("💀 You have surrendered your life...");
-  player.happiness = 0;
-  player.stress = 100;
-  player.reputation = 0;
-  player.money = 0;
-  setGameBackground("heaven.svg"); // optional: add a symbolic image
-  localStorage.removeItem("selectedHouse");
+  // Fade out + reset life visuals
+  const fade = document.createElement("div");
+  fade.className = "fade-screen";
+  fade.style.cssText = `
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background:black; opacity:0; transition: opacity 1.5s;
+    z-index:9999;
+  `;
+  document.body.appendChild(fade);
+  setTimeout(() => fade.style.opacity = 1, 50);
+
   setTimeout(() => {
+    // Clear all progress and reset visuals
+    clearProgress();
+    setGameBackground("heaven.svg");
+    showToast("💀 You have surrendered your life...");
+
+    // Reset stats
+    player = {
+      money: 0,
+      reputation: 0,
+      stress: 100,
+      happiness: 0,
+      age: player.age,
+      month: player.month,
+      ownedBusinesses: [],
+      ownedLuxury: []
+    };
+
+    // Remove outfit data
+    localStorage.removeItem("playerOutfitSrc");
+    localStorage.removeItem("playerOutfit");
+    localStorage.removeItem("playerGender");
+    document.getElementById("playerCharacter").src = "assets/default.png";
+
+    fade.remove();
     alert("Your life has ended. You can start a new one anytime.");
-  }, 1000);
+  }, 1800);
 }
 
 function restartLife() {
-  // Reset player data
-  player = {
-    money: 10000,
-    reputation: 0,
-    stress: 0,
-    happiness: 50,
-    age: 0,
-    month: 1,
-    ownedBusinesses: [],
-    ownedLuxury: []
-  };
+  const savedGender = localStorage.getItem("playerGender");
+  const savedOutfitSrc = localStorage.getItem("playerOutfitSrc");
 
-  // Reset family, outfit, and house
-  family = { surname: "", father: {}, mother: {}, siblings: [] };
-  generateFamily();
-  localStorage.removeItem("playerOutfitSrc");
-  localStorage.removeItem("playerOutfit");
-  localStorage.removeItem("playerGender");
-  localStorage.removeItem("selectedHouse");
+  const rebirth = document.createElement("div");
+  rebirth.className = "fade-screen";
+  rebirth.style.cssText = `
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background:white; opacity:0; transition: opacity 1s;
+    z-index:9999;
+  `;
+  document.body.appendChild(rebirth);
+  setTimeout(() => rebirth.style.opacity = 1, 50);
 
-  setGameBackground("birth.svg"); // optional newborn background
-  updateStats();
-  showToast("A new life begins!");
+  setTimeout(() => {
+    // Reset all stats and life
+    player = {
+      money: 10000,
+      reputation: 0,
+      stress: 0,
+      happiness: 50,
+      age: 0,
+      month: 1,
+      ownedBusinesses: [],
+      ownedLuxury: []
+    };
+    family = { surname: "", father: {}, mother: {}, siblings: [] };
+    generateFamily();
+    clearProgress();
+
+    setGameBackground("birth.svg");
+    if (savedOutfitSrc) {
+      document.getElementById("playerCharacter").src = savedOutfitSrc;
+      localStorage.setItem("playerGender", savedGender);
+      localStorage.setItem("playerOutfitSrc", savedOutfitSrc);
+    } else {
+      document.getElementById("playerCharacter").src = "assets/default.png";
+    }
+
+    updateStats();
+    showToast("🌅 A new life begins!");
+    rebirth.remove();
+  }, 1200);
 }
 
 
@@ -654,13 +733,14 @@ function restartLife() {
 (async function init() {
   await loadBusinesses();
   await loadLuxuryItems();
+  loadProgress(); // NEW - restore saved progress
   generateFamily();
   clampStats();
   updateStats();
-const savedHouse = localStorage.getItem("selectedHouse");
-if (savedHouse) {
-  player.selectedHouse = JSON.parse(savedHouse);
-  setGameBackground(player.selectedHouse.image);
-}
-})();
 
+  const savedHouse = localStorage.getItem("selectedHouse");
+  if (savedHouse) {
+    player.selectedHouse = JSON.parse(savedHouse);
+    setGameBackground(player.selectedHouse.image);
+  }
+})();
