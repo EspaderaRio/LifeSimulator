@@ -55,13 +55,23 @@ const characterOutfits = {
     { id: "polo", src: "assets/female/polo.png" },
     { id: "dress", src: "assets/female/dress.png" },
     { id: "suit", src: "assets/female/suit.png" },
-    { id: "suit", src: "assets/female/princess.png" }
+    { id: "suit", src: "assets/female/princess.png" },
+    { id: "suit1", src: "assets/female1/suit.svg" }, 
+    { id: "athletic", src: "assets/female1/athletic.svg" },
+    { id: "cocktail", src: "assets/female1/cocktail.svg" },
+    { id: "casual", src: "assets/female1/casual.svg" },
+    { id: "polo1", src: "assets/female1/polo.svg" }
   ],
   male: [
-    { id: "tshirt", src: "assets/male/polo.png" },
-    { id: "hoodie", src: "assets/male/tshirt.png" },
+    { id: "polo", src: "assets/male/polo.png" },
+    { id: "tshirt", src: "assets/male/tshirt.png" },
     { id: "suit", src: "assets/male/suit.png" },
-    { id: "suit", src: "assets/male/prince.png" }
+    { id: "prince", src: "assets/male/prince.png" },
+    { id: "suit1", src: "assets/male1/suit.svg" }, 
+    { id: "athletic", src: "assets/male1/athletic.svg" },
+    { id: "cocktail", src: "assets/male1/cocktail.svg" },
+    { id: "casual", src: "assets/male1/casual.svg" },
+    { id: "polo1", src: "assets/male1/polo.svg" }
   ]
 };
 
