@@ -87,6 +87,19 @@ const characterOutfits = {
   ]
 };
 
+// Universal Modal Management System
+function openModal(modalElement) {
+  document.querySelectorAll(".modal").forEach(m => {
+    if (m !== modalElement) m.classList.add("hidden");
+  });
+  modalElement.classList.remove("hidden");
+}
+
+function closeModal(modalElement) {
+  modalElement.classList.add("hidden");
+}
+
+
 // Open and close modal
 openCharacterTab.onclick = () => {
   characterModal.classList.remove("hidden");
