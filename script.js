@@ -87,7 +87,11 @@ const characterOutfits = {
   ]
 };
 
-// Universal Modal Management System
+/* ============================================================
+   MODAL MANAGEMENT SYSTEM (Enhanced)
+============================================================ */
+
+// Automatically closes other modals when one opens
 function openModal(modalElement) {
   document.querySelectorAll(".modal").forEach(m => {
     if (m !== modalElement) m.classList.add("hidden");
@@ -95,6 +99,7 @@ function openModal(modalElement) {
   modalElement.classList.remove("hidden");
 }
 
+// Closes a specific modal
 function closeModal(modalElement) {
   modalElement.classList.add("hidden");
 }
@@ -102,11 +107,11 @@ function closeModal(modalElement) {
 
 // Open and close modal
 openCharacterTab.onclick = () => {
-  characterModal.classList.remove("hidden");
+  openModal(characterModal);
 };
 
 closeCharacter.onclick = () => {
-  characterModal.classList.add("hidden");
+  closeModal(characterModal);
 };
 
 // Gender selection
@@ -258,11 +263,11 @@ card.querySelector("button").onclick = () => buyBusiness(b);
 businessChoices.appendChild(card);
 });
 
-businessModal.classList.remove("hidden");
+openModal(businessModal);
 }
 
 function closeBusinessTab() {
-businessModal.classList.add("hidden");
+closeModal(businessModal);
 }
 
 function buyBusiness(b) {
@@ -336,11 +341,11 @@ categoriesDiv.appendChild(btn);
 const firstCategory = Object.keys(luxuryItems)[0];
 if (firstCategory) displayLuxuryCategory(firstCategory);
 
-luxuryModal.classList.remove("hidden");
+openModal(luxuryModal);
 }
 
 function closeLuxuryTab() {
-luxuryModal.classList.add("hidden");
+closeModal(luxuryModal);
 }
 
 function setActiveCategory(activeBtn) {
@@ -495,11 +500,11 @@ card.querySelector("button").onclick = () => doLifeAction(a, card);
 lifeChoices.appendChild(card);
 });
 
-lifeModal.classList.remove("hidden");
+openModal(lifeModal);
 }
 
 function closeLifeTab() {
-lifeModal.classList.add("hidden");
+closeModal(lifeModal);
 }
 
 function doLifeAction(a, card) {
