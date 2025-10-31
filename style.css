@@ -3,7 +3,6 @@ body {
   background: #1e1e2f;
   color: #fff;
   margin: 0;
-  font-size: xx-small;
 }
 
 .game-container {
@@ -110,7 +109,9 @@ h2, h3 {
   border-radius: 10px;
   text-align: center;
 }
-
+.manage-business-card h3 {
+  color:white;
+}
 .manage-business-card img {
   width: 64px;
   height: 64px;
@@ -486,7 +487,7 @@ footer button:active {
 
 
 /* Close button */
-.close-btn, #close-luxury {
+.close-btn, #close-luxury, #close-manage-business {
   position: absolute; /* position relative to .modal-content */
   top: 10px;
   right: 10px;
@@ -506,7 +507,7 @@ footer button:active {
   transform: scale(1.2); /* hover effect */
 }
 
-.close-btn img, #close-luxury img {
+.close-btn img, #close-luxury img, #close-manage-business img {
   width: 24px;
   height: 24px;
 }
