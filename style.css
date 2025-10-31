@@ -547,7 +547,7 @@ footer button:active {
 
 
 
-.close-btn, #close-luxury, #close-manage-business {
+.close-btn, #close-luxury, #close-manage-business, #close-modal {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -565,7 +565,7 @@ footer button:active {
   transform: scale(1.2); /* hover effect */
 }
 
-.close-btn img, #close-luxury img, #close-manage-business img {
+.close-btn img, #close-luxury img, #close-manage-business img, #close-modal img {
   width: 24px;
   height: 24px;
 }
