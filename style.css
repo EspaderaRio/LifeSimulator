@@ -320,30 +320,33 @@ section {
 
 
 footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: center; /* centers horizontally */
-  gap: 10px;               /* space between buttons */
-  padding: 15px;
+  justify-content: space-around; /* evenly spaced */
   align-items: center;
+  background-color: #fff; /* change if you want */
+  padding: 10px 0;
+  box-shadow: 0 -3px 6px rgba(0,0,0,0.15);
+  z-index: 1000;
 }
 
 footer button {
-  width:280px;
-  padding: 10px 15px;
-  border-radius: 8px;
+   flex: 1;
+  margin: 0 5px;
+  font-size: 20px; /* adjust icon size */
+  padding: 8px 0;
+  background: #f9f9f9;
   border: none;
+  border-radius: 10px;
   cursor: pointer;
-  background: #3498db;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* centers content inside the button */
-  transition: background 0.25s ease, transform 0.2s ease;
+  transition: transform 0.2s, background 0.2s;
 }
 
 footer button:hover {
-  background: #2980b9;
+   background: #e0e0e0;
   transform: translateY(-2px);
 }
 
@@ -472,4 +475,10 @@ footer button:active {
 }
 .hidden {
   display: none;
+}
+@media (max-width: 600px) {
+  .bottom-bar button {
+    font-size: 18px;
+    padding: 6px 0;
+  }
 }
