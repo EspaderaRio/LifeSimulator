@@ -17,6 +17,7 @@ header h1 {
 h2, h3 {
   color: black;
 }
+
 .stats, .hud {
   display: flex;
   gap: 15px;
@@ -140,11 +141,13 @@ h2, h3 {
   background: linear-gradient(135deg, #0064b7, #0088d7);
 }
 
-#business-display {
+#business-display, #luxury-display {
   text-align: center;
   padding-bottom: 10px;
 }
-
+#business-display h3, #luxury-display h3 {
+  color: white;
+}
 #player-section {
   display: flex;
   flex-direction: column;
