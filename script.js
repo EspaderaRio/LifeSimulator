@@ -563,7 +563,6 @@ document.getElementById("open-life-tab").addEventListener("click", openLifeTab);
 document.getElementById("close-life").addEventListener("click", closeLifeTab);
 document.getElementById("close-business").addEventListener("click", closeBusinessTab);
 document.getElementById("close-luxury").addEventListener("click", closeLuxuryTab);
-document.getElementById("select-house").addEventListener("click", openHouseSelection);
 document.getElementById("advance-month").addEventListener("click", () => advanceTime("month"));
 document.getElementById("advance-year").addEventListener("click", () => advanceTime("year"));
 
