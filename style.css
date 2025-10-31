@@ -8,7 +8,7 @@ body {
 }
 main {
   margin-bottom: 40px;
-  padding-top: 60px; /* prevents HUD overlap */
+  padding-top: 10px; /* prevents HUD overlap */
 }
 
 .game-container {
@@ -29,6 +29,7 @@ h2, h3 {
 }
 
 .stats {
+  margin-top: 40px;
   display: flex;
   gap: 15px;
   align-items: center;
