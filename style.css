@@ -141,10 +141,35 @@ header h1 {
   text-align: center;
   padding-bottom: 10px;
 }
+#player-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 15px;
+}
 
-#player-character-display + button,
-#player-character-display + button + button,
-#player-character-display + button + button + button {
+#player-character-bg {
+  position: relative;
+  width: 300px;
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 12px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+#player-character-display img {
+  width: 120px;
+  height: auto;
+  position: relative;
+  z-index: 2;
+}
+
+.player-buttons button {
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -156,22 +181,18 @@ header h1 {
   color: white;
   box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   transition: all 0.25s ease-in-out;
-}
 
-#player-character-display + button:hover,
-#player-character-display + button + button:hover,
-#player-character-display + button + button + button:hover {
+.player-buttons button:hover {
   transform: scale(1.1);
   background: linear-gradient(135deg, #0078d7, #00a8ff);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.35);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
 }
 
-#player-character-display + button:active,
-#player-character-display + button + button:active,
-#player-character-display + button + button + button:active {
+.player-buttons button:active {
   transform: scale(0.95);
   background: linear-gradient(135deg, #0064b7, #0088d7);
 }
+
 
 section {
   text-align: center;
