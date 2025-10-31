@@ -62,8 +62,7 @@ marketTrend: b.marketTrend || 1,
 riskFactor: b.riskFactor || 0.1,
 });
 
-```
-// Calculations
+
 const upgradeCost = Math.round(b.cost * 0.7 * b.level);
 const managerCost = Math.round(b.cost * 0.25);
 const sellValue = Math.round(b.cost * b.level * 0.8);
