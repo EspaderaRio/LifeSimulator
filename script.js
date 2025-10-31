@@ -338,24 +338,53 @@ activeBtn.classList.add("active");
 }
 
 function displayLuxuryCategory(category) {
-luxuryChoices.innerHTML = "";
-const grid = document.createElement("div");
-grid.className = "luxury-grid";
+  luxuryChoices.innerHTML = "";
+  const grid = document.createElement("div");
+  grid.className = "luxury-grid";
 
-const items = luxuryItems[category]?.items || [];
-items.forEach(item => {
-const card = document.createElement("div");
-card.className = "luxury-card";
-card.innerHTML = `      <img src="assets/svgs/${item.image || "default.svg"}" alt="${item.name}">       <p>${item.name}</p>       <p>Cost: $${item.cost.toLocaleString()}</p>
-      ${item.happinessImpact ?`<p>Happiness: +${item.happinessImpact}</p>`: ""}       <button>Buy</button>
-   `;
-card.querySelector("button").onclick = () => buyLuxury(item, card);
-grid.appendChild(card);
-});
+  const items = luxuryItems[category]?.items || [];
+  items.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "luxury-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${item.image || "default.svg"}" alt="${item.name}">
+      <p>${item.name}</p>
+      <p>Cost: $${item.cost.toLocaleString()}</p>
+      ${item.happinessImpact ? `<p>Happiness: +${item.happinessImpact}</p>` : ""}
+    `;
 
-luxuryChoices.appendChild(grid);
-grid.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+    const owned = player.ownedLuxury.some(l => l.name === item.name);
+
+    // If owned, show "Set as Home" for Houses, otherwise "Owned"
+    const button = document.createElement("button");
+
+    if (owned && category === "Houses") {
+      button.textContent = "Set as Home";
+      button.onclick = () => {
+        player.selectedHouse = item;
+        localStorage.setItem("selectedHouse", JSON.stringify(item)); // save permanently
+        setGameBackground(item.image);
+        showToast(`${item.name} is now your home!`);
+      };
+    } 
+    else if (!owned) {
+      button.textContent = "Buy";
+      button.onclick = () => buyLuxury(item, card);
+    } 
+    else {
+      button.textContent = "Owned";
+      button.disabled = true;
+      button.style.opacity = "0.6";
+    }
+
+    card.appendChild(button);
+    grid.appendChild(card);
+  });
+
+  luxuryChoices.appendChild(grid);
+  grid.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
 }
+
 
 function buyLuxury(item, card) {
 if (player.ownedLuxury.some(l => l.name === item.name))
@@ -390,6 +419,48 @@ card.innerHTML = `       <img src="assets/svgs/${l.image || "default.svg"}" alt=
     `;
 ownedLuxuryGrid.appendChild(card);
 });
+}
+
+
+function openHouseSelection() {
+  const houses = player.ownedLuxury.filter(l => l.category === "Houses");
+
+  if (houses.length === 0) {
+    return showToast("You don’t own any houses yet!");
+  }
+
+  // Create modal container dynamically
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Select Your Home</h2>
+      <div class="house-grid"></div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const grid = modal.querySelector(".house-grid");
+  houses.forEach(house => {
+    const card = document.createElement("div");
+    card.className = "house-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${house.image}" alt="${house.name}">
+      <p>${house.name}</p>
+      <button>Select</button>
+    `;
+    card.querySelector("button").onclick = () => {
+      player.selectedHouse = house;
+      setGameBackground(house.image);
+      showToast(`${house.name} is now your home!`);
+      modal.remove();
+    };
+    grid.appendChild(card);
+  });
+
+  modal.querySelector(".close").onclick = () => modal.remove();
 }
 
 // ===================== PERSONAL LIFE ===================== //
@@ -492,8 +563,10 @@ document.getElementById("open-life-tab").addEventListener("click", openLifeTab);
 document.getElementById("close-life").addEventListener("click", closeLifeTab);
 document.getElementById("close-business").addEventListener("click", closeBusinessTab);
 document.getElementById("close-luxury").addEventListener("click", closeLuxuryTab);
+document.getElementById("select-house").addEventListener("click", openHouseSelection);
 document.getElementById("advance-month").addEventListener("click", () => advanceTime("month"));
 document.getElementById("advance-year").addEventListener("click", () => advanceTime("year"));
+
 
 // ===================== FAMILY GENERATION ===================== //
 function generateFamily() {
@@ -533,7 +606,9 @@ function generateFamily() {
   generateFamily();
   clampStats();
   updateStats();
-  if (player.selectedHouse?.image) {
+const savedHouse = localStorage.getItem("selectedHouse");
+if (savedHouse) {
+  player.selectedHouse = JSON.parse(savedHouse);
   setGameBackground(player.selectedHouse.image);
 }
 })();
