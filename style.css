@@ -237,6 +237,10 @@ section {
   background: #2563eb;
 }
 
+.luxury-category-btn {
+  width: 120px;
+  height: auto;
+}
 
 .luxury-categories {
   display: flex;
@@ -249,7 +253,7 @@ section {
   border: none;
   border-radius: 8px;
   background: #555577;
-  color: #fff;
+  color: #fff6f6;
   cursor: pointer;
   transition: background 0.3s;
 }
