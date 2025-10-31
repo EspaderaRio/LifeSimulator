@@ -104,6 +104,12 @@ function closeModal(modalElement) {
   modalElement.classList.add("hidden");
 }
 
+const menuToggle = document.getElementById('menu-toggle');
+const controlButtons = document.getElementById('control-buttons');
+
+menuToggle.addEventListener('click', () => {
+  controlButtons.classList.toggle('hidden');
+});
 
 // Open and close modal
 openCharacterTab.onclick = () => {
