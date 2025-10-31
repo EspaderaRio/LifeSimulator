@@ -14,11 +14,23 @@ ownedBusinesses: [],
 ownedLuxury: []
 };
 
+// ===================== FAMILY DATA ===================== //
+let family = {
+  surname: "",
+  father: {},
+  mother: {},
+  siblings: []
+};
+
 function setGameBackground(imageName) {
-  document.body.style.backgroundImage = `url('assets/svgs/${imageName}')`;
-  document.body.style.backgroundSize = "cover";
-  document.body.style.backgroundPosition = "center";
-  document.body.style.backgroundRepeat = "no-repeat";
+  const bgDiv = document.getElementById("player-character-bg");
+  if (bgDiv) {
+    bgDiv.style.backgroundImage = `url('assets/svgs/${imageName}')`;
+    bgDiv.style.backgroundSize = "cover";
+    bgDiv.style.backgroundPosition = "center";
+    bgDiv.style.backgroundRepeat = "no-repeat";
+    bgDiv.style.transition = "background-image 0.8s ease-in-out";
+  }
 }
 
 
@@ -422,13 +434,14 @@ showToast(`You enjoyed ${a.name}!`);
 // ===================== TIME PROGRESSION ===================== //
 function advanceTime(type) {
 let monthsPassed = type === "year" ? 12 : 1;
-player.month += monthsPassed;
+  player.month += monthsPassed;
 
 if (player.month > 12) {
-player.month = 1;
-player.age++;
-}
-
+    player.month = 1;
+    player.age++;
+    handleLifeProgression();
+  }
+  
 let totalIncome = 0;
 player.ownedBusinesses.forEach(b => {
 totalIncome += (b.profitPerYear / 12) * monthsPassed;
@@ -444,7 +457,27 @@ updateStats();
 showToast(`Time advanced! Age: ${player.age}, Money: $${player.money.toLocaleString()}`);
 }
 
+// ===================== LIFE STAGES ===================== //
+function handleLifeProgression() {
+  if (player.age === 0) {
+    showToast("You were born into the " + family.surname + " family!");
+  } else if (player.age === 3) {
+    showToast("You learned to talk and play with " + (family.siblings[0]?.name || "your toys") + ".");
+  } else if (player.age === 6) {
+    showToast("You started school!");
+  } else if (player.age === 12) {
+    showToast("You discovered a hobby — maybe sports or studying!");
+  } else if (player.age === 18) {
+    showToast("You’re now an adult! Time to build your future!");
+  }
+}
+
+
 // ===================== EVENT LISTENERS ===================== //
+document.getElementById("open-family-tab").addEventListener("click", () => {
+  alert(`Father: ${family.father.name}\nMother: ${family.mother.name}\nSiblings: ${family.siblings.map(s => s.name).join(", ") || "None"}`);
+});
+
 document.getElementById("open-business-tab").addEventListener("click", async () => {
 if (!businesses.length) await loadBusinesses();
 openBusinessTab();
@@ -462,10 +495,46 @@ document.getElementById("close-luxury").addEventListener("click", closeLuxuryTab
 document.getElementById("advance-month").addEventListener("click", () => advanceTime("month"));
 document.getElementById("advance-year").addEventListener("click", () => advanceTime("year"));
 
+// ===================== FAMILY GENERATION ===================== //
+function generateFamily() {
+  const surnames = ["Santos", "Reyes", "Garcia", "Cruz", "Dela Cruz", "Mendoza", "Lopez"];
+  const maleNames = ["Carlos", "Juan", "Miguel", "Jose", "Antonio", "Rafael"];
+  const femaleNames = ["Maria", "Ana", "Carmen", "Sofia", "Isabella", "Luz"];
+  
+  family.surname = surnames[Math.floor(Math.random() * surnames.length)];
+
+  family.father = {
+    name: maleNames[Math.floor(Math.random() * maleNames.length)] + " " + family.surname,
+    relationship: 80
+  };
+  family.mother = {
+    name: femaleNames[Math.floor(Math.random() * femaleNames.length)] + " " + family.surname,
+    relationship: 90
+  };
+
+  // Random 0–2 siblings
+  const siblingCount = Math.floor(Math.random() * 3);
+  for (let i = 0; i < siblingCount; i++) {
+    const gender = Math.random() < 0.5 ? "male" : "female";
+    const name = (gender === "male"
+      ? maleNames[Math.floor(Math.random() * maleNames.length)]
+      : femaleNames[Math.floor(Math.random() * femaleNames.length)]) + " " + family.surname;
+    family.siblings.push({ name, gender, relationship: 70 });
+  }
+
+  console.log("Generated family:", family);
+}
+
+
 // ===================== INITIALIZE GAME ===================== //
 (async function init() {
-await loadBusinesses();
-await loadLuxuryItems();
-clampStats();
-updateStats();
+  await loadBusinesses();
+  await loadLuxuryItems();
+  generateFamily();
+  clampStats();
+  updateStats();
+  if (player.selectedHouse?.image) {
+  setGameBackground(player.selectedHouse.image);
+}
 })();
+
