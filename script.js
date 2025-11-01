@@ -857,10 +857,6 @@ document.getElementById("open-family-tab").addEventListener("click", () => {
   alert(`Father: ${family.father.name}\nMother: ${family.mother.name}\nSiblings: ${family.siblings.map(s => s.name).join(", ") || "None"}`);
 });
 
-document.getElementById("open-business-tab").addEventListener("click", async () => {
-if (!businesses.length) await loadBusinesses();
-openBusinessTab();
-});
 
 document.getElementById("open-luxury-tab").addEventListener("click", async () => {
 if (Object.keys(luxuryItems).length === 0) await loadLuxuryItems();
