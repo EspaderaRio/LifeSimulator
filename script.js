@@ -16,15 +16,65 @@ export let player = {
   profession: null
 };
 
-
-
-
 // ===================== FAMILY DATA ===================== //
 let family = {
   surname: "",
   father: {},
   mother: {},
   siblings: []
+};
+// ===================== GLOBAL VARIABLES ===================== //
+let businesses = [];
+let luxuryItems = {};
+
+const openMenuTab = document.getElementById("menu-toggle");
+const closeMenuTab = document.getElementById("close-modal");
+const businessModal = document.getElementById("businessModal");
+const luxuryModal = document.getElementById("luxuryModal");
+const lifeModal = document.getElementById("lifeModal");
+
+const businessChoices = document.getElementById("business-choices");
+const luxuryChoices = document.getElementById("luxury-choices");
+const lifeChoices = document.getElementById("life-choices");
+
+const ownedBusinessGrid = document.getElementById("owned-businesses");
+const ownedLuxuryGrid = document.getElementById("owned-luxury-grid");
+
+// === CHARACTER CUSTOMIZATION ===
+const characterModal = document.getElementById("characterModal");
+const openCharacterTab = document.getElementById("open-character-tab");
+const closeCharacter = document.getElementById("close-character");
+const outfitSelection = document.getElementById("outfit-selection");
+const outfitOptions = document.getElementById("outfit-options");
+const characterPreview = document.getElementById("character-preview-img");
+
+let playerGender = localStorage.getItem("playerGender") || null;
+let playerOutfit = localStorage.getItem("playerOutfit") || null;
+
+// Outfit data
+const characterOutfits = {
+  female: [
+    { id: "polo", src: "assets/female/polo.png" },
+    { id: "dress", src: "assets/female/dress.png" },
+    { id: "suit", src: "assets/female/suit.png" },
+    { id: "suit", src: "assets/female/princess.png" },
+    { id: "suit1", src: "assets/female1/suit.svg" }, 
+    { id: "athletic", src: "assets/female1/athletic.svg" },
+    { id: "cocktail", src: "assets/female1/cocktail.svg" },
+    { id: "casual", src: "assets/female1/casual.svg" },
+    { id: "polo1", src: "assets/female1/polo.svg" }
+  ],
+  male: [
+    { id: "polo", src: "assets/male/polo.png" },
+    { id: "tshirt", src: "assets/male/tshirt.png" },
+    { id: "suit", src: "assets/male/suit.png" },
+    { id: "prince", src: "assets/male/prince.png" },
+    { id: "suit1", src: "assets/male1/suit.svg" }, 
+    { id: "athletic", src: "assets/male1/athletic.svg" },
+    { id: "cocktail", src: "assets/male1/cocktail.svg" },
+    { id: "casual", src: "assets/male1/casual.svg" },
+    { id: "polo1", src: "assets/male1/polo.svg" }
+  ]
 };
 
 // ===================== HELPERS ===================== //
@@ -54,12 +104,15 @@ function showToast(message) {
 
 // ===================== BACKGROUND CONTROL ===================== //
 function setGameBackground(imageName) {
-  const bgDiv = safeGet("player-character-bg");
-  if (!bgDiv) return;
-  bgDiv.style.background = `url('assets/svgs/${imageName}') center/cover no-repeat`;
-  bgDiv.style.transition = "background-image 0.8s ease-in-out";
+  const bgDiv = document.getElementById("player-character-bg");
+  if (bgDiv) {
+    bgDiv.style.backgroundImage = `url('assets/svgs/${imageName}')`;
+    bgDiv.style.backgroundSize = "cover";
+    bgDiv.style.backgroundPosition = "center";
+    bgDiv.style.backgroundRepeat = "no-repeat";
+    bgDiv.style.transition = "background-image 0.8s ease-in-out";
+  }
 }
-
 // ===================== MODAL HANDLING ===================== //
 
 function openModal(modalElement) {
@@ -206,22 +259,19 @@ function openLicensedTab() {
     };
   });
 }
+
 // ===================== CONTROL MODAL ===================== //
-const openMenuTab = document.getElementById("menu-toggle");
-const closeMenuTab = document.getElementById("close-modal");
 
 openMenuTab.onclick = () => openModal(document.getElementById("MenuTab"));
 closeMenuTab.onclick = () => closeModal(document.getElementById("MenuTab"));
 
 // ===================== SELECT CHARACTER ===================== //
-const openCharacterTab = document.getElementById("open-character-tab");
-const closeCharacterTab = document.getElementById("close-character");
 // Open and close modal
 openCharacterTab.onclick = () => {
   openModal(characterModal);
 };
 
-closeCharacterTab.onclick = () => {
+closeCharacter.onclick = () => {
   closeModal(characterModal);
 };
 
@@ -285,6 +335,7 @@ if (savedOutfitSrc) {
   playerCharacter.src = savedOutfitSrc;
 }
 
+
 // ===================== LIFE EVENTS ===================== //
 function handleLifeProgression() {
   if (player.age === 0) {
@@ -293,13 +344,14 @@ function handleLifeProgression() {
     showToast(`You learned to talk and play with ${family.siblings[0]?.name || "your toys"}.`);
   } else if (player.age === 6) {
     showToast("You started school!");
-  } else if (player.age === 12) {
-    showToast("You discovered a hobby — maybe sports or studying!");
-  } if (player.age === 18 && !player.profession) {
+  }else if (player.age === 12) {
+  showToast("You discovered a hobby — maybe sports or studying!");
+} else if (player.age === 18 && !player.profession) {
   showToast("You’re now an adult! Choose your profession!");
   openProfessionSelection();
 }
 }
+
 
 // ===================== LIFE ACTIONS ===================== //
 function openLifeTab() {
@@ -432,7 +484,7 @@ function updateStats() {
   happinessFill.style.backgroundColor =
     player.happiness > 70 ? "#4CAF50" : player.happiness > 40 ? "#FFC107" : "#E53935";
 
-  displayManagedBusinesses();
+  displayOwnedBusinesses();
   displayOwnedLuxury();
 }
 
@@ -462,99 +514,244 @@ BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
 ============================================================ */
 
 // ===================== BUSINESS TAB ===================== //
+async function loadBusinesses() {
+try {
+const res = await fetch("businesses.json");
+if (!res.ok) throw new Error("Failed to load businesses.json");
+businesses = await res.json();
+} catch (err) {
+console.error(err);
+}
+}
+
 function openBusinessTab() {
-  const modal = safeGet("businessModal");
-  const container = safeGet("business-list");
-  container.innerHTML = "";
+businessChoices.innerHTML = "";
 
-  const availableBusinesses = [
-    { name: "Café", cost: 5000, profitPerYear: 1200, reputationImpact: 1, stressImpact: 1, icon: "cafe.svg" },
-    { name: "Tech Startup", cost: 20000, profitPerYear: 6000, reputationImpact: 3, stressImpact: 2, icon: "startup.svg" },
-    { name: "Real Estate", cost: 50000, profitPerYear: 10000, reputationImpact: 5, stressImpact: 3, icon: "realestate.svg" },
-    { name: "Franchise", cost: 75000, profitPerYear: 15000, reputationImpact: 6, stressImpact: 4, icon: "franchise.svg" }
-  ];
-
-  availableBusinesses.forEach(b => {
-    const card = document.createElement("div");
-    card.className = "business-card";
-    card.innerHTML = `
-      <img src="assets/svgs/${b.icon}" alt="${b.name}">
-      <h3>${b.name}</h3>
-      <p>Cost: $${b.cost.toLocaleString()}</p>
-      <p>Yearly Profit: $${b.profitPerYear.toLocaleString()}</p>
-      <p>Reputation +${b.reputationImpact}</p>
-      <button>Buy</button>
+businesses.forEach(b => {
+const card = document.createElement("div");
+card.className = "business-card";
+card.innerHTML = `       <img src="assets/svgs/${b.image || "default.svg"}" alt="${b.name}">       <p>${b.name}</p>       <p>Cost: $${b.cost}</p>       <p>Stress: +${b.stressImpact}</p>       <p>Reputation: +${b.reputationImpact}</p>       <button>Buy</button>
     `;
-    const btn = card.querySelector("button");
-    btn.onclick = () => buyBusiness(b, card, btn);
-    container.appendChild(card);
-  });
+card.querySelector("button").onclick = () => buyBusiness(b);
+businessChoices.appendChild(card);
+});
 
-  openModal(modal);
+openModal(businessModal);
 }
 
-function buyBusiness(business, card, btn) {
-  if (player.money < business.cost)
-    return showToast("Not enough funds to purchase this business!");
-
-  player.money -= business.cost;
-  player.ownedBusinesses.push({ ...business });
-  btn.disabled = true;
-  btn.textContent = "Owned";
-
-  card.animate([{ transform: "scale(0.95)" }, { transform: "scale(1)" }], { duration: 300 });
-  updateStats();
-  showToast(`You purchased ${business.name}!`);
+function closeBusinessTab() {
+closeModal(businessModal);
 }
 
-// ===================== LUXURY TAB ===================== //
+function buyBusiness(b) {
+const owned = player.ownedBusinesses.some(x => x.name === b.name);
+if (owned) return showToast(`You already own ${b.name}!`);
+
+if (player.money < b.cost) return showToast("Not enough money!");
+
+player.money -= b.cost;
+player.stress += b.stressImpact;
+player.reputation += b.reputationImpact;
+player.ownedBusinesses.push(b);
+
+animateCardPurchase(b.image);
+updateStats();
+showToast(`Purchased ${b.name}!`);
+}
+
+function displayOwnedBusinesses() {
+ownedBusinessGrid.innerHTML = "";
+player.ownedBusinesses.forEach(b => {
+const card = document.createElement("div");
+card.className = "business-card";
+card.innerHTML = `       <img src="assets/svgs/${b.image || "default.svg"}" alt="${b.name}">       <p>${b.name}</p>       <p>Stress: +${b.stressImpact}</p>       <p>Reputation: +${b.reputationImpact}</p>
+    `;
+ownedBusinessGrid.appendChild(card);
+});
+}
+
+// ===================== LUXURY HANDLERS ===================== //
+async function loadLuxuryItems() {
+try {
+const res = await fetch("luxury.json");
+if (!res.ok) throw new Error("Failed to load luxury.json");
+luxuryItems = await res.json();
+} catch (err) {
+console.error(err);
+}
+}
+
 function openLuxuryTab() {
-  const modal = safeGet("luxuryModal");
-  const container = safeGet("luxury-list");
-  container.innerHTML = "";
+luxuryChoices.innerHTML = "";
+const categoriesDiv = document.getElementById("luxury-categories");
+categoriesDiv.innerHTML = "";
 
-  const luxuries = [
-    { name: "Sports Car", cost: 80000, happinessBoost: 20, reputationBoost: 5, icon: "car.svg" },
-    { name: "Mansion", cost: 200000, happinessBoost: 40, reputationBoost: 10, icon: "mansion.svg" },
-    { name: "Yacht", cost: 350000, happinessBoost: 50, reputationBoost: 15, icon: "yacht.svg" },
-    { name: "Private Jet", cost: 1000000, happinessBoost: 70, reputationBoost: 20, icon: "jet.svg" }
-  ];
+Object.keys(luxuryItems).forEach((category, index) => {
+const catData = luxuryItems[category];
+const btn = document.createElement("button");
+btn.className = "luxury-category-btn";
 
-  luxuries.forEach(l => {
+
+const icon = document.createElement("img");
+icon.src = `assets/svgs/${catData.icon || "default.svg"}`;
+icon.alt = category;
+icon.style.width = "24px";
+icon.style.height = "24px";
+icon.style.marginRight = "6px";
+
+btn.appendChild(icon);
+btn.appendChild(document.createTextNode(category));
+if (index === 0) btn.classList.add("active");
+
+btn.onclick = () => {
+  setActiveCategory(btn);
+  displayLuxuryCategory(category);
+};
+categoriesDiv.appendChild(btn);
+
+});
+
+const firstCategory = Object.keys(luxuryItems)[0];
+if (firstCategory) displayLuxuryCategory(firstCategory);
+
+openModal(luxuryModal);
+}
+
+function closeLuxuryTab() {
+closeModal(luxuryModal);
+}
+
+function setActiveCategory(activeBtn) {
+document.querySelectorAll("#luxury-categories button").forEach(btn =>
+btn.classList.remove("active")
+);
+activeBtn.classList.add("active");
+}
+
+function displayLuxuryCategory(category) {
+  luxuryChoices.innerHTML = "";
+  const grid = document.createElement("div");
+  grid.className = "luxury-grid";
+
+  const items = luxuryItems[category]?.items || [];
+  items.forEach(item => {
     const card = document.createElement("div");
     card.className = "luxury-card";
     card.innerHTML = `
-      <img src="assets/svgs/${l.icon}" alt="${l.name}">
-      <h3>${l.name}</h3>
-      <p>Cost: $${l.cost.toLocaleString()}</p>
-      <p>Happiness +${l.happinessBoost}</p>
-      <p>Reputation +${l.reputationBoost}</p>
-      <button>Buy</button>
+      <img src="assets/svgs/${item.image || "default.svg"}" alt="${item.name}">
+      <p>${item.name}</p>
+      <p>Cost: $${item.cost.toLocaleString()}</p>
+      ${item.happinessImpact ? `<p>Happiness: +${item.happinessImpact}</p>` : ""}
     `;
-    const btn = card.querySelector("button");
-    btn.onclick = () => buyLuxury(l, card, btn);
-    container.appendChild(card);
+
+    const owned = player.ownedLuxury.some(l => l.name === item.name);
+
+    // If owned, show "Set as Home" for Houses, otherwise "Owned"
+    const button = document.createElement("button");
+
+    if (owned && category === "Houses") {
+      button.textContent = "Set as Home";
+      button.onclick = () => {
+        player.selectedHouse = item;
+        localStorage.setItem("selectedHouse", JSON.stringify(item)); // save permanently
+        setGameBackground(item.image);
+        showToast(`${item.name} is now your home!`);
+      };
+    } 
+    else if (!owned) {
+      button.textContent = "Buy";
+      button.onclick = () => buyLuxury(item, card);
+    } 
+    else {
+      button.textContent = "Owned";
+      button.disabled = true;
+      button.style.opacity = "0.6";
+    }
+
+    card.appendChild(button);
+    grid.appendChild(card);
   });
 
-  openModal(modal);
+  luxuryChoices.appendChild(grid);
+  grid.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 });
+}
+function buyLuxury(item, card) {
+if (player.ownedLuxury.some(l => l.name === item.name))
+return showToast(`You already own ${item.name}!`);
+if (player.money < item.cost)
+return showToast("Not enough money!");
+
+player.money -= item.cost;
+player.ownedLuxury.push(item);
+
+  // If bought item is a House, set as background
+if (item.category === "Houses") {
+  player.selectedHouse = item;
+  setGameBackground(item.image);
 }
 
-function buyLuxury(luxury, card, btn) {
-  if (player.money < luxury.cost)
-    return showToast("Not enough funds to purchase this luxury!");
+const gain = item.happinessImpact || 0;
+player.happiness = Math.min(100, player.happiness + gain);
+player.reputation += Math.floor(gain / 5);
 
-  player.money -= luxury.cost;
-  player.happiness = clamp(player.happiness + luxury.happinessBoost);
-  player.reputation = clamp(player.reputation + luxury.reputationBoost);
-  player.ownedLuxury.push({ ...luxury });
-
-  btn.disabled = true;
-  btn.textContent = "Owned";
-  card.animate([{ transform: "scale(0.95)" }, { transform: "scale(1)" }], { duration: 300 });
-
-  updateStats();
-  showToast(`You purchased ${luxury.name}!`);
+animateCardPurchase(item.image);
+updateStats();
+showToast(`Purchased ${item.name}! Happiness +${gain}`);
 }
+
+function displayOwnedLuxury() {
+ownedLuxuryGrid.innerHTML = "";
+player.ownedLuxury.forEach(l => {
+const card = document.createElement("div");
+card.className = "luxury-card";
+card.innerHTML = `       <img src="assets/svgs/${l.image || "default.svg"}" alt="${l.name}">       <p>${l.name}</p>       <p>Happiness: +${l.happinessImpact || 0}</p>
+    `;
+ownedLuxuryGrid.appendChild(card);
+});
+}
+
+
+function openHouseSelection() {
+  const houses = player.ownedLuxury.filter(l => l.category === "Houses");
+
+  if (houses.length === 0) {
+    return showToast("You don’t own any houses yet!");
+  }
+
+  // Create modal container dynamically
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Select Your Home</h2>
+      <div class="house-grid"></div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const grid = modal.querySelector(".house-grid");
+  houses.forEach(house => {
+    const card = document.createElement("div");
+    card.className = "house-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${house.image}" alt="${house.name}">
+      <p>${house.name}</p>
+      <button>Select</button>
+    `;
+    card.querySelector("button").onclick = () => {
+      player.selectedHouse = house;
+      setGameBackground(house.image);
+      showToast(`${house.name} is now your home!`);
+      modal.remove();
+    };
+    grid.appendChild(card);
+  });
+
+  modal.querySelector(".close").onclick = () => modal.remove();
+}
+
 
 // ===================== DOCTOR TAB ===================== //
 
@@ -662,6 +859,26 @@ function surrenderLife() {
 }
 
 // ===================== EVENT LISTENER ===================== //
+document.getElementById("open-family-tab").addEventListener("click", () => {
+  alert(`Father: ${family.father.name}\nMother: ${family.mother.name}\nSiblings: ${family.siblings.map(s => s.name).join(", ") || "None"}`);
+});
+
+document.getElementById("open-business-tab").addEventListener("click", async () => {
+if (!businesses.length) await loadBusinesses();
+openBusinessTab();
+});
+
+document.getElementById("open-luxury-tab").addEventListener("click", async () => {
+if (Object.keys(luxuryItems).length === 0) await loadLuxuryItems();
+openLuxuryTab();
+});
+
+document.getElementById("open-life-tab").addEventListener("click", openLifeTab);
+document.getElementById("close-life").addEventListener("click", closeLifeTab);
+document.getElementById("close-business").addEventListener("click", closeBusinessTab);
+document.getElementById("close-luxury").addEventListener("click", closeLuxuryTab);
+document.getElementById("advance-month").addEventListener("click", () => advanceTime("month"));
+document.getElementById("advance-year").addEventListener("click", () => advanceTime("year"));
 document.getElementById("open-character-tab").addEventListener("click", openCharacterTab);
 document.getElementById("menu-toggle").addEventListener("click", openMenuTab);
 document.getElementById("open-doctor-tab").addEventListener("click", openDoctorTab);
