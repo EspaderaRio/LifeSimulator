@@ -1138,17 +1138,89 @@ function closeLifeTab() {
 
 
 function doLifeAction(a, card) {
-if (player.money < a.cost) return showToast("Not enough money!");
-stress: 0,
-player.money -= a.cost;
-player.stress = Math.max(0, player.stress + a.stressChange);
-player.happiness = Math.min(100, player.happiness + a.happinessChange);
-player.reputation += a.reputationChange;
+  // Check money
+  const gymCost = 2000; // per year
+  const dietCost = 1500; // per year
 
-card.animate([{ transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 300 });
-updateStats();
-showToast(`You enjoyed ${a.name}!`);
+  let totalCost = a.cost || 0;
+  if (player.gymMembership) totalCost += gymCost;
+  if (player.dietPlan) totalCost += dietCost;
+
+  if (player.money < totalCost) return showToast("Not enough money!");
+
+  // Deduct cost
+  player.money -= totalCost;
+
+  // Apply stress/happiness/reputation effects
+  player.stress = Math.max(0, player.stress + (a.stressChange || 0));
+  player.happiness = Math.min(100, player.happiness + (a.happinessChange || 0));
+  player.reputation += (a.reputationChange || 0);
+
+  // Apply gym/diet health benefit
+  if (player.gymMembership) player.health = Math.min(player.health + 5, 100);
+  if (player.dietPlan) player.health = Math.min(player.health + 3, 100);
+
+  // Animate card
+  card.animate([{ transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 300 });
+
+  // Update UI
+  updateStats();
+
+  // Show toast
+  showToast(`You enjoyed ${a.name}! Gym/Diet costs applied.`);
 }
+
+
+/* ============================================================
+HEALTH PROGRAMS
+============================================================ */
+export function applyHealthPrograms() {
+  if (player.gymMembership) {
+    player.health = Math.min(player.health + 5, 100); // health boost
+    player.money -= gymCost; // yearly cost
+  }
+  if (player.dietPlan) {
+    player.health = Math.min(player.health + 3, 100);
+    player.money -= dietCost; // yearly cost
+  }
+
+  player.happiness = clamp(player.happiness - 1, -100, 100); // optional slight stress if needed
+  updateStats();
+  showToast("Health programs applied for the year.");
+}
+
+/* ============================================================
+SHOW EXPENSES
+============================================================ */
+export function showExpenses() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay expenses-modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h2>Yearly Expenses</h2>
+      <ul>
+        <li>Gym Membership: ${player.gymMembership ? '$' + gymCost : '$0'}</li>
+        <li>Diet Plan: ${player.dietPlan ? '$' + dietCost : '$0'}</li>
+        <li>Other Expenses: ${player.ownedBusinesses?.reduce((sum, b) => sum + (b.maintenanceCost || 0), 0) || '$0'}</li>
+      </ul>
+      <p>Total Expenses: $${calculateTotalExpenses()}</p>
+      <button id="close-expenses">Close</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#close-expenses').addEventListener('click', () => modal.remove());
+}
+
+// Helper to calculate total expenses
+function calculateTotalExpenses() {
+  let total = 0;
+  if (player.gymMembership) total += gymCost;
+  if (player.dietPlan) total += dietCost;
+  if (player.ownedBusinesses) total += player.ownedBusinesses.reduce((sum, b) => sum + (b.maintenanceCost || 0), 0);
+  return total;
+}
+
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
 ============================================================ */
@@ -1905,6 +1977,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Failed to load startup data:", err);
   }
 });
+
+document.getElementById('toggle-gym').addEventListener('change', e => {
+  player.gymMembership = e.target.checked;
+});
+document.getElementById('toggle-diet').addEventListener('change', e => {
+  player.dietPlan = e.target.checked;
+});
+document.getElementById('view-expenses').addEventListener('click', showExpenses);
+
 
 document.addEventListener("DOMContentLoaded", () => {
  document.getElementById("menu-toggle").addEventListener("click", () => openModal(document.getElementById("MenuTab")));
