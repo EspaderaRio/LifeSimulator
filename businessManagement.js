@@ -1,7 +1,6 @@
 /* ----------------------------
 IMPORT FUNCTIONS
 -----------------------------*/
-import { player } from './script.js';
 
 /* ----------------------------
 GLOBAL ELEMENTS & REFERENCES
@@ -236,4 +235,4 @@ updateStats();
 /* ----------------------------
 EXPORT FUNCTIONS
 -----------------------------*/
-export { displayManagedBusinesses };
+
