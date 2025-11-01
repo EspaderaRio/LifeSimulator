@@ -42,6 +42,7 @@ const lifeChoices = document.getElementById("life-choices");
 
 const ownedBusinessGrid = document.getElementById("owned-businesses");
 const ownedLuxuryGrid = document.getElementById("owned-luxury-grid");
+const closeLifeTab = document.getElementById("close-life");
 const lifeToggleBtn = document.getElementById("life-toggle");
 lifeToggleBtn.addEventListener("click", openLifeTab);
 
@@ -493,7 +494,7 @@ closeModal(lifeModal);
 
 function doLifeAction(a, card) {
 if (player.money < a.cost) return showToast("Not enough money!");
-
+stress: 0,
 player.money -= a.cost;
 player.stress = Math.max(0, player.stress + a.stressChange);
 player.happiness = Math.min(100, player.happiness + a.happinessChange);
