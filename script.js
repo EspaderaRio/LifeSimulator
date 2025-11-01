@@ -96,12 +96,12 @@ function openProfessionSelection() {
   };
   modal.querySelector("#choose-athlete").onclick = () => {
     player.profession = "athlete";
-    openSportSelection();
+    openSportsTab();
     modal.remove();
   };
   modal.querySelector("#choose-licensed").onclick = () => {
     player.profession = "licensed";
-    openLicensedSelection();
+    openLicensedTab();
     modal.remove();
   };
 }
