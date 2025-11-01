@@ -529,14 +529,20 @@ closeBusinessBtn.addEventListener("click", closeBusinessTab);
 
 // ===================== BUSINESS TAB ===================== //
 async function loadBusinesses() {
-try {
-const res = await fetch("businesses.json");
-if (!res.ok) throw new Error("Failed to load businesses.json");
-businesses = await res.json();
-} catch (err) {
-console.error(err);
+  try {
+    const res = await fetch("businesses.json");
+    if (!res.ok) throw new Error("Failed to load businesses.json");
+    businesses = await res.json();
+  } catch (err) {
+    console.error(err);
+    // fallback data for testing
+    businesses = [
+      { name: "Coffee Shop", cost: 5000, stressImpact: 5, reputationImpact: 2, image: "coffee.svg" },
+      { name: "Tech Startup", cost: 20000, stressImpact: 10, reputationImpact: 5, image: "tech.svg" }
+    ];
+  }
 }
-}
+
 
 function openBusinessTab() {
 businessChoices.innerHTML = "";
