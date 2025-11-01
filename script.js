@@ -889,10 +889,6 @@ document.getElementById("open-family-tab").addEventListener("click", () => {
 });
 
 
-document.getElementById("open-luxury-tab").addEventListener("click", async () => {
-if (Object.keys(luxuryItems).length === 0) await loadLuxuryItems();
-openLuxuryTab();
-});
 document.addEventListener("DOMContentLoaded", () => {
  document.getElementById("menu-toggle").addEventListener("click", () => openModal(document.getElementById("MenuTab")));
  document.getElementById("close-modal").addEventListener("click", () => closeModal(document.getElementById("MenuTab")));
