@@ -18,7 +18,12 @@
     "icon": "house.svg",
     "items": [
       { "name": "Beach House", "cost": 900000, "happinessImpact": 25, "image": "beach_house.svg" },
-      { "name": "Penthouse", "cost": 1500000, "happinessImpact": 30, "image": "penthouse.svg" }
+      { "name": "Penthouse", "cost": 1500000, "happinessImpact": 30, "image": "penthouse.svg" },
+      { "name": "Classic", "cost": 2000000, "happinessImpact": 30, "image": "classic.svg" },
+      { "name": "Castle", "cost": 50000000, "happinessImpact": 40, "image": "castle.svg" },
+      { "name": "Merrit-Island", "cost": 4000000, "happinessImpact": 30, "image": "merrit-island.svg" },
+      { "name": "Las_Vegas", "cost": 10000000, "happinessImpact": 30, "image": "lasvegas.svg" },
+      { "name": "Itallian_Villa", "cost": 15000000, "happinessImpact": 30, "image": "itallianvilla.svg" }
     ]
   },
   "Jewelry": {
