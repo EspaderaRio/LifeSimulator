@@ -2,9 +2,9 @@
 BUSINESSLIFE SIMULATOR (Optimized v3 - Debugged + Refined)
 ============================================================ */
 // ===================== IMPORT FUNCTIONS ===================== //
-
+import { displayManagedBusinesses } from './businessManagement.js';
 // ===================== PLAYER DATA ===================== //
-let player = {
+export let player = {
   money: 10000,
   reputation: 0,
   health: 100,
@@ -15,6 +15,9 @@ let player = {
   ownedLuxury: [],
   profession: null
 };
+
+
+
 
 // ===================== FAMILY DATA ===================== //
 let family = {
@@ -561,8 +564,12 @@ function surrenderLife() {
 // ===================== EVENT LISTENER ===================== //
 
 document.getElementById("open-doctor-tab").addEventListener("click", openDoctorTab);
+document.getElementById("open-profession-btn").addEventListener("click", openProfessionSelection);
+document.getElementById("surrender-life").addEventListener("click", surrenderLife);
+document.getElementById("restart-life").addEventListener("click", restartLife);
 document.querySelectorAll(".toast").forEach(t => t.remove());
 
+window.openProfessionSelection = openProfessionSelection;
 
 // ===================== INITIALIZE ===================== //
 (async function init() {
@@ -571,3 +578,5 @@ document.querySelectorAll(".toast").forEach(t => t.remove());
   updateStats();
 })();
 // ===================== EXPORT FUNCTIONS ===================== //
+
+export { updateStats, showToast, openSportsTab, openLicensedTab, openBusinessTab, displayOwnedLuxury };
