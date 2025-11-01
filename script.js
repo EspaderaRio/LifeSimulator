@@ -891,7 +891,6 @@ document.getElementById("open-family-tab").addEventListener("click", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
  document.getElementById("menu-toggle").addEventListener("click", () => openModal(document.getElementById("MenuTab")));
- document.getElementById("close-modal").addEventListener("click", () => closeModal(document.getElementById("MenuTab")));
  document.getElementById("open-life-tab").addEventListener("click", openLifeTab);
  document.getElementById("open-sports-tab").addEventListener("click", openSportsTab);
  document.getElementById("open-licensed-tab").addEventListener("click", openLicensedTab);
