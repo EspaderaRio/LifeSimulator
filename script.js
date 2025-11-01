@@ -221,7 +221,7 @@ openCharacterTab.onclick = () => {
   openModal(characterModal);
 };
 
-closeCharacter.onclick = () => {
+closeCharacterTab.onclick = () => {
   closeModal(characterModal);
 };
 
