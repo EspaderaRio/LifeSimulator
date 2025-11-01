@@ -151,20 +151,20 @@ function animateCardPurchase(imageSrc) {
 
 // ===================== PROFESSION SELECTION ===================== //
 function openProfessionSelection() {
-  // If already has a profession, open its current tab instead
+  // If player already has a profession, open its tab
   if (player.profession) {
     switch (player.profession) {
-      case "Entrepreneur": return openBusinessTab();
-      case "Athlete": return openSportsTab(player.subProfession);
-      case "Licensed Professional": return openLicensedTab(player.subProfession);
-      case "Celebrity": return openCelebrityTab(player.subProfession);
-      case "Model": return openModelTab(player.subProfession);
-      case "Freelancer": return openFreelancerTab(player.subProfession);
+      case "entrepreneur": return openBusinessTab(player.subProfession);
+      case "athlete": return openSportsTab(player.subProfession);
+      case "licensed": return openLicensedTab(player.subProfession);
+      case "celebrity": return openCelebrityTab(player.subProfession);
+      case "model": return openModelTab(player.subProfession);
+      case "freelancer": return openFreelancerTab(player.subProfession);
       default: return showToast("No profession tab found.");
     }
   }
 
-  // Otherwise open the selection menu
+  // Otherwise show profession selection modal
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
   modal.innerHTML = `
@@ -183,30 +183,34 @@ function openProfessionSelection() {
     </div>
   `;
   document.body.appendChild(modal);
+
   modal.querySelector(".close").onclick = () => modal.remove();
 
-  const selectProfession = (profession, openTabFn) => {
-    player.profession = profession;
+  // Helper function to select profession
+  const selectProfession = (prof, displayName, openTabFn) => {
+    player.profession = prof.toLowerCase(); // lowercase for logic
+    player.professionDisplay = displayName; // for UI display
     player.subProfession = null;
     player.retired = false;
-    showToast(`You became a ${profession}!`);
+    showToast(`You became a ${displayName}!`);
     updateStats();
     modal.remove();
     openTabFn();
   };
 
+  // Bind profession buttons
   modal.querySelector("#choose-entrepreneur").onclick = () =>
-    selectProfession("entrepreneur", openBusinessTab);
+    selectProfession("entrepreneur", "Entrepreneur", openBusinessTab);
   modal.querySelector("#choose-athlete").onclick = () =>
-    selectProfession("athlete", openSportsTab);
+    selectProfession("athlete", "Athlete", openSportsTab);
   modal.querySelector("#choose-licensed").onclick = () =>
-    selectProfession("licensed", openLicensedTab);
+    selectProfession("licensed", "Licensed Professional", openLicensedTab);
   modal.querySelector("#choose-celebrity").onclick = () =>
-    selectProfession("celebrity", openCelebrityTab);
+    selectProfession("celebrity", "Celebrity", openCelebrityTab);
   modal.querySelector("#choose-model").onclick = () =>
-    selectProfession("model", openModelTab);
+    selectProfession("model", "Model", openModelTab);
   modal.querySelector("#choose-freelancer").onclick = () =>
-    selectProfession("freelancer", openFreelancerTab);
+    selectProfession("freelancer", "Freelancer", openFreelancerTab);
 }
 
 // ===================== RETIREMENT ===================== //
