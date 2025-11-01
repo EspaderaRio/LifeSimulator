@@ -1246,7 +1246,7 @@ function buyBusiness(b) {
 
 
 // ----------------------------- Helpers -----------------------------
-function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
 function fmt(n) { return n?.toLocaleString?.() ?? String(n); }
 
 // ----------------------------- Business UI -----------------------------
