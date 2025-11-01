@@ -1,3 +1,7 @@
+/* ----------------------------
+IMPORT FUNCTIONS
+-----------------------------*/
+import { player } from './script.js';
 
 /* ----------------------------
 GLOBAL ELEMENTS & REFERENCES
