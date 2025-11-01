@@ -1,6 +1,9 @@
 /* ============================================================
 BUSINESSLIFE SIMULATOR (Optimized v3 - Debugged + Refined)
 ============================================================ */
+// ===================== IMPORT FUNCTIONS ===================== //
+import { displayManagedBusinesses } from './businessManagement.js';
+
 
 // ===================== PLAYER DATA ===================== //
 let player = {
