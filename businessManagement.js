@@ -1,7 +1,7 @@
 /* ----------------------------
 IMPORT FUNCTIONS
 -----------------------------*/
-
+import { player, updateStats, showToast } from './script.js';
 /* ----------------------------
 GLOBAL ELEMENTS & REFERENCES
 -----------------------------*/
@@ -9,7 +9,6 @@ const manageBusinessBtn = document.getElementById("open-manage-businesses");
 const businessManageModal = document.getElementById("businessManageModal");
 const closeBusinessManage = document.getElementById("close-manage-business");
 const manageBusinessList = document.getElementById("manage-business-list");
-
 /* ----------------------------
 EVENT LISTENERS
 -----------------------------*/
@@ -235,4 +234,5 @@ updateStats();
 /* ----------------------------
 EXPORT FUNCTIONS
 -----------------------------*/
+export { displayManagedBusinesses };
 
