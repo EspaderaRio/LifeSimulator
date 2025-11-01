@@ -1,6 +1,7 @@
 /* ============================================================
-ADVANCED BUSINESS MANAGEMENT SYSTEM — ENHANCED v2
+IMPORT FUNCTIONS
 ============================================================ */
+import { displayManagedBusinesses } from './businessManagement.js';
 
 /* ----------------------------
 GLOBAL ELEMENTS & REFERENCES
