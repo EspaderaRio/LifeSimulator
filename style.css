@@ -373,7 +373,12 @@ section {
   object-fit: contain; /* Ensures full outfit shows, no cropping */
   image-rendering: auto;
 }
-
+.profession-grid img {
+  width: 50px
+}
+.profession-grid button {
+  
+}
 
 footer {
   position: fixed;
@@ -455,9 +460,22 @@ footer button:active {
 #restart-life img, #surrender-life img {
   width: 24px;
 }
-
-
-
+#MenuTab button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: bold;
+  margin: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+  transition: all 0.2s ease-in-out;
+}
+#MenuTab button:hover {
+  transform: scale(1.10);
+}
+#MenuTab img {
+  width: 40px;
+}
 
 
 /* === MODALS === */
@@ -558,7 +576,7 @@ footer button:active {
 
 
 
-.close-btn, #close-luxury, #close-manage-business, #close-modal {
+.close-btn, #close-luxury, #close-manage-business, #close-modal, .close {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -576,7 +594,7 @@ footer button:active {
   transform: scale(1.2); /* hover effect */
 }
 
-.close-btn img, #close-luxury img, #close-manage-business img, #close-modal img {
+.close-btn img, #close-luxury img, #close-manage-business img, #close-modal img, .close img {
   width: 24px;
   height: 24px;
 }
