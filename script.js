@@ -1194,307 +1194,319 @@ updateStats();
 showToast(`Purchased ${b.name}!`);
 }
 
+
+
+// ----------------------------- Helpers -----------------------------
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+function fmt(n) { return n?.toLocaleString?.() ?? String(n); }
+
+// ----------------------------- Business UI -----------------------------
 function displayOwnedBusinesses() {
-  ownedBusinessGrid.innerHTML = "";
-  player.ownedBusinesses.forEach(b => {
-    const card = document.createElement("div");
-    card.className = "business-card";
+  if (!ownedBusinessGrid) return;
+  ownedBusinessGrid.innerHTML = '';
+  (player.ownedBusinesses || []).forEach(b => {
+    const card = document.createElement('div');
+    card.className = 'business-card';
     card.innerHTML = `
-      <img src="assets/svgs/${b.image || "default.svg"}" alt="${b.name}">
-      <p>${b.name}</p>
-      <p>Stress: +${b.stressImpact}</p>
-      <p>Reputation: +${b.reputationImpact}</p>
+      <img src="assets/svgs/${b.image || 'default.svg'}" alt="${b.name}">
+      <p class="biz-name">${b.name}</p>
+      <p>Lvl: ${b.level ?? 1} • Employees: ${b.employees ?? 0}</p>
+      <p>Market: ${(b.marketTrend * 100).toFixed(0)}% • Eff: ${(b.efficiency * 100).toFixed(0)}%</p>
     `;
-
-    // 🟢 Click to manage business
-    card.addEventListener("click", () => openBusinessManagement(b));
-
+    card.addEventListener('click', () => openBusinessManagement(b));
     ownedBusinessGrid.appendChild(card);
   });
 }
 
+// ----------------------------- Management Modal -----------------------------
 function openBusinessManagement(business) {
-  const modal = document.createElement("div");
-  modal.className = "modal-overlay";
-
-  // 🧩 Default values if missing
+  // normalize
   business.level ??= 1;
   business.efficiency ??= 1;
   business.marketTrend ??= 1;
   business.hasManager ??= false;
-  business.products ??= [];
+  business.products ??= []; // { name, price, demand }
   business.employees ??= 0;
+  business.employeeList ??= []; // [{name, role, salary, productivity}]
   business.profitPerYear ??= business.cost * 0.3;
-  business.ownership ??= 100; // percent owned
+  business.ownership ??= 100; // percent
 
+  // computed costs
   const upgradeCost = Math.round(business.cost * 0.7 * business.level);
   const managerCost = Math.round(business.cost * 0.25);
   const sellValue = Math.round(business.cost * business.level * 0.8 * (business.ownership / 100));
-  const collectValue = Math.round(
-    (business.profitPerYear / 12) *
-    business.level *
-    business.efficiency *
-    business.marketTrend *
-    (player.intelligence / 100 + 1)
-  );
-  const advertiseCost = Math.round(business.cost * 0.2);
-  const maintenanceCost = Math.round(business.cost * 0.1);
-  const expansionCost = Math.round(business.cost * 1.6 * business.level);
-  const researchCost = Math.round(business.cost * 0.25 * business.level);
-  const surveyCost = Math.round(business.cost * 0.1);
-  const productCost = Math.round(business.cost * 0.2);
-  const employeeCost = Math.round(business.cost * 0.05);
   const investmentCost = Math.round(business.cost * 0.5 * business.level);
+  const collectBase = (business.profitPerYear / 12) * business.level * business.efficiency * business.marketTrend;
+  const productCost = Math.round(business.cost * 0.15);
+  const surveyCost = Math.round(business.cost * 0.08 * (1 + business.level * 0.02));
+  const employeeHireCost = Math.round(business.cost * 0.05);
 
+  // build modal
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>${business.name} (Lvl ${business.level})</h2>
-      <p><strong>Market Trend:</strong> ${(business.marketTrend * 100).toFixed(0)}%</p>
-      <p><strong>Efficiency:</strong> ${(business.efficiency * 100).toFixed(0)}%</p>
-      <p><strong>Employees:</strong> ${business.employees}</p>
-      <p><strong>Ownership:</strong> ${business.ownership}%</p>
-      <p><strong>Manager:</strong> ${business.hasManager ? "✅ Hired" : "❌ None"}</p>
-      <hr>
+      <p><strong>Ownership:</strong> ${business.ownership}% • <strong>Manager:</strong> ${business.hasManager ? '✅' : '❌'}</p>
+      <p><strong>Employees:</strong> ${business.employees} (${business.employeeList.length}) • <strong>Products:</strong> ${business.products.length}</p>
+      <p><strong>Market Trend:</strong> ${(business.marketTrend * 100).toFixed(0)}% • <strong>Efficiency:</strong> ${(business.efficiency * 100).toFixed(0)}%</p>
+      <hr/>
+      <div class="biz-products">
+        <h4>Products</h4>
+        <ul id="biz-product-list">
+          ${business.products.map(p => `<li>${p.name} — $${p.price} (d:${p.demand})</li>`).join('') || '<li>No products</li>'}
+        </ul>
+      </div>
+      <div class="biz-employees">
+        <h4>Employees</h4>
+        <ul id="biz-employee-list">
+          ${business.employeeList.map(e => `<li>${e.name} — ${e.role} — $${e.salary}/mo (prod:${e.productivity})</li>`).join('') || '<li>No employees</li>'}
+        </ul>
+      </div>
+      <hr/>
       <div class="business-actions">
         <button id="collect-btn">💰 Collect Profit</button>
-        <button id="invest-btn">📈 Invest ($${investmentCost.toLocaleString()})</button>
-        <button id="upgrade-btn">⬆️ Upgrade ($${upgradeCost.toLocaleString()})</button>
-        <button id="manager-btn">👔 Hire Manager ($${managerCost.toLocaleString()})</button>
-        <button id="advertise-btn">📢 Advertise ($${advertiseCost.toLocaleString()})</button>
-        <button id="maintain-btn">🧰 Maintain ($${maintenanceCost.toLocaleString()})</button>
-        <button id="expand-btn">🏗️ Expand ($${expansionCost.toLocaleString()})</button>
-        <button id="research-btn">🔬 Research ($${researchCost.toLocaleString()})</button>
-        <button id="product-btn">🧃 Add Product ($${productCost.toLocaleString()})</button>
+        <button id="invest-btn">📈 Invest ($${investmentCost})</button>
+        <button id="upgrade-btn">⬆️ Upgrade ($${upgradeCost})</button>
+        <button id="manager-btn">👔 Hire Manager ($${managerCost})</button>
+        <button id="advertise-btn">📢 Advertise ($${Math.round(business.cost * 0.12)})</button>
+        <button id="survey-btn">📊 Launch Survey ($${surveyCost})</button>
+        <button id="product-btn">🧃 Add Product ($${productCost})</button>
         <button id="edit-btn">✏️ Edit Product</button>
-        <button id="survey-btn">📊 Launch Survey ($${surveyCost.toLocaleString()})</button>
-        <button id="employee-btn">👷 Hire Employee ($${employeeCost.toLocaleString()})</button>
+        <button id="hire-employee-btn">👷 Hire Employee ($${employeeHireCost})</button>
+        <button id="payroll-btn">💸 Run Payroll</button>
         <button id="partial-sell-btn">🏦 Sell Shares</button>
-        <button id="sell-btn">💵 Sell Company ($${sellValue.toLocaleString()})</button>
+        <button id="sell-btn">💵 Sell Company ($${fmt(sellValue)})</button>
+      </div>
+      <div style="margin-top:12px; text-align:left; font-size:0.9em; color:#ccc;">
+        Tip: employee productivity increases profit; happy employees reduce turnover.
       </div>
     </div>
   `;
-
   document.body.appendChild(modal);
-  modal.querySelector(".close").onclick = () => modal.remove();
 
-  // 💰 Collect profit with variation
-  modal.querySelector("#collect-btn").onclick = () => {
-    const variation = 0.8 + Math.random() * 0.4; // +/- 20%
-    const intelligenceBonus = player.intelligence / 100 + 1;
-    const stressPenalty = Math.max(0.8, 1 - player.stress / 200);
-    const finalProfit = Math.round(collectValue * variation * intelligenceBonus * stressPenalty);
+  // close handler
+  modal.querySelector('.close').onclick = () => { modal.remove(); displayOwnedBusinesses(); };
 
-    player.money += finalProfit;
-    player.happiness += 2;
-    showToast(`Collected $${finalProfit.toLocaleString()} profit from ${business.name}`);
+  // ---------- ACTIONS ----------
+
+  // Collect profit: realistic fluctuation based on stats, employees, products
+  modal.querySelector('#collect-btn').onclick = () => {
+    // factors: base, product demand, employees, player stats
+    const productDemandFactor = business.products.length ? (business.products.reduce((s,p)=>s+p.demand,0)/business.products.length)/50 : 1;
+    const employeeProd = business.employeeList.reduce((s,e)=>s+(e.productivity||1), 0) || (business.hasManager ? 2 : 1);
+    const intelligenceFactor = clamp(1 + (player.intelligence || 50)/200, 0.9, 2.0);
+    const stressPenalty = clamp(1 - (player.stress || 0)/300, 0.6, 1.0);
+    const randomVar = 0.85 + Math.random()*0.3; // +/-15%
+    let profit = Math.round(collectBase * productDemandFactor * (employeeProd/1.5) * intelligenceFactor * stressPenalty * randomVar);
+
+    // adjust if manager
+    if (business.hasManager) profit = Math.round(profit * 1.12);
+
+    player.money += profit;
+    player.happiness += 1;
+    showToast(`Collected $${fmt(profit)} from ${business.name}.`);
     updateStats();
+    modal.remove(); openBusinessManagement(business);
   };
 
-  // 📈 Invest in business
-  modal.querySelector("#invest-btn").onclick = () => {
-    if (player.money < investmentCost) return showToast("Not enough money!");
+  // Invest: risk / reward depends on player stats
+  modal.querySelector('#invest-btn').onclick = () => {
+    const cost = investmentCost;
+    if (player.money < cost) return showToast('Not enough money to invest.');
+    player.money -= cost;
 
-    player.money -= investmentCost;
     const luck = Math.random();
-    const skillFactor = (player.intelligence + player.reputation + player.happiness) / 300;
+    const skill = ((player.intelligence||50) + (player.reputation||10) + (player.happiness||50)) / 300;
+    const score = luck + skill;
 
-    if (luck + skillFactor > 0.8) {
-      // Great success
-      business.marketTrend += 0.2;
-      business.profitPerYear *= 1.4;
-      player.reputation += 4;
+    if (score > 0.85) {
+      business.marketTrend = clamp(business.marketTrend + 0.2, 0.5, 3);
+      business.profitPerYear *= 1.45;
+      player.reputation += 3;
       player.happiness += 3;
-      showToast(`Your investment paid off! ${business.name} profit skyrocketed!`);
-    } else if (luck + skillFactor > 0.5) {
-      // Moderate success
-      business.marketTrend += 0.1;
-      business.profitPerYear *= 1.2;
-      player.reputation += 2;
-      showToast(`Investment was decent. ${business.name} grew steadily.`);
+      showToast(`Investment succeeded! ${business.name} surged.`);
+    } else if (score > 0.55) {
+      business.marketTrend = clamp(business.marketTrend + 0.08, 0.5, 2);
+      business.profitPerYear *= 1.18;
+      player.reputation += 1;
+      showToast('Investment yielded moderate gains.');
     } else {
-      // Failure
-      business.marketTrend -= 0.1;
+      business.marketTrend = clamp(business.marketTrend - 0.08, 0.2, 2);
       business.profitPerYear *= 0.9;
       player.stress += 3;
       player.happiness -= 2;
-      showToast(`Investment failed. ${business.name} lost market confidence.`);
+      showToast('Investment failed. Market confidence slipped.');
     }
 
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
 
-  // 🏦 Partial Sell Shares
-  modal.querySelector("#partial-sell-btn").onclick = () => {
-    const percent = parseInt(prompt("Enter percentage to sell (1-100):"));
-    if (!percent || percent <= 0 || percent > business.ownership)
-      return showToast("Invalid percentage.");
-
-    const value = Math.round(
-      business.cost *
-      business.level *
-      (percent / 100) *
-      business.marketTrend *
-      0.8
-    );
-
-    player.money += value;
-    business.ownership -= percent;
-    player.reputation -= percent / 10;
-    showToast(`You sold ${percent}% of ${business.name} for $${value.toLocaleString()}`);
-    updateStats();
-    modal.remove(); openBusinessManagement(business);
-  };
-
-  // 💵 Sell Company Fully
-  modal.querySelector("#sell-btn").onclick = () => {
-    if (!confirm(`Are you sure you want to fully sell ${business.name}?`)) return;
-    player.money += sellValue;
-    player.ownedBusinesses = player.ownedBusinesses.filter(x => x.name !== business.name);
-    player.reputation += 3;
-    player.happiness += 5;
-    showToast(`You sold ${business.name} for $${sellValue.toLocaleString()}`);
-    updateStats();
-    displayOwnedBusinesses();
-    modal.remove();
-  };
-
-  modal.querySelector("#upgrade-btn").onclick = () => {
-    if (player.money < upgradeCost) return showToast("Not enough money!");
+  // Upgrade
+  modal.querySelector('#upgrade-btn').onclick = () => {
+    if (player.money < upgradeCost) return showToast('Not enough money to upgrade.');
     player.money -= upgradeCost;
     business.level++;
+    business.profitPerYear = Math.round(business.profitPerYear * 1.35);
+    business.efficiency = clamp(business.efficiency + 0.06, 0.5, 2);
     player.reputation += 2;
-    player.stress += 2;
-    showToast(`${business.name} upgraded to level ${business.level}!`);
+    player.stress += 1;
+    showToast(`${business.name} upgraded to level ${business.level}.`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
 
-  modal.querySelector("#manager-btn").onclick = () => {
-    if (business.hasManager) return showToast(`${business.name} already has a manager!`);
-    if (player.money < managerCost) return showToast("Not enough money!");
+  // Hire Manager
+  modal.querySelector('#manager-btn').onclick = () => {
+    if (business.hasManager) return showToast('Manager already hired.');
+    if (player.money < managerCost) return showToast('Not enough to hire manager.');
     player.money -= managerCost;
     business.hasManager = true;
-    player.stress -= 3;
-    showToast(`Manager hired for ${business.name}!`);
+    player.stress = Math.max(0, (player.stress || 0) - 3);
+    showToast('Manager hired. Passive income will improve.');
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
 
-  modal.querySelector("#advertise-btn").onclick = () => {
-    if (player.money < advertiseCost) return showToast("Not enough money!");
-    player.money -= advertiseCost;
-    business.marketTrend += 0.1;
-    player.reputation += 3;
-    showToast(`${business.name} gained more popularity!`);
-    updateStats();
-    modal.remove(); openBusinessManagement(business);
-  };
-
-  modal.querySelector("#maintain-btn").onclick = () => {
-    if (player.money < maintenanceCost) return showToast("Not enough money!");
-    player.money -= maintenanceCost;
-    business.efficiency = Math.min(business.efficiency + 0.05, 1);
-    player.stress -= 1;
-    showToast(`${business.name} efficiency improved!`);
-    updateStats();
-    modal.remove(); openBusinessManagement(business);
-  };
-
-  modal.querySelector("#expand-btn").onclick = () => {
-    if (player.money < expansionCost) return showToast("Not enough money!");
-    player.money -= expansionCost;
-    business.profitPerYear *= 1.5;
-    player.reputation += 4;
-    player.stress += 4;
-    showToast(`${business.name} expanded to new locations!`);
-    updateStats();
-    modal.remove(); openBusinessManagement(business);
-  };
-
-  modal.querySelector("#research-btn").onclick = () => {
-    if (player.money < researchCost) return showToast("Not enough money!");
-    player.money -= researchCost;
-    business.efficiency += 0.1;
-    player.intelligence += 1;
-    showToast(`${business.name} innovated through research!`);
-    updateStats();
-    modal.remove(); openBusinessManagement(business);
-  };
-
-  // ========== NEW ACTIONS ==========
-
-  // 🧃 Add Product
-  modal.querySelector("#product-btn").onclick = () => {
-    if (player.money < productCost) return showToast("Not enough money!");
-    const productName = prompt("Enter product name:");
-    if (!productName) return;
-    player.money -= productCost;
-    business.products.push(productName);
+  // Advertise
+  modal.querySelector('#advertise-btn').onclick = () => {
+    const cost = Math.round(business.cost * 0.12);
+    if (player.money < cost) return showToast('Not enough for advertising.');
+    player.money -= cost;
+    business.marketTrend = clamp(business.marketTrend + (0.07 + Math.random()*0.06), 0.3, 3);
     player.reputation += 2;
-    player.stress += 1;
-    showToast(`New product "${productName}" launched!`);
+    showToast('Advertising boosted visibility.');
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
 
-  // ✏️ Edit Product
-  modal.querySelector("#edit-btn").onclick = () => {
-    if (!business.products.length) return showToast("No products to edit!");
-    const oldName = prompt("Enter product name to edit:");
-    if (!business.products.includes(oldName)) return showToast("Product not found!");
-    const newName = prompt("Enter new product name:");
-    const idx = business.products.indexOf(oldName);
-    business.products[idx] = newName;
-    player.stress += 1;
-    player.reputation += 1;
-    showToast(`Product renamed to "${newName}"`);
-    modal.remove(); openBusinessManagement(business);
-  };
-
-  // 📊 Launch Survey
-  modal.querySelector("#survey-btn").onclick = () => {
-    if (player.money < surveyCost) return showToast("Not enough money!");
+  // Survey
+  modal.querySelector('#survey-btn').onclick = () => {
+    if (player.money < surveyCost) return showToast('Not enough to run survey.');
     player.money -= surveyCost;
-
-    const randomOutcome = Math.random();
-    if (randomOutcome < 0.3) {
-      business.marketTrend -= 0.05;
-      showToast(`Survey results were poor. Customers aren't satisfied.`);
-      player.happiness -= 2;
+    const r = Math.random();
+    if (r < 0.28) {
+      business.marketTrend = clamp(business.marketTrend - 0.05, 0.2, 3);
+      player.happiness -= 1;
+      showToast('Survey showed poor reception.');
     } else {
-      business.marketTrend += 0.1;
-      showToast(`Survey was successful! Market interest increased.`);
-      player.reputation += 2;
-      player.happiness += 2;
+      business.marketTrend = clamp(business.marketTrend + 0.08, 0.3, 3);
+      player.reputation += 1;
+      player.happiness += 1;
+      showToast('Survey revealed winning features — market interest rose.');
     }
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
 
-  // 👷 Hire Employee
-  modal.querySelector("#employee-btn").onclick = () => {
-    if (player.money < employeeCost) return showToast("Not enough money!");
-    player.money -= employeeCost;
-    business.employees++;
-    player.stress -= 1;
-    player.happiness += 1;
-    showToast(`Hired a new employee for ${business.name}!`);
+  // Add Product
+  modal.querySelector('#product-btn').onclick = () => {
+    if (player.money < productCost) return showToast('Not enough to launch a product.');
+    const name = prompt('Product name:');
+    if (!name) return;
+    const price = parseInt(prompt('Selling price (number):') || '0', 10) || Math.round(business.cost * 0.02);
+    const demand = clamp(parseInt(prompt('Initial demand (1-100):')||'50',10), 1, 100);
+    player.money -= productCost;
+    business.products.push({ name, price, demand });
+    player.reputation += 1;
+    player.stress += 1;
+    showToast(`Launched product "${name}".`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
 
-  // 💵 Sell
-  modal.querySelector("#sell-btn").onclick = () => {
-    player.money += sellValue;
-    player.ownedBusinesses = player.ownedBusinesses.filter(x => x.name !== business.name);
-    showToast(`You sold ${business.name} for $${sellValue.toLocaleString()}`);
+  // Edit Product
+  modal.querySelector('#edit-btn').onclick = () => {
+    if (!business.products.length) return showToast('No products to edit.');
+    const names = business.products.map(p => p.name).join(', ');
+    const oldName = prompt(`Products: ${names}\nEnter product name to edit:`);
+    const idx = business.products.findIndex(p => p.name === oldName);
+    if (idx === -1) return showToast('Product not found.');
+    const newName = prompt('New product name:', business.products[idx].name);
+    const newPrice = parseInt(prompt('New price:', business.products[idx].price) || business.products[idx].price, 10);
+    const newDemand = clamp(parseInt(prompt('Demand (1-100):', business.products[idx].demand) || business.products[idx].demand,10),1,100);
+    business.products[idx] = { name: newName || business.products[idx].name, price: newPrice, demand: newDemand };
+    player.reputation += 1;
+    showToast('Product updated.');
     updateStats();
-    displayOwnedBusinesses();
-    modal.remove();
+    modal.remove(); openBusinessManagement(business);
   };
+
+  // Hire Employee
+  modal.querySelector('#hire-employee-btn').onclick = () => {
+    if (player.money < employeeHireCost) return showToast('Not enough to hire.');
+    const name = prompt('Employee name:') || `Hire${business.employeeList.length+1}`;
+    const role = prompt('Role/title:') || 'Staff';
+    const salary = parseInt(prompt('Monthly salary:', Math.round(business.cost * 0.02)) || Math.round(business.cost * 0.02), 10);
+    const productivity = clamp(parseFloat(prompt('Productivity (0.5-2.0):', '1.0')||'1.0'), 0.5, 2);
+    player.money -= employeeHireCost;
+    business.employees++;
+    business.employeeList.push({ name, role, salary, productivity });
+    player.happiness += 1;
+    showToast(`Hired ${name} as ${role}.`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // Payroll (pay monthly salaries) — reduces player.money, increases efficiency slightly
+  modal.querySelector('#payroll-btn').onclick = () => {
+    const totalSalaries = business.employeeList.reduce((s,e)=>s + (e.salary || 0),0);
+    if (player.money < totalSalaries) return showToast('Not enough to run payroll!');
+    player.money -= totalSalaries;
+    // happy employees -> small efficiency boost
+    business.efficiency = clamp(business.efficiency + (0.02 * business.employeeList.length), 0.5, 2.5);
+    player.happiness += Math.min(3, business.employeeList.length);
+    showToast(`Payroll executed: paid $${fmt(totalSalaries)} in salaries.`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // Partial Sell Shares
+  modal.querySelector('#partial-sell-btn').onclick = () => {
+    const percent = parseInt(prompt(`Enter % to sell (1-${business.ownership}):`), 10);
+    if (!percent || percent < 1 || percent > business.ownership) return showToast('Invalid percentage.');
+    const value = Math.round(business.cost * business.level * (percent/100) * business.marketTrend * 0.85);
+    player.money += value;
+    business.ownership -= percent;
+    player.reputation = Math.max(0, (player.reputation || 0) - Math.round(percent/10));
+    showToast(`Sold ${percent}% of ${business.name} for $${fmt(value)}.`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // Full Sell
+  modal.querySelector('#sell-btn').onclick = () => {
+    if (!confirm(`Sell ${business.name} for $${fmt(sellValue)}?`)) return;
+    player.money += sellValue;
+    player.ownedBusinesses = (player.ownedBusinesses || []).filter(x => x.name !== business.name);
+    player.reputation += 2;
+    player.happiness += 3;
+    showToast(`Sold ${business.name} for $${fmt(sellValue)}.`);
+    updateStats();
+    modal.remove();
+    displayOwnedBusinesses();
+  };
+
+  // cleanup: ensure display refresh on close
+  modal.addEventListener('remove', () => displayOwnedBusinesses());
 }
+
+// ----------------------------- Passive collection helper -----------------------------
+function collectAllPassive() {
+  (player.ownedBusinesses || []).forEach(b => {
+    if (b.hasManager) {
+      const monthly = Math.round((b.profitPerYear/12) * (b.level||1) * (b.efficiency||1) * (b.marketTrend||1));
+      // small random fluctuation
+      const got = Math.round(monthly * (0.9 + Math.random()*0.2));
+      player.money += got;
+    }
+  });
+  updateStats();
+}
+
+
 
 // ===================== LUXURY HANDLERS ===================== //
 const openLuxuryBtn = document.getElementById("luxury-toggle");
@@ -1873,6 +1885,9 @@ export {
   openSportsTab, 
   openLicensedTab, 
   openBusinessTab, 
-  displayOwnedLuxury 
+  displayOwnedLuxury,
+  displayOwnedBusinesses, 
+  openBusinessManagement, 
+  collectAllPassive
 };
 
