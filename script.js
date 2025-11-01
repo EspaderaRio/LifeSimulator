@@ -608,7 +608,13 @@ ownedBusinessGrid.appendChild(card);
 const openLuxuryBtn = document.getElementById("luxury-toggle");
 const closeLuxuryBtn = document.getElementById("close-luxury");
 
-openLuxuryBtn.addEventListener("click", openLuxuryTab);
+openLuxuryBtn.addEventListener("click", async () => {
+  if (!luxuryItems || Object.keys(luxuryItems).length === 0) {
+    await loadLuxuryItems();
+  }
+  openLuxuryTab();
+});
+
 closeLuxuryBtn.addEventListener("click", closeLuxuryTab);
 
 async function loadLuxuryItems() {
@@ -797,8 +803,8 @@ function openHouseSelection() {
 const openDoctorBtn = document.getElementById("open-doctor-tab");
 const closeDoctorBtn = document.getElementById("close-doctor");
 
-openDoctorBtn.addEventListener("click", openLuxuryTab);
-closeDoctorBtn.addEventListener("click", closeLuxuryTab);
+openDoctorBtn.addEventListener("click", openDoctorTab);
+closeDoctorBtn.addEventListener("click", closeDoctorTab);
 
 function openDoctorTab() {
   const modal = document.getElementById("doctorModal");
@@ -826,6 +832,10 @@ function openDoctorTab() {
   });
 
   openModal(modal);
+}
+
+function closeDoctorTab() {
+closeModal(doctorModal);
 }
 
 function healAtDoctor(treatment) {
@@ -903,12 +913,38 @@ function surrenderLife() {
   showToast("You surrendered your life. Everything has been reset.");
 }
 
-// ===================== EVENT LISTENER ===================== //
-document.getElementById("open-family-tab").addEventListener("click", () => {
-  alert(`Father: ${family.father.name}\nMother: ${family.mother.name}\nSiblings: ${family.siblings.map(s => s.name).join(", ") || "None"}`);
-});
+// ===================== FAMILY TAB ===================== //
+const openFamilyBtn = document.getElementById("open-family-tab");
+const closeFamilyBtn = document.getElementById("close-family-tab");
+
+openFamilyBtn.addEventListener("click", openFamilyTab);
+closeFamilyBtn.addEventListener("click", closeFamilyTab);
+
+function openFamilyTab() {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span id="close-family-tab" class="close-btn"><img src="assets/buttons/close.svg" alt="Close"></span>
+      <h2>Your Family</h2>
+      <p><strong>Father:</strong> ${family.father.name}</p>
+      <p><strong>Mother:</strong> ${family.mother.name}</p>
+      <p><strong>Siblings:</strong> ${family.siblings.map(s => s.name).join(", ") || "None"}</p>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector(".close-btn").onclick = () => modal.remove();
+}
+
+
+// ===================== INITIAL LOAD ===================== //
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadBusinesses(); // Load your JSON data right away
+  try {
+    await loadBusinesses();      // Load business data
+    await loadLuxuryItems();     // Load luxury data
+  } catch (err) {
+    console.error("Failed to load startup data:", err);
+  }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
