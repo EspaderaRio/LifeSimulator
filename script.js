@@ -5,6 +5,7 @@ BUSINESSLIFE SIMULATOR (Optimized v3 - Debugged + Refined)
 import { displayManagedBusinesses } from './businessManagement.js';
 // ===================== PLAYER DATA ===================== //
 export let player = {
+  stress: 0,
   money: 10000,
   reputation: 0,
   health: 100,
@@ -27,8 +28,13 @@ let family = {
 let businesses = [];
 let luxuryItems = {};
 
-const openMenuTab = document.getElementById("menu-toggle");
-const closeMenuTab = document.getElementById("close-modal");
+
+const openLuxuryTab = document.getElementById("luxury-toggle");
+const openBusinessTab = document.getElementById("business-toggle");
+const openCareerTab = document.getElementById("career-toggle");
+const openSportsTab = document.getElementById("sports-toggle");
+const openLicensedTab = document.getElementById("licensed-toggle");
+
 const businessModal = document.getElementById("businessModal");
 const luxuryModal = document.getElementById("luxuryModal");
 const lifeModal = document.getElementById("lifeModal");
@@ -39,6 +45,8 @@ const lifeChoices = document.getElementById("life-choices");
 
 const ownedBusinessGrid = document.getElementById("owned-businesses");
 const ownedLuxuryGrid = document.getElementById("owned-luxury-grid");
+const lifeToggleBtn = document.getElementById("life-toggle");
+lifeToggleBtn.addEventListener("click", openLifeTab);
 
 // === CHARACTER CUSTOMIZATION ===
 const characterModal = document.getElementById("characterModal");
@@ -126,6 +134,23 @@ function closeModal(modalElement) {
 }
 
 
+// ===================== CARD PURCHASE ANIMATION ===================== //
+function animateCardPurchase(imageSrc) {
+  const img = document.createElement("img");
+  img.src = `assets/svgs/${imageSrc}`;
+  img.style.position = "fixed";
+  img.style.top = "50%";
+  img.style.left = "50%";
+  img.style.transform = "translate(-50%, -50%) scale(0.5)";
+  img.style.transition = "all 0.5s ease-in-out";
+  img.style.zIndex = "1000";
+  document.body.appendChild(img);
+  setTimeout(() => {
+    img.style.transform = "translate(-50%, -50%) scale(1.2)";
+    img.style.opacity = "0";
+  }, 50);
+  setTimeout(() => img.remove(), 600);
+}
 
 // ===================== PROFESSION SELECTION ===================== //
 function openProfessionSelection() {
@@ -263,7 +288,7 @@ function openLicensedTab() {
 // ===================== CONTROL MODAL ===================== //
 
 openMenuTab.onclick = () => openModal(document.getElementById("MenuTab"));
-closeMenuTab.onclick = () => closeModal(document.getElementById("MenuTab"));
+closeMenuTab.onclick = () => closeModal(document.getElementById("close-menu"));
 
 // ===================== SELECT CHARACTER ===================== //
 // Open and close modal
@@ -350,51 +375,6 @@ function handleLifeProgression() {
   showToast("You’re now an adult! Choose your profession!");
   openProfessionSelection();
 }
-}
-
-
-// ===================== LIFE ACTIONS ===================== //
-function openLifeTab() {
-  const actions = [
-    { name: "Vacation Trip", cost: 2000, healthChange: +10, happinessChange: +25, reputationChange: +3, image: "vacation.svg" },
-    { name: "Family Time", cost: 500, healthChange: +5, happinessChange: +20, reputationChange: 0, image: "family.svg" },
-    { name: "Charity Donation", cost: 1500, healthChange: 0, happinessChange: +10, reputationChange: +10, image: "charity.svg" },
-    { name: "Spa Day", cost: 800, healthChange: +15, happinessChange: +15, reputationChange: 0, image: "spa.svg" }
-  ];
-
-  const container = safeGet("life-choices");
-  container.innerHTML = "";
-
-  actions.forEach(a => {
-    const card = document.createElement("div");
-    card.className = "life-card";
-    card.innerHTML = `
-      <img src="assets/svgs/${a.image}" alt="${a.name}">
-      <p>${a.name}</p>
-      <p>Cost: $${a.cost}</p>
-      <p>Happiness: +${a.happinessChange}</p>
-      <p>Health: +${a.healthChange}</p>
-      <p>Reputation: +${a.reputationChange}</p>
-      <button>Do Activity</button>
-    `;
-    card.querySelector("button").onclick = () => doLifeAction(a, card);
-    container.appendChild(card);
-  });
-
-  openModal(safeGet("lifeModal"));
-}
-
-function doLifeAction(a, card) {
-  if (player.money < a.cost) return showToast("Not enough money!");
-
-  player.money -= a.cost;
-  player.health = clamp(player.health + a.healthChange);
-  player.happiness = clamp(player.happiness + a.happinessChange);
-  player.reputation = clamp(player.reputation + a.reputationChange);
-
-  card.animate([{ transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 300 });
-  updateStats();
-  showToast(`You enjoyed ${a.name}!`);
 }
 
 // ===================== TIME PROGRESSION ===================== //
@@ -487,6 +467,44 @@ function generateFamily() {
     } ${family.surname}`;
     return { name, gender, relationship: 70 };
   });
+}
+// ===================== PERSONAL LIFE ===================== //
+function openLifeTab() {
+lifeChoices.innerHTML = "";
+const actions = [
+{ name: "Vacation Trip", cost: 2000, stressChange: -20, happinessChange: +25, reputationChange: +3, image: "vacation.svg" },
+{ name: "Family Time", cost: 500, stressChange: -15, happinessChange: +20, reputationChange: 0, image: "family.svg" },
+{ name: "Charity Donation", cost: 1500, stressChange: -5, happinessChange: +10, reputationChange: +10, image: "charity.svg" },
+{ name: "Spa Day", cost: 800, stressChange: -25, happinessChange: +15, reputationChange: 0, image: "spa.svg" }
+];
+
+actions.forEach(a => {
+const card = document.createElement("div");
+card.className = "life-card";
+card.innerHTML = `       <img src="assets/svgs/${a.image || "default.svg"}" alt="${a.name}">       <p>${a.name}</p>       <p>Cost: $${a.cost}</p>       <p>Stress: ${a.stressChange}</p>       <p>Happiness: +${a.happinessChange}</p>       <p>Reputation: +${a.reputationChange}</p>       <button>Do Activity</button>
+    `;
+card.querySelector("button").onclick = () => doLifeAction(a, card);
+lifeChoices.appendChild(card);
+});
+
+openModal(lifeModal);
+}
+
+function closeLifeTab() {
+closeModal(lifeModal);
+}
+
+function doLifeAction(a, card) {
+if (player.money < a.cost) return showToast("Not enough money!");
+
+player.money -= a.cost;
+player.stress = Math.max(0, player.stress + a.stressChange);
+player.happiness = Math.min(100, player.happiness + a.happinessChange);
+player.reputation += a.reputationChange;
+
+card.animate([{ transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 300 });
+updateStats();
+showToast(`You enjoyed ${a.name}!`);
 }
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
@@ -851,20 +869,29 @@ document.getElementById("open-luxury-tab").addEventListener("click", async () =>
 if (Object.keys(luxuryItems).length === 0) await loadLuxuryItems();
 openLuxuryTab();
 });
+document.addEventListener("DOMContentLoaded", () => {
+ document.getElementById("menu-toggle").addEventListener("click", () => openModal(document.getElementById("MenuTab")));
+ document.getElementById("close-modal").addEventListener("click", () => closeModal(document.getElementById("MenuTab")));
+ document.getElementById("open-life-tab").addEventListener("click", openLifeTab);
+ document.getElementById("open-sports-tab").addEventListener("click", openSportsTab);
+ document.getElementById("open-licensed-tab").addEventListener("click", openLicensedTab);
+ document.getElementById("close-life").addEventListener("click", closeLifeTab);
+ document.getElementById("close-business").addEventListener("click", closeBusinessTab);
+ document.getElementById("close-luxury").addEventListener("click", closeLuxuryTab);
+ document.getElementById("advance-month").addEventListener("click", () => advanceTime("month"));
+ document.getElementById("advance-year").addEventListener("click", () => advanceTime("year"));
+ document.getElementById("open-character-tab").addEventListener("click", openCharacterTab);
+ document.getElementById("menu-toggle").addEventListener("click", openMenuTab);
+ document.getElementById("open-doctor-tab").addEventListener("click", openDoctorTab);
+ document.getElementById("open-profession-btn").addEventListener("click", openProfessionSelection);
+ document.getElementById("surrender-life").addEventListener("click", surrenderLife);
+ document.getElementById("restart-life").addEventListener("click", restartLife);
+ document.querySelectorAll(".toast").forEach(t => t.remove());
+});
 
-document.getElementById("open-life-tab").addEventListener("click", openLifeTab);
-document.getElementById("close-life").addEventListener("click", closeLifeTab);
-document.getElementById("close-business").addEventListener("click", closeBusinessTab);
-document.getElementById("close-luxury").addEventListener("click", closeLuxuryTab);
-document.getElementById("advance-month").addEventListener("click", () => advanceTime("month"));
-document.getElementById("advance-year").addEventListener("click", () => advanceTime("year"));
-document.getElementById("open-character-tab").addEventListener("click", openCharacterTab);
-document.getElementById("menu-toggle").addEventListener("click", openMenuTab);
-document.getElementById("open-doctor-tab").addEventListener("click", openDoctorTab);
-document.getElementById("open-profession-btn").addEventListener("click", openProfessionSelection);
-document.getElementById("surrender-life").addEventListener("click", surrenderLife);
-document.getElementById("restart-life").addEventListener("click", restartLife);
-document.querySelectorAll(".toast").forEach(t => t.remove());
+
+
+
 
 window.openProfessionSelection = openProfessionSelection;
 
