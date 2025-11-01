@@ -476,7 +476,9 @@ footer button:active {
 #MenuTab img {
   width: 40px;
 }
-
+.career-card img, .sport-card img {
+  width: 100px
+}
 
 /* === MODALS === */
 .modal {
