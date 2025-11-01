@@ -1,7 +1,3 @@
-/* ============================================================
-IMPORT FUNCTIONS
-============================================================ */
-import { displayManagedBusinesses } from './businessManagement.js';
 
 /* ----------------------------
 GLOBAL ELEMENTS & REFERENCES
