@@ -241,10 +241,16 @@ h2, h3 {
   background: linear-gradient(135deg, #0064b7, #0088d7);
 }
 
-
 section {
   text-align: center;
   margin-top: 10px;
+}
+
+.business-header h3, .business-header p {
+  color:white;
+}
+.business-info p {
+  color:white;
 }
 
 .business-actions {
