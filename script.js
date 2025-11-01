@@ -207,13 +207,11 @@ function openLicensedTab() {
   });
 }
 // ===================== CONTROL MODAL ===================== //
-openMenuTab.onclick = () => {
-  openModal(menu-toggle);
-};
+const openMenuTab = document.getElementById("menu-toggle");
+const closeMenuTab = document.getElementById("close-modal");
 
-closeMenuTab.onclick = () => {
-  closeModal(menu-toggle);
-};
+openMenuTab.onclick = () => openModal(document.getElementById("MenuTab"));
+closeMenuTab.onclick = () => closeModal(document.getElementById("MenuTab"));
 
 // ===================== SELECT CHARACTER ===================== //
 // Open and close modal
@@ -680,4 +678,12 @@ window.openProfessionSelection = openProfessionSelection;
 })();
 // ===================== EXPORT FUNCTIONS ===================== //
 
-export { updateStats, showToast, openSportsTab, openLicensedTab, openBusinessTab, displayOwnedLuxury };
+export { 
+  updateStats, 
+  showToast, 
+  openSportsTab, 
+  openLicensedTab, 
+  openBusinessTab, 
+  displayOwnedLuxury 
+};
+
