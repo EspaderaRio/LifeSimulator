@@ -3,6 +3,8 @@ BUSINESSLIFE SIMULATOR (Optimized v3 - Debugged + Refined)
 ============================================================ */
 // ===================== IMPORT FUNCTIONS ===================== //
 import { displayManagedBusinesses } from './businessManagement.js';
+import { checkYearlyScenarioTrigger, generateScenario } from './scenario.js';
+
 // ===================== PLAYER DATA ===================== //
 export let player = {
   stress: 0,
@@ -980,42 +982,70 @@ function advanceTime(type) {
   const monthsPassed = type === "year" ? 12 : 1;
   player.month += monthsPassed;
 
+  // Handle month rollover and age increase
   if (player.month > 12) {
     player.month = 1;
     player.age++;
     handleLifeProgression();
   }
 
+  // Trigger yearly scenario events
+  if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
+    checkYearlyScenarioTrigger();
+  }
+
   let totalIncome = 0;
+
+  // Calculate business income
   player.ownedBusinesses.forEach(b => {
-    totalIncome += (b.profitPerYear / 12) * monthsPassed;
+    // Ensure business properties exist to prevent NaN
+    if (!b.level) b.level = 1;
+    if (!b.efficiency) b.efficiency = 1;
+    if (!b.marketTrend) b.marketTrend = 1;
+    if (!b.ownership) b.ownership = 100;
+
+    const incomeForBiz =
+      (b.profitPerYear / 12) *
+      monthsPassed *
+      b.level *
+      b.efficiency *
+      b.marketTrend *
+      (b.ownership / 100);
+
+    totalIncome += incomeForBiz;
+
+    // Apply impacts per business
     player.health -= (b.stressImpact / 12) * monthsPassed;
     player.reputation += (b.reputationImpact / 12) * monthsPassed;
   });
 
-  // Profession-based income and impact
-if (player.profession === "entrepreneur") {
-  player.money += 12000 * (monthsPassed / 12);
-  player.health -= 2 * (monthsPassed / 12);
-  player.reputation += 1 * (monthsPassed / 12);
-} else if (player.profession === "athlete") {
-  player.money += 8000 * (monthsPassed / 12);
-  player.health -= 4 * (monthsPassed / 12);
-  player.happiness += 3 * (monthsPassed / 12);
-} else if (player.profession === "licensed") {
-  player.money += 6000 * (monthsPassed / 12);
-  player.health -= 1 * (monthsPassed / 12);
-  player.reputation += 2 * (monthsPassed / 12);
-}
+  // Profession-based income and impacts
+  if (player.profession === "entrepreneur") {
+    player.money += 12000 * (monthsPassed / 12);
+    player.health -= 2 * (monthsPassed / 12);
+    player.reputation += 1 * (monthsPassed / 12);
+  } else if (player.profession === "athlete") {
+    player.money += 8000 * (monthsPassed / 12);
+    player.health -= 4 * (monthsPassed / 12);
+    player.happiness += 3 * (monthsPassed / 12);
+  } else if (player.profession === "licensed") {
+    player.money += 6000 * (monthsPassed / 12);
+    player.health -= 1 * (monthsPassed / 12);
+    player.reputation += 2 * (monthsPassed / 12);
+  }
 
+  // Add total passive income from businesses
   player.money += Math.round(totalIncome);
+
+  // Finalize stats
   clampStats();
   updateStats();
-  
-  if (player.profession)
-  showToast(`You earned income from your ${player.profession} career! Age: ${player.age}`);
 
+  // Toast feedback
+  if (player.profession)
+    showToast(`You earned income from your ${player.profession} career! Age: ${player.age}`);
 }
+
 
 
 // ===================== STATS UPDATE ===================== //
@@ -1145,14 +1175,14 @@ async function loadBusinesses() {
 
 
 async function openBusinessTab() {
-  // Only load once
+  
   if (!businesses.length) {
     console.log("Loading businesses...");
     await loadBusinesses();
     console.log("Loaded:", businesses);
   }
 
-  // Now render the cards
+ 
   businessChoices.innerHTML = "";
 
   businesses.forEach(b => {
@@ -1179,21 +1209,40 @@ closeModal(businessModal);
 }
 
 function buyBusiness(b) {
-const owned = player.ownedBusinesses.some(x => x.name === b.name);
-if (owned) return showToast(`You already own ${b.name}!`);
+  const owned = player.ownedBusinesses.some(x => x.name === b.name);
+  if (owned) return showToast(`You already own ${b.name}!`);
 
-if (player.money < b.cost) return showToast("Not enough money!");
+  if (player.money < b.cost) return showToast("Not enough money!");
 
-player.money -= b.cost;
-player.stress += b.stressImpact;
-player.reputation += b.reputationImpact;
-player.ownedBusinesses.push(b);
+  
+  player.money -= b.cost;
 
-animateCardPurchase(b.image);
-updateStats();
-showToast(`Purchased ${b.name}!`);
+
+  player.stress += b.stressImpact;
+  player.reputation += b.reputationImpact;
+
+  
+  const newBusiness = {
+    ...b,
+    level: 1,           
+    efficiency: 1,     
+    marketTrend: 1,     
+    ownership: 100,    
+    profitPerYear: b.profitPerYear || b.cost * 0.2,
+    lastIncome: 0,     
+    employees: b.employees || 0,
+    upgrades: []       
+  };
+
+ 
+  player.ownedBusinesses.push(newBusiness);
+
+
+  animateCardPurchase(b.image);
+  updateStats();
+  displayOwnedBusinesses(); // Optional: refresh display
+  showToast(`You purchased ${b.name}!`);
 }
-
 
 
 // ----------------------------- Helpers -----------------------------
