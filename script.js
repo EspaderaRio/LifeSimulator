@@ -1217,21 +1217,34 @@ function openBusinessManagement(business) {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
 
-  // Add fallback properties if not yet initialized
+  // 🧩 Default values if missing
   business.level ??= 1;
   business.efficiency ??= 1;
   business.marketTrend ??= 1;
   business.hasManager ??= false;
+  business.products ??= [];
+  business.employees ??= 0;
   business.profitPerYear ??= business.cost * 0.3;
+  business.ownership ??= 100; // percent owned
 
   const upgradeCost = Math.round(business.cost * 0.7 * business.level);
   const managerCost = Math.round(business.cost * 0.25);
-  const sellValue = Math.round(business.cost * business.level * 0.8);
-  const collectValue = Math.round(business.profitPerYear / 12 * business.level * business.efficiency * business.marketTrend);
+  const sellValue = Math.round(business.cost * business.level * 0.8 * (business.ownership / 100));
+  const collectValue = Math.round(
+    (business.profitPerYear / 12) *
+    business.level *
+    business.efficiency *
+    business.marketTrend *
+    (player.intelligence / 100 + 1)
+  );
   const advertiseCost = Math.round(business.cost * 0.2);
   const maintenanceCost = Math.round(business.cost * 0.1);
   const expansionCost = Math.round(business.cost * 1.6 * business.level);
   const researchCost = Math.round(business.cost * 0.25 * business.level);
+  const surveyCost = Math.round(business.cost * 0.1);
+  const productCost = Math.round(business.cost * 0.2);
+  const employeeCost = Math.round(business.cost * 0.05);
+  const investmentCost = Math.round(business.cost * 0.5 * business.level);
 
   modal.innerHTML = `
     <div class="modal-content">
@@ -1239,17 +1252,25 @@ function openBusinessManagement(business) {
       <h2>${business.name} (Lvl ${business.level})</h2>
       <p><strong>Market Trend:</strong> ${(business.marketTrend * 100).toFixed(0)}%</p>
       <p><strong>Efficiency:</strong> ${(business.efficiency * 100).toFixed(0)}%</p>
+      <p><strong>Employees:</strong> ${business.employees}</p>
+      <p><strong>Ownership:</strong> ${business.ownership}%</p>
       <p><strong>Manager:</strong> ${business.hasManager ? "✅ Hired" : "❌ None"}</p>
       <hr>
       <div class="business-actions">
-        <button id="collect-btn">💰 Collect +$${collectValue.toLocaleString()}</button>
+        <button id="collect-btn">💰 Collect Profit</button>
+        <button id="invest-btn">📈 Invest ($${investmentCost.toLocaleString()})</button>
         <button id="upgrade-btn">⬆️ Upgrade ($${upgradeCost.toLocaleString()})</button>
         <button id="manager-btn">👔 Hire Manager ($${managerCost.toLocaleString()})</button>
         <button id="advertise-btn">📢 Advertise ($${advertiseCost.toLocaleString()})</button>
         <button id="maintain-btn">🧰 Maintain ($${maintenanceCost.toLocaleString()})</button>
         <button id="expand-btn">🏗️ Expand ($${expansionCost.toLocaleString()})</button>
         <button id="research-btn">🔬 Research ($${researchCost.toLocaleString()})</button>
-        <button id="sell-btn">💵 Sell +$${sellValue.toLocaleString()}</button>
+        <button id="product-btn">🧃 Add Product ($${productCost.toLocaleString()})</button>
+        <button id="edit-btn">✏️ Edit Product</button>
+        <button id="survey-btn">📊 Launch Survey ($${surveyCost.toLocaleString()})</button>
+        <button id="employee-btn">👷 Hire Employee ($${employeeCost.toLocaleString()})</button>
+        <button id="partial-sell-btn">🏦 Sell Shares</button>
+        <button id="sell-btn">💵 Sell Company ($${sellValue.toLocaleString()})</button>
       </div>
     </div>
   `;
@@ -1257,17 +1278,94 @@ function openBusinessManagement(business) {
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
-  // === Button Actions ===
+  // 💰 Collect profit with variation
   modal.querySelector("#collect-btn").onclick = () => {
-    player.money += collectValue;
-    showToast(`Collected $${collectValue.toLocaleString()} from ${business.name}`);
+    const variation = 0.8 + Math.random() * 0.4; // +/- 20%
+    const intelligenceBonus = player.intelligence / 100 + 1;
+    const stressPenalty = Math.max(0.8, 1 - player.stress / 200);
+    const finalProfit = Math.round(collectValue * variation * intelligenceBonus * stressPenalty);
+
+    player.money += finalProfit;
+    player.happiness += 2;
+    showToast(`Collected $${finalProfit.toLocaleString()} profit from ${business.name}`);
     updateStats();
+  };
+
+  // 📈 Invest in business
+  modal.querySelector("#invest-btn").onclick = () => {
+    if (player.money < investmentCost) return showToast("Not enough money!");
+
+    player.money -= investmentCost;
+    const luck = Math.random();
+    const skillFactor = (player.intelligence + player.reputation + player.happiness) / 300;
+
+    if (luck + skillFactor > 0.8) {
+      // Great success
+      business.marketTrend += 0.2;
+      business.profitPerYear *= 1.4;
+      player.reputation += 4;
+      player.happiness += 3;
+      showToast(`Your investment paid off! ${business.name} profit skyrocketed!`);
+    } else if (luck + skillFactor > 0.5) {
+      // Moderate success
+      business.marketTrend += 0.1;
+      business.profitPerYear *= 1.2;
+      player.reputation += 2;
+      showToast(`Investment was decent. ${business.name} grew steadily.`);
+    } else {
+      // Failure
+      business.marketTrend -= 0.1;
+      business.profitPerYear *= 0.9;
+      player.stress += 3;
+      player.happiness -= 2;
+      showToast(`Investment failed. ${business.name} lost market confidence.`);
+    }
+
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // 🏦 Partial Sell Shares
+  modal.querySelector("#partial-sell-btn").onclick = () => {
+    const percent = parseInt(prompt("Enter percentage to sell (1-100):"));
+    if (!percent || percent <= 0 || percent > business.ownership)
+      return showToast("Invalid percentage.");
+
+    const value = Math.round(
+      business.cost *
+      business.level *
+      (percent / 100) *
+      business.marketTrend *
+      0.8
+    );
+
+    player.money += value;
+    business.ownership -= percent;
+    player.reputation -= percent / 10;
+    showToast(`You sold ${percent}% of ${business.name} for $${value.toLocaleString()}`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // 💵 Sell Company Fully
+  modal.querySelector("#sell-btn").onclick = () => {
+    if (!confirm(`Are you sure you want to fully sell ${business.name}?`)) return;
+    player.money += sellValue;
+    player.ownedBusinesses = player.ownedBusinesses.filter(x => x.name !== business.name);
+    player.reputation += 3;
+    player.happiness += 5;
+    showToast(`You sold ${business.name} for $${sellValue.toLocaleString()}`);
+    updateStats();
+    displayOwnedBusinesses();
+    modal.remove();
   };
 
   modal.querySelector("#upgrade-btn").onclick = () => {
     if (player.money < upgradeCost) return showToast("Not enough money!");
     player.money -= upgradeCost;
     business.level++;
+    player.reputation += 2;
+    player.stress += 2;
     showToast(`${business.name} upgraded to level ${business.level}!`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
@@ -1278,6 +1376,7 @@ function openBusinessManagement(business) {
     if (player.money < managerCost) return showToast("Not enough money!");
     player.money -= managerCost;
     business.hasManager = true;
+    player.stress -= 3;
     showToast(`Manager hired for ${business.name}!`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
@@ -1286,8 +1385,9 @@ function openBusinessManagement(business) {
   modal.querySelector("#advertise-btn").onclick = () => {
     if (player.money < advertiseCost) return showToast("Not enough money!");
     player.money -= advertiseCost;
-    business.marketTrend += 0.05;
-    showToast(`${business.name} gained popularity!`);
+    business.marketTrend += 0.1;
+    player.reputation += 3;
+    showToast(`${business.name} gained more popularity!`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
@@ -1296,6 +1396,7 @@ function openBusinessManagement(business) {
     if (player.money < maintenanceCost) return showToast("Not enough money!");
     player.money -= maintenanceCost;
     business.efficiency = Math.min(business.efficiency + 0.05, 1);
+    player.stress -= 1;
     showToast(`${business.name} efficiency improved!`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
@@ -1305,7 +1406,9 @@ function openBusinessManagement(business) {
     if (player.money < expansionCost) return showToast("Not enough money!");
     player.money -= expansionCost;
     business.profitPerYear *= 1.5;
-    showToast(`${business.name} expanded!`);
+    player.reputation += 4;
+    player.stress += 4;
+    showToast(`${business.name} expanded to new locations!`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
@@ -1314,11 +1417,75 @@ function openBusinessManagement(business) {
     if (player.money < researchCost) return showToast("Not enough money!");
     player.money -= researchCost;
     business.efficiency += 0.1;
+    player.intelligence += 1;
     showToast(`${business.name} innovated through research!`);
     updateStats();
     modal.remove(); openBusinessManagement(business);
   };
 
+  // ========== NEW ACTIONS ==========
+
+  // 🧃 Add Product
+  modal.querySelector("#product-btn").onclick = () => {
+    if (player.money < productCost) return showToast("Not enough money!");
+    const productName = prompt("Enter product name:");
+    if (!productName) return;
+    player.money -= productCost;
+    business.products.push(productName);
+    player.reputation += 2;
+    player.stress += 1;
+    showToast(`New product "${productName}" launched!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // ✏️ Edit Product
+  modal.querySelector("#edit-btn").onclick = () => {
+    if (!business.products.length) return showToast("No products to edit!");
+    const oldName = prompt("Enter product name to edit:");
+    if (!business.products.includes(oldName)) return showToast("Product not found!");
+    const newName = prompt("Enter new product name:");
+    const idx = business.products.indexOf(oldName);
+    business.products[idx] = newName;
+    player.stress += 1;
+    player.reputation += 1;
+    showToast(`Product renamed to "${newName}"`);
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // 📊 Launch Survey
+  modal.querySelector("#survey-btn").onclick = () => {
+    if (player.money < surveyCost) return showToast("Not enough money!");
+    player.money -= surveyCost;
+
+    const randomOutcome = Math.random();
+    if (randomOutcome < 0.3) {
+      business.marketTrend -= 0.05;
+      showToast(`Survey results were poor. Customers aren't satisfied.`);
+      player.happiness -= 2;
+    } else {
+      business.marketTrend += 0.1;
+      showToast(`Survey was successful! Market interest increased.`);
+      player.reputation += 2;
+      player.happiness += 2;
+    }
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // 👷 Hire Employee
+  modal.querySelector("#employee-btn").onclick = () => {
+    if (player.money < employeeCost) return showToast("Not enough money!");
+    player.money -= employeeCost;
+    business.employees++;
+    player.stress -= 1;
+    player.happiness += 1;
+    showToast(`Hired a new employee for ${business.name}!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  // 💵 Sell
   modal.querySelector("#sell-btn").onclick = () => {
     player.money += sellValue;
     player.ownedBusinesses = player.ownedBusinesses.filter(x => x.name !== business.name);
