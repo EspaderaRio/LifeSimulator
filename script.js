@@ -328,7 +328,7 @@ function updateStats() {
   happinessFill.style.backgroundColor =
     player.happiness > 70 ? "#4CAF50" : player.happiness > 40 ? "#FFC107" : "#E53935";
 
-  displayOwnedBusinesses();
+  displayManagedBusinesses();
   displayOwnedLuxury();
 }
 
