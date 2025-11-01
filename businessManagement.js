@@ -231,3 +231,8 @@ player.money += profit;
 });
 updateStats();
 }, 60000); // every 60s = 1 in-game month
+
+/* ----------------------------
+EXPORT FUNCTIONS
+-----------------------------*/
+export { displayManagedBusinesses };
