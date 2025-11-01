@@ -13,8 +13,8 @@
       <!-- HUD bars -->
       <div class="hud">
         <div class="hud-bar">
-          <span>Stress</span>
-          <div class="bar stress-bar"><div class="fill" id="stress-fill"></div></div>
+          <span>Health</span>
+          <div class="bar health-bar"><div class="fill" id="health-fill"></div></div>
         </div>
         <div class="hud-bar">
           <span>Happiness</span>
@@ -31,6 +31,7 @@
         <span id="reputation-text">⭐ 0</span>
         <span id="age">Age: 18</span>
         <span id="month">Month: 1</span>
+        <span id="profession">Profession: None</span>
       </div>
     </header>
 
@@ -65,10 +66,7 @@
     </main>
 
     <footer>
-  <button id="open-business-tab"><img src="assets/buttons/business.svg" alt="Business"></button>
-  <button id="open-luxury-tab"><img src="assets/buttons/luxury.svg" alt="Luxury"></button>
-  <button id="open-life-tab"><img src="assets/buttons/life.svg" alt="Life"></button>
-  <button id="open-family-tab"><img src="assets/buttons/family.svg" alt="Family"></button>
+  <button onclick="openProfessionTab()"><img src="assets/buttons/profession.svg" alt="Profession"></button>
   <button id="menu-toggle"><img src="assets/buttons/menu.svg" alt="Menu"></button>
 </footer>
   </div>
@@ -77,11 +75,27 @@
 <div id="control-modal" class="modal hidden">
   <div class="modal-content">
     <button id="close-modal"><img src="assets/buttons/close.svg" alt="Close"></button>
+    <button onclick="openLifeTab()">Life</button>
+    <button onclick="openBusinessTab()">Business</button>
+    <button onclick="openLuxuryTab()">Luxury</button>
+    <button onclick="openSportsTab()">Sports</button>
+    <button onclick="openLicensedTab()">Career</button>
+    <button id="open-doctor-tab"><img src="assets/buttons/doctor.svg" alt="Doctor"></button>
+    <button id="open-family-tab"><img src="assets/buttons/family.svg" alt="Family"></button>
     <button id="surrender-life" class="control-btn"><img src="assets/buttons/surrender.svg" alt="Surrender"></button>
     <button id="restart-life" class="control-btn"><img src="assets/buttons/restart.svg" alt="Restart"></button>
   </div>
 </div>
-  
+
+  <!-- Profession Modal -->
+<div id="professionModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal(this.parentElement.parentElement)">&times;</span>
+    <h2>Choose a Profession</h2>
+    <div id="profession-list" class="grid"></div>
+  </div>
+</div>
+
 <!-- Personal Life Modal -->
 <div id="lifeModal" class="modal hidden">
   <div class="modal-content">
@@ -144,6 +158,16 @@
 
   </div>
 </div>
+  <!-- Doctor Modal -->
+<div id="doctorModal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal(this.parentElement.parentElement)">&times;</span>
+    <h2>Doctor Visit</h2>
+    <div id="doctor-choices" class="grid"></div>
+  </div>
+</div>
+
+
 
   <script src="script.js"></script>
   <script src="businessManagement.js"></script>
