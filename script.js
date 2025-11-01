@@ -1331,6 +1331,9 @@ function openBusinessManagement(business) {
       <div style="margin-top:12px; text-align:left; font-size:0.9em; color:#ccc;">
         Tip: employee productivity increases profit; happy employees reduce turnover.
       </div>
+       <div class="button-group">
+        <button id="retire-btn">🚪 Resign/Retire</button>
+      </div>
     </div>
   `;
   document.body.appendChild(modal);
@@ -1537,7 +1540,12 @@ function openBusinessManagement(business) {
     modal.remove();
     displayOwnedBusinesses();
   };
-
+  
+    modal.querySelector("#retire-btn").onclick = () => {
+    modal.remove();
+    openRetirementOption();
+  };
+  
   // cleanup: ensure display refresh on close
   modal.addEventListener('remove', () => displayOwnedBusinesses());
 }
