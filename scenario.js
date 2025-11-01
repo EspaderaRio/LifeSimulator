@@ -1498,11 +1498,16 @@ function applyChoiceEffects(choice) {
 
 // ---------------- Yearly trigger ----------------
 export function checkYearlyScenarioTrigger() {
+  // Existing business profit updates
   (player.ownedBusinesses || []).forEach(biz => {
     const variance = (Math.random() - 0.5) * 0.3; // ±15%
     biz.profitPerYear *= (1 + variance * biz.marketTrend);
     biz.profitPerYear = Math.max(500, biz.profitPerYear);
   });
 
+  // Apply Gym & Diet yearly cost/effects
+  applyHealthPrograms();
+
   if (Math.random() < 0.85) generateScenario();
 }
+
