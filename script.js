@@ -2,8 +2,6 @@
 BUSINESSLIFE SIMULATOR (Optimized v3 - Debugged + Refined)
 ============================================================ */
 // ===================== IMPORT FUNCTIONS ===================== //
-import { displayManagedBusinesses } from './businessManagement.js';
-
 
 // ===================== PLAYER DATA ===================== //
 let player = {
@@ -573,4 +571,3 @@ document.querySelectorAll(".toast").forEach(t => t.remove());
   updateStats();
 })();
 // ===================== EXPORT FUNCTIONS ===================== //
-export { player };
