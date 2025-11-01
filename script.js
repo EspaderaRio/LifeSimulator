@@ -572,3 +572,5 @@ document.querySelectorAll(".toast").forEach(t => t.remove());
   clampStats();
   updateStats();
 })();
+// ===================== EXPORT FUNCTIONS ===================== //
+export { player };
