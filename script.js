@@ -285,7 +285,7 @@ function openLicensedTab() {
 // ===================== CONTROL MODAL ===================== //
 
 openMenuTab.onclick = () => openModal(document.getElementById("MenuTab"));
-closeMenuTab.onclick = () => closeModal(document.getElementById("close-menu"));
+closeMenuTab.onclick = () => closeModal(document.getElementById("MenuTab"));
 
 // ===================== SELECT CHARACTER ===================== //
 // Open and close modal
