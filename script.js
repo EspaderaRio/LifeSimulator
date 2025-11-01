@@ -915,10 +915,8 @@ function surrenderLife() {
 
 // ===================== FAMILY TAB ===================== //
 const openFamilyBtn = document.getElementById("open-family-tab");
-const closeFamilyBtn = document.getElementById("close-family-tab");
 
 openFamilyBtn.addEventListener("click", openFamilyTab);
-closeFamilyBtn.addEventListener("click", closeFamilyTab);
 
 function openFamilyTab() {
   const modal = document.createElement("div");
