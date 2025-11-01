@@ -1138,18 +1138,17 @@ function closeLifeTab() {
 
 
 function doLifeAction(a, card) {
-  // Check money
-  const gymCost = 2000; // per year
-  const dietCost = 1500; // per year
-
-  let totalCost = a.cost || 0;
-  if (player.gymMembership) totalCost += gymCost;
-  if (player.dietPlan) totalCost += dietCost;
+  const gymCost = player.gymMembership ? 2000 : 0;
+  const dietCost = player.dietPlan ? 1500 : 0;
+  let totalCost = (a.cost || 0); 
 
   if (player.money < totalCost) return showToast("Not enough money!");
 
   // Deduct cost
   player.money -= totalCost;
+
+  // Track recurring expenses
+  player.otherExpenses = (player.otherExpenses || 0) + gymCost + dietCost;
 
   // Apply stress/happiness/reputation effects
   player.stress = Math.max(0, player.stress + (a.stressChange || 0));
@@ -1160,66 +1159,88 @@ function doLifeAction(a, card) {
   if (player.gymMembership) player.health = Math.min(player.health + 5, 100);
   if (player.dietPlan) player.health = Math.min(player.health + 3, 100);
 
-  // Animate card
   card.animate([{ transform: "scale(0.9)" }, { transform: "scale(1)" }], { duration: 300 });
-
-  // Update UI
   updateStats();
-
-  // Show toast
   showToast(`You enjoyed ${a.name}! Gym/Diet costs applied.`);
 }
+
 
 
 /* ============================================================
 HEALTH PROGRAMS
 ============================================================ */
-export function applyHealthPrograms() {
-  if (player.gymMembership) {
-    player.health = Math.min(player.health + 5, 100); // health boost
-    player.money -= gymCost; // yearly cost
-  }
-  if (player.dietPlan) {
-    player.health = Math.min(player.health + 3, 100);
-    player.money -= dietCost; // yearly cost
+export function applyYearlyHealthAndExpenses() {
+  const gymCost = player.gymMembership ? 2000 : 0;
+  const dietCost = player.dietPlan ? 1500 : 0;
+  const totalCost = gymCost + dietCost;
+
+  if (player.money >= totalCost) {
+    player.money -= totalCost;
+  } else {
+    showToast("Not enough money to maintain gym/diet! Benefits removed.");
+    player.gymMembership = false;
+    player.dietPlan = false;
   }
 
-  player.happiness = clamp(player.happiness - 1, -100, 100); // optional slight stress if needed
+  if (player.gymMembership) player.health = Math.min(player.health + 5, 100);
+  if (player.dietPlan) player.health = Math.min(player.health + 3, 100);
+
   updateStats();
-  showToast("Health programs applied for the year.");
+  updateExpensesTab();
 }
+
 
 /* ============================================================
 SHOW EXPENSES
 ============================================================ */
-export function showExpenses() {
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay expenses-modal';
-  modal.innerHTML = `
-    <div class="modal-content">
-      <h2>Yearly Expenses</h2>
-      <ul>
-        <li>Gym Membership: ${player.gymMembership ? '$' + gymCost : '$0'}</li>
-        <li>Diet Plan: ${player.dietPlan ? '$' + dietCost : '$0'}</li>
-        <li>Other Expenses: ${player.ownedBusinesses?.reduce((sum, b) => sum + (b.maintenanceCost || 0), 0) || '$0'}</li>
-      </ul>
-      <p>Total Expenses: $${calculateTotalExpenses()}</p>
-      <button id="close-expenses">Close</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
+function updateExpensesTab() {
+  const list = document.getElementById("expenses-list");
+  list.innerHTML = "";
 
-  modal.querySelector('#close-expenses').addEventListener('click', () => modal.remove());
+  let total = 0;
+
+  const gymCost = player.gymMembership ? 2000 : 0;
+  const dietCost = player.dietPlan ? 1500 : 0;
+
+  if (gymCost) {
+    list.innerHTML += `<li>Gym Membership: $${gymCost}</li>`;
+    total += gymCost;
+  }
+
+  if (dietCost) {
+    list.innerHTML += `<li>Diet Plan: $${dietCost}</li>`;
+    total += dietCost;
+  }
+
+  if (player.otherExpenses) {
+    list.innerHTML += `<li>Other Expenses: $${player.otherExpenses}</li>`;
+    total += player.otherExpenses;
+  }
+
+  document.getElementById("total-expenses").textContent = `Total Yearly Expenses: $${total.toLocaleString()}`;
 }
 
-// Helper to calculate total expenses
+function openExpensesTab() {
+  updateExpensesTab();
+  document.getElementById("expenses-tab").classList.remove("hidden");
+}
+
+function closeExpensesTab() {
+  document.getElementById("expenses-tab").classList.add("hidden");
+}
+
+
 function calculateTotalExpenses() {
   let total = 0;
-  if (player.gymMembership) total += gymCost;
-  if (player.dietPlan) total += dietCost;
-  if (player.ownedBusinesses) total += player.ownedBusinesses.reduce((sum, b) => sum + (b.maintenanceCost || 0), 0);
+  if (player.gymMembership) total += 2000;
+  if (player.dietPlan) total += 1500;
+  if (player.ownedBusinesses) {
+    total += player.ownedBusinesses.reduce((sum, b) => sum + (b.maintenanceCost || 0), 0);
+  }
+  if (player.otherExpenses) total += player.otherExpenses;
   return total;
 }
+
 
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
@@ -1984,7 +2005,7 @@ document.getElementById('toggle-gym').addEventListener('change', e => {
 document.getElementById('toggle-diet').addEventListener('change', e => {
   player.dietPlan = e.target.checked;
 });
-document.getElementById('view-expenses').addEventListener('click', showExpenses);
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -2026,6 +2047,7 @@ export {
   displayOwnedLuxury,
   displayOwnedBusinesses, 
   openBusinessManagement, 
-  collectAllPassive
+  collectAllPassive,
+  applyHealthPrograms
 };
 
