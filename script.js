@@ -29,7 +29,6 @@ let businesses = [];
 let luxuryItems = {};
 
 
-const openLuxuryTab = document.getElementById("luxury-toggle");
 const openCareerTab = document.getElementById("career-toggle");
 
 const businessModal = document.getElementById("businessModal");
