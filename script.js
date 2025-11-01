@@ -534,30 +534,44 @@ async function loadBusinesses() {
     if (!res.ok) throw new Error("Failed to load businesses.json");
     businesses = await res.json();
   } catch (err) {
-    console.error(err);
-    // fallback data for testing
+    console.warn("⚠️ Using fallback businesses:", err);
     businesses = [
-      { name: "Coffee Shop", cost: 5000, stressImpact: 5, reputationImpact: 2, image: "coffee.svg" },
-      { name: "Tech Startup", cost: 20000, stressImpact: 10, reputationImpact: 5, image: "tech.svg" }
+      { name: "Test Shop", cost: 1000, stressImpact: 2, reputationImpact: 2, image: "default.svg" }
     ];
   }
 }
 
 
-function openBusinessTab() {
-businessChoices.innerHTML = "";
 
-businesses.forEach(b => {
-const card = document.createElement("div");
-card.className = "business-card";
-card.innerHTML = `       <img src="assets/svgs/${b.image || "default.svg"}" alt="${b.name}">       <p>${b.name}</p>       <p>Cost: $${b.cost}</p>       <p>Stress: +${b.stressImpact}</p>       <p>Reputation: +${b.reputationImpact}</p>       <button>Buy</button>
+async function openBusinessTab() {
+  // Only load once
+  if (!businesses.length) {
+    console.log("Loading businesses...");
+    await loadBusinesses();
+    console.log("Loaded:", businesses);
+  }
+
+  // Now render the cards
+  businessChoices.innerHTML = "";
+
+  businesses.forEach(b => {
+    const card = document.createElement("div");
+    card.className = "business-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${b.image || "default.svg"}" alt="${b.name}">
+      <p>${b.name}</p>
+      <p>Cost: $${b.cost.toLocaleString()}</p>
+      <p>Stress: +${b.stressImpact}</p>
+      <p>Reputation: +${b.reputationImpact}</p>
+      <button>Buy</button>
     `;
-card.querySelector("button").onclick = () => buyBusiness(b);
-businessChoices.appendChild(card);
-});
+    card.querySelector("button").onclick = () => buyBusiness(b);
+    businessChoices.appendChild(card);
+  });
 
-openModal(businessModal);
+  openModal(businessModal);
 }
+
 
 function closeBusinessTab() {
 closeModal(businessModal);
@@ -893,7 +907,9 @@ function surrenderLife() {
 document.getElementById("open-family-tab").addEventListener("click", () => {
   alert(`Father: ${family.father.name}\nMother: ${family.mother.name}\nSiblings: ${family.siblings.map(s => s.name).join(", ") || "None"}`);
 });
-
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadBusinesses(); // Load your JSON data right away
+});
 
 document.addEventListener("DOMContentLoaded", () => {
  document.getElementById("menu-toggle").addEventListener("click", () => openModal(document.getElementById("MenuTab")));
