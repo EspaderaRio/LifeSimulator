@@ -28,7 +28,7 @@
       { "name": "Castle", "cost": 50000000, "happinessImpact": 40, "image": "castle.svg" },
       { "name": "Merrit-Island", "cost": 4000000, "happinessImpact": 30, "image": "merrit-island.svg" },
       { "name": "Las_Vegas", "cost": 10000000, "happinessImpact": 30, "image": "lasvegas.svg" },
-      { "name": "Itallian_Villa", "cost": 15000000, "happinessImpact": 30, "image": "itallianvilla.svg" }
+      { "name": "Italian_Villa", "cost": 15000000, "happinessImpact": 30, "image": "italianvilla.svg" }
     ]
   },
   "Jewelry": {
