@@ -30,7 +30,6 @@ let luxuryItems = {};
 
 
 const openLuxuryTab = document.getElementById("luxury-toggle");
-const openBusinessTab = document.getElementById("business-toggle");
 const openCareerTab = document.getElementById("career-toggle");
 
 const businessModal = document.getElementById("businessModal");
