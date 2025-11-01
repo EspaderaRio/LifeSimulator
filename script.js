@@ -1195,14 +1195,138 @@ showToast(`Purchased ${b.name}!`);
 }
 
 function displayOwnedBusinesses() {
-ownedBusinessGrid.innerHTML = "";
-player.ownedBusinesses.forEach(b => {
-const card = document.createElement("div");
-card.className = "business-card";
-card.innerHTML = `       <img src="assets/svgs/${b.image || "default.svg"}" alt="${b.name}">       <p>${b.name}</p>       <p>Stress: +${b.stressImpact}</p>       <p>Reputation: +${b.reputationImpact}</p>
+  ownedBusinessGrid.innerHTML = "";
+  player.ownedBusinesses.forEach(b => {
+    const card = document.createElement("div");
+    card.className = "business-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${b.image || "default.svg"}" alt="${b.name}">
+      <p>${b.name}</p>
+      <p>Stress: +${b.stressImpact}</p>
+      <p>Reputation: +${b.reputationImpact}</p>
     `;
-ownedBusinessGrid.appendChild(card);
-});
+
+    // 🟢 Click to manage business
+    card.addEventListener("click", () => openBusinessManagement(b));
+
+    ownedBusinessGrid.appendChild(card);
+  });
+}
+
+function openBusinessManagement(business) {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+
+  // Add fallback properties if not yet initialized
+  business.level ??= 1;
+  business.efficiency ??= 1;
+  business.marketTrend ??= 1;
+  business.hasManager ??= false;
+  business.profitPerYear ??= business.cost * 0.3;
+
+  const upgradeCost = Math.round(business.cost * 0.7 * business.level);
+  const managerCost = Math.round(business.cost * 0.25);
+  const sellValue = Math.round(business.cost * business.level * 0.8);
+  const collectValue = Math.round(business.profitPerYear / 12 * business.level * business.efficiency * business.marketTrend);
+  const advertiseCost = Math.round(business.cost * 0.2);
+  const maintenanceCost = Math.round(business.cost * 0.1);
+  const expansionCost = Math.round(business.cost * 1.6 * business.level);
+  const researchCost = Math.round(business.cost * 0.25 * business.level);
+
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>${business.name} (Lvl ${business.level})</h2>
+      <p><strong>Market Trend:</strong> ${(business.marketTrend * 100).toFixed(0)}%</p>
+      <p><strong>Efficiency:</strong> ${(business.efficiency * 100).toFixed(0)}%</p>
+      <p><strong>Manager:</strong> ${business.hasManager ? "✅ Hired" : "❌ None"}</p>
+      <hr>
+      <div class="business-actions">
+        <button id="collect-btn">💰 Collect +$${collectValue.toLocaleString()}</button>
+        <button id="upgrade-btn">⬆️ Upgrade ($${upgradeCost.toLocaleString()})</button>
+        <button id="manager-btn">👔 Hire Manager ($${managerCost.toLocaleString()})</button>
+        <button id="advertise-btn">📢 Advertise ($${advertiseCost.toLocaleString()})</button>
+        <button id="maintain-btn">🧰 Maintain ($${maintenanceCost.toLocaleString()})</button>
+        <button id="expand-btn">🏗️ Expand ($${expansionCost.toLocaleString()})</button>
+        <button id="research-btn">🔬 Research ($${researchCost.toLocaleString()})</button>
+        <button id="sell-btn">💵 Sell +$${sellValue.toLocaleString()}</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  modal.querySelector(".close").onclick = () => modal.remove();
+
+  // === Button Actions ===
+  modal.querySelector("#collect-btn").onclick = () => {
+    player.money += collectValue;
+    showToast(`Collected $${collectValue.toLocaleString()} from ${business.name}`);
+    updateStats();
+  };
+
+  modal.querySelector("#upgrade-btn").onclick = () => {
+    if (player.money < upgradeCost) return showToast("Not enough money!");
+    player.money -= upgradeCost;
+    business.level++;
+    showToast(`${business.name} upgraded to level ${business.level}!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  modal.querySelector("#manager-btn").onclick = () => {
+    if (business.hasManager) return showToast(`${business.name} already has a manager!`);
+    if (player.money < managerCost) return showToast("Not enough money!");
+    player.money -= managerCost;
+    business.hasManager = true;
+    showToast(`Manager hired for ${business.name}!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  modal.querySelector("#advertise-btn").onclick = () => {
+    if (player.money < advertiseCost) return showToast("Not enough money!");
+    player.money -= advertiseCost;
+    business.marketTrend += 0.05;
+    showToast(`${business.name} gained popularity!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  modal.querySelector("#maintain-btn").onclick = () => {
+    if (player.money < maintenanceCost) return showToast("Not enough money!");
+    player.money -= maintenanceCost;
+    business.efficiency = Math.min(business.efficiency + 0.05, 1);
+    showToast(`${business.name} efficiency improved!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  modal.querySelector("#expand-btn").onclick = () => {
+    if (player.money < expansionCost) return showToast("Not enough money!");
+    player.money -= expansionCost;
+    business.profitPerYear *= 1.5;
+    showToast(`${business.name} expanded!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  modal.querySelector("#research-btn").onclick = () => {
+    if (player.money < researchCost) return showToast("Not enough money!");
+    player.money -= researchCost;
+    business.efficiency += 0.1;
+    showToast(`${business.name} innovated through research!`);
+    updateStats();
+    modal.remove(); openBusinessManagement(business);
+  };
+
+  modal.querySelector("#sell-btn").onclick = () => {
+    player.money += sellValue;
+    player.ownedBusinesses = player.ownedBusinesses.filter(x => x.name !== business.name);
+    showToast(`You sold ${business.name} for $${sellValue.toLocaleString()}`);
+    updateStats();
+    displayOwnedBusinesses();
+    modal.remove();
+  };
 }
 
 // ===================== LUXURY HANDLERS ===================== //
