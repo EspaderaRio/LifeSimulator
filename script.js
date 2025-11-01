@@ -214,6 +214,8 @@ openMenuTab.onclick = () => openModal(document.getElementById("MenuTab"));
 closeMenuTab.onclick = () => closeModal(document.getElementById("MenuTab"));
 
 // ===================== SELECT CHARACTER ===================== //
+const openCharacterTab = document.getElementById("open-character-tab");
+const closeCharacterTab = document.getElementById("close-character");
 // Open and close modal
 openCharacterTab.onclick = () => {
   openModal(characterModal);
