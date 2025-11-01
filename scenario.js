@@ -7,7 +7,7 @@ Supports athlete sport specialization.
 import { player, updateStats } from './script.js';
 import { displayOwnedBusinesses } from './script.js';
 import { showToast } from './script.js';
-import {applyHealthPrograms } from './script.js';
+import {applyYearlyHealthAndExpenses } from './script.js';
 
 // Utility: clamp number between min and max
 function clamp(num, min, max) {
@@ -1507,7 +1507,7 @@ export function checkYearlyScenarioTrigger() {
   });
 
   // Apply Gym & Diet yearly cost/effects
-  applyHealthPrograms();
+ applyYearlyHealthAndExpenses(); 
 
   if (Math.random() < 0.85) generateScenario();
 }
