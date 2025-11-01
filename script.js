@@ -309,6 +309,28 @@ if (player.profession === "entrepreneur") {
 
 }
 
+// ===================== OWNED LUXURY ===================== //
+function displayOwnedLuxury() {
+  const container = document.getElementById("owned-luxury-grid");
+  container.innerHTML = "";
+
+  player.ownedLuxury.forEach(l => {
+    const card = document.createElement("div");
+    card.className = "luxury-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${l.icon || "default.svg"}" alt="${l.name}">
+      <h3>${l.name}</h3>
+      <p>Happiness +${l.happinessBoost || 0}</p>
+      <p>Reputation +${l.reputationBoost || 0}</p>
+    `;
+    container.appendChild(card);
+  });
+
+  if (player.ownedLuxury.length === 0) {
+    container.innerHTML = `<p>You don't own any luxury items yet.</p>`;
+  }
+}
+
 // ===================== STATS UPDATE ===================== //
 function updateStats() {
   clampStats();
