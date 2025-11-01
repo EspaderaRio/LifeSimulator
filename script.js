@@ -466,30 +466,45 @@ function generateFamily() {
   });
 }
 // ===================== PERSONAL LIFE ===================== //
+const openLifeBtn = document.getElementById("life-toggle");
+const closeLifeBtn = document.getElementById("close-life");
+
+openLifeBtn.addEventListener("click", openLifeTab);
+closeLifeBtn.addEventListener("click", closeLifeTab);
+
 function openLifeTab() {
-lifeChoices.innerHTML = "";
-const actions = [
-{ name: "Vacation Trip", cost: 2000, stressChange: -20, happinessChange: +25, reputationChange: +3, image: "vacation.svg" },
-{ name: "Family Time", cost: 500, stressChange: -15, happinessChange: +20, reputationChange: 0, image: "family.svg" },
-{ name: "Charity Donation", cost: 1500, stressChange: -5, happinessChange: +10, reputationChange: +10, image: "charity.svg" },
-{ name: "Spa Day", cost: 800, stressChange: -25, happinessChange: +15, reputationChange: 0, image: "spa.svg" }
-];
+  lifeChoices.innerHTML = "";
 
-actions.forEach(a => {
-const card = document.createElement("div");
-card.className = "life-card";
-card.innerHTML = `       <img src="assets/svgs/${a.image || "default.svg"}" alt="${a.name}">       <p>${a.name}</p>       <p>Cost: $${a.cost}</p>       <p>Stress: ${a.stressChange}</p>       <p>Happiness: +${a.happinessChange}</p>       <p>Reputation: +${a.reputationChange}</p>       <button>Do Activity</button>
+  const actions = [
+    { name: "Vacation Trip", cost: 2000, stressChange: -20, happinessChange: +25, reputationChange: +3, image: "vacation.svg" },
+    { name: "Family Time", cost: 500, stressChange: -15, happinessChange: +20, reputationChange: 0, image: "family.svg" },
+    { name: "Charity Donation", cost: 1500, stressChange: -5, happinessChange: +10, reputationChange: +10, image: "charity.svg" },
+    { name: "Spa Day", cost: 800, stressChange: -25, happinessChange: +15, reputationChange: 0, image: "spa.svg" }
+  ];
+
+  actions.forEach(a => {
+    const card = document.createElement("div");
+    card.className = "life-card";
+    card.innerHTML = `
+      <img src="assets/svgs/${a.image || "default.svg"}" alt="${a.name}">
+      <p>${a.name}</p>
+      <p>Cost: $${a.cost}</p>
+      <p>Stress: ${a.stressChange}</p>
+      <p>Happiness: +${a.happinessChange}</p>
+      <p>Reputation: +${a.reputationChange}</p>
+      <button>Do Activity</button>
     `;
-card.querySelector("button").onclick = () => doLifeAction(a, card);
-lifeChoices.appendChild(card);
-});
+    card.querySelector("button").onclick = () => doLifeAction(a, card);
+    lifeChoices.appendChild(card);
+  });
 
-openModal(lifeModal);
+  openModal(lifeModal);
 }
 
 function closeLifeTab() {
-closeModal(lifeModal);
+  closeModal(lifeModal);
 }
+
 
 function doLifeAction(a, card) {
 if (player.money < a.cost) return showToast("Not enough money!");
@@ -506,6 +521,11 @@ showToast(`You enjoyed ${a.name}!`);
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
 ============================================================ */
+const openBusinessBtn = document.getElementById("business-toggle");
+const closeBusinessBtn = document.getElementById("close-business");
+
+openBusinessBtn.addEventListener("click", openBusinessTab);
+closeBusinessBtn.addEventListener("click", closeBusinessTab);
 
 // ===================== BUSINESS TAB ===================== //
 async function loadBusinesses() {
@@ -565,6 +585,12 @@ ownedBusinessGrid.appendChild(card);
 }
 
 // ===================== LUXURY HANDLERS ===================== //
+const openLuxuryBtn = document.getElementById("luxury-toggle");
+const closeLuxuryBtn = document.getElementById("close-luxury");
+
+openLuxuryBtn.addEventListener("click", openLuxuryTab);
+closeLuxuryBtn.addEventListener("click", closeLuxuryTab);
+
 async function loadLuxuryItems() {
 try {
 const res = await fetch("luxury.json");
@@ -748,6 +774,11 @@ function openHouseSelection() {
 
 
 // ===================== DOCTOR TAB ===================== //
+const openDoctorBtn = document.getElementById("open-doctor-tab");
+const closeDoctorBtn = document.getElementById("close-doctor");
+
+openDoctorBtn.addEventListener("click", openLuxuryTab);
+closeDoctorBtn.addEventListener("click", closeLuxuryTab);
 
 function openDoctorTab() {
   const modal = document.getElementById("doctorModal");
