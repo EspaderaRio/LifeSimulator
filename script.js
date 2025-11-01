@@ -196,17 +196,17 @@ function openProfessionSelection() {
   };
 
   modal.querySelector("#choose-entrepreneur").onclick = () =>
-    selectProfession("Entrepreneur", openBusinessTab);
+    selectProfession("entrepreneur", openBusinessTab);
   modal.querySelector("#choose-athlete").onclick = () =>
-    selectProfession("Athlete", openSportsTab);
+    selectProfession("athlete", openSportsTab);
   modal.querySelector("#choose-licensed").onclick = () =>
-    selectProfession("Licensed Professional", openLicensedTab);
+    selectProfession("licensed", openLicensedTab);
   modal.querySelector("#choose-celebrity").onclick = () =>
-    selectProfession("Celebrity", openCelebrityTab);
+    selectProfession("celebrity", openCelebrityTab);
   modal.querySelector("#choose-model").onclick = () =>
-    selectProfession("Model", openModelTab);
+    selectProfession("model", openModelTab);
   modal.querySelector("#choose-freelancer").onclick = () =>
-    selectProfession("Freelancer", openFreelancerTab);
+    selectProfession("freelancer", openFreelancerTab);
 }
 
 // ===================== RETIREMENT ===================== //
@@ -440,9 +440,11 @@ function openMatchTab(sport) {
   };
 }
 
-// ===================== LICENSED TAB ===================== //
+// ===================== LICENSED TAB (Expanded) ===================== //
 function openLicensedTab(current = null) {
-  if (current) return openSpecificLicensedTab(current);
+  if (current || player.subProfession) {
+    return openSpecificLicensedTab(current || player.subProfession);
+  }
 
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
@@ -463,7 +465,20 @@ function openLicensedTab(current = null) {
 
   modal.querySelectorAll("[data-career]").forEach(btn => {
     btn.onclick = () => {
+      player.profession = "licensed";
       player.subProfession = btn.dataset.career;
+
+      // Initialize career stats if not yet
+      if (!player.licensedSkills) player.licensedSkills = {};
+      if (!player.licensedSkills[btn.dataset.career]) {
+        player.licensedSkills[btn.dataset.career] = {
+          level: 1,
+          exp: 0,
+          moneyEarned: 0,
+          jobsDone: 0
+        };
+      }
+
       modal.remove();
       openSpecificLicensedTab(btn.dataset.career);
     };
@@ -471,44 +486,96 @@ function openLicensedTab(current = null) {
 }
 
 function openSpecificLicensedTab(career) {
-  const data = {
-    doctor: { health: -10, rep: +5, money: +5000, happiness: -3 },
-    engineer: { health: -5, rep: +3, money: +4000, happiness: -2 },
-    lawyer: { health: -7, rep: +4, money: +4500, happiness: -2 }
-  };
-  const c = data[career];
-
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
+
+  // Career base data
+  const data = {
+    doctor: { health: -10, rep: +5, baseMoney: 5000, happiness: -3 },
+    engineer: { health: -5, rep: +3, baseMoney: 4000, happiness: -2 },
+    lawyer: { health: -7, rep: +4, baseMoney: 4500, happiness: -2 }
+  };
+  const c = data[career];
+  const stats = player.licensedSkills[career];
+
+  // Calculate level-based pay bonus
+  const moneyEarned = c.baseMoney + stats.level * 500;
+
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>${career.charAt(0).toUpperCase() + career.slice(1)}</h2>
-      <p>Workload: Health ${c.health} | Reputation +${c.rep} | Money +${c.money} | Happiness ${c.happiness}</p>
-      <button id="work-btn">Work</button>
-      <button id="retire-btn">Resign/Retire</button>
+      <h2>${capitalize(career)}</h2>
+      <p><strong>Level:</strong> ${stats.level} | <strong>Experience:</strong> ${stats.exp}/100</p>
+      <p><strong>Jobs Completed:</strong> ${stats.jobsDone} | <strong>Total Earnings:</strong> $${stats.moneyEarned}</p>
+      <hr>
+      <p>Workload: Health ${c.health} | Reputation +${c.rep} | Money +${moneyEarned} | Happiness ${c.happiness}</p>
+      <div class="button-group">
+        <button id="work-btn">💼 Work</button>
+        <button id="train-btn">📚 Attend Training</button>
+        <button id="retire-btn">🚪 Resign/Retire</button>
+      </div>
     </div>
   `;
+
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
+  // WORK ACTION
   modal.querySelector("#work-btn").onclick = () => {
     player.health += c.health;
     player.reputation += c.rep;
-    player.money += c.money;
+    player.money += moneyEarned;
     player.happiness += c.happiness;
+
+    stats.exp += 25; // Gain experience per job
+    stats.jobsDone++;
+    stats.moneyEarned += moneyEarned;
+
+    // Level up
+    if (stats.exp >= 100) {
+      stats.level++;
+      stats.exp = stats.exp - 100;
+      showToast(`🏅 ${career} leveled up to Level ${stats.level}!`);
+    } else {
+      showToast(`💼 You completed a job as ${career}.`);
+    }
+
     updateStats();
-    showToast(`You worked as a ${career}!`);
+    modal.remove();
+    openSpecificLicensedTab(career);
   };
+
+  // TRAINING/CONFERENCE ACTION (Improves future work efficiency)
+  modal.querySelector("#train-btn").onclick = () => {
+    stats.exp += 15;
+    player.money -= 500; // Cost of training
+    player.happiness += 2;
+    player.health -= 2;
+
+    if (stats.exp >= 100) {
+      stats.level++;
+      stats.exp -= 100;
+      showToast(`📚 ${career} leveled up to Level ${stats.level} via training!`);
+    } else {
+      showToast(`📚 Training improved your skills for ${career}.`);
+    }
+
+    updateStats();
+    modal.remove();
+    openSpecificLicensedTab(career);
+  };
+
+  // RETIRE / RESIGN
   modal.querySelector("#retire-btn").onclick = () => {
     modal.remove();
     openRetirementOption();
   };
 }
 
+
 // ===================== CELEBRITY TAB ===================== //
 function openCelebrityTab(type = null) {
-  if (type) return openSpecificCelebrityTab(type);
+  if (type || player.subProfession) return openSpecificCelebrityTab(type || player.subProfession);
 
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
@@ -529,7 +596,20 @@ function openCelebrityTab(type = null) {
 
   modal.querySelectorAll("[data-celeb]").forEach(btn => {
     btn.onclick = () => {
+      player.profession = "celebrity";
       player.subProfession = btn.dataset.celeb;
+
+      if (!player.celebritySkills) player.celebritySkills = {};
+      if (!player.celebritySkills[btn.dataset.celeb]) {
+        player.celebritySkills[btn.dataset.celeb] = {
+          level: 1,
+          exp: 0,
+          fame: 0,
+          gigsDone: 0,
+          moneyEarned: 0
+        };
+      }
+
       modal.remove();
       openSpecificCelebrityTab(btn.dataset.celeb);
     };
@@ -537,35 +617,56 @@ function openCelebrityTab(type = null) {
 }
 
 function openSpecificCelebrityTab(type) {
-  const data = {
-    actor: { fame: +5, money: +5000, happy: +8, health: -3 },
-    musician: { fame: +6, money: +4000, happy: +9, health: -4 },
-    influencer: { fame: +4, money: +3000, happy: +7, health: -2 },
-  };
-  const c = data[type];
-
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
+
+  const data = {
+    actor: { money: 5000, fame: 5, happy: 8, health: -3 },
+    musician: { money: 4000, fame: 6, happy: 9, health: -4 },
+    influencer: { money: 3000, fame: 4, happy: 7, health: -2 }
+  };
+  const c = data[type];
+  const stats = player.celebritySkills[type];
+
+  const levelBonus = stats.level * 500;
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>${capitalize(type)} Life</h2>
-      <p>Do shows, appearances, and social events to boost fame and income.</p>
-      <p>Fame +${c.fame} | Money +${c.money} | Happiness +${c.happy} | Health ${c.health}</p>
-      <button id="perform-btn">Perform</button>
-      <button id="retire-btn">Resign/Retire</button>
+      <h2>${capitalize(type)}</h2>
+      <p><strong>Level:</strong> ${stats.level} | <strong>EXP:</strong> ${stats.exp}/100</p>
+      <p><strong>Gigs Done:</strong> ${stats.gigsDone} | <strong>Total Money:</strong> $${stats.moneyEarned}</p>
+      <p>Income: $${c.money + levelBonus} | Fame +${c.fame} | Happiness +${c.happy}</p>
+      <div class="button-group">
+        <button id="perform-btn">🎤 Perform/Act</button>
+        <button id="retire-btn">🚪 Resign/Retire</button>
+      </div>
     </div>
   `;
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
   modal.querySelector("#perform-btn").onclick = () => {
+    player.money += c.money + levelBonus;
     player.reputation += c.fame;
-    player.money += c.money;
     player.happiness += c.happy;
     player.health += c.health;
+
+    stats.exp += 25;
+    stats.fame += c.fame;
+    stats.gigsDone++;
+    stats.moneyEarned += c.money + levelBonus;
+
+    if (stats.exp >= 100) {
+      stats.level++;
+      stats.exp -= 100;
+      showToast(`🏆 ${type} leveled up to Level ${stats.level}!`);
+    } else {
+      showToast(`🎬 You completed a gig as ${type}!`);
+    }
+
     updateStats();
-    showToast(`You performed as a ${type}!`);
+    modal.remove();
+    openSpecificCelebrityTab(type);
   };
 
   modal.querySelector("#retire-btn").onclick = () => {
@@ -576,14 +677,14 @@ function openSpecificCelebrityTab(type) {
 
 // ===================== MODEL TAB ===================== //
 function openModelTab(type = null) {
-  if (type) return openSpecificModelTab(type);
+  if (type || player.subProfession) return openSpecificModelTab(type || player.subProfession);
 
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>Modeling Career</h2>
+      <h2>Model Career</h2>
       <p>Select your modeling specialty:</p>
       <div class="career-grid">
         <button data-model="runway">💃 Runway</button>
@@ -597,7 +698,19 @@ function openModelTab(type = null) {
 
   modal.querySelectorAll("[data-model]").forEach(btn => {
     btn.onclick = () => {
+      player.profession = "model";
       player.subProfession = btn.dataset.model;
+
+      if (!player.modelSkills) player.modelSkills = {};
+      if (!player.modelSkills[btn.dataset.model]) {
+        player.modelSkills[btn.dataset.model] = {
+          level: 1,
+          exp: 0,
+          jobsDone: 0,
+          moneyEarned: 0
+        };
+      }
+
       modal.remove();
       openSpecificModelTab(btn.dataset.model);
     };
@@ -605,35 +718,55 @@ function openModelTab(type = null) {
 }
 
 function openSpecificModelTab(type) {
-  const data = {
-    runway: { money: +4000, rep: +5, happy: +6, health: -3 },
-    fashion: { money: +3500, rep: +4, happy: +7, health: -2 },
-    commercial: { money: +3000, rep: +3, happy: +5, health: -1 },
-  };
-  const m = data[type];
-
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
+
+  const data = {
+    runway: { money: 4000, rep: 5, happy: 6, health: -3 },
+    fashion: { money: 3500, rep: 4, happy: 7, health: -2 },
+    commercial: { money: 3000, rep: 3, happy: 5, health: -1 }
+  };
+  const m = data[type];
+  const stats = player.modelSkills[type];
+
+  const levelBonus = stats.level * 300;
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>${capitalize(type)} Model</h2>
-      <p>Attend shoots and events to boost reputation and income.</p>
-      <p>Money +${m.money} | Reputation +${m.rep} | Happiness +${m.happy} | Health ${m.health}</p>
-      <button id="work-btn">Work</button>
-      <button id="retire-btn">Resign/Retire</button>
+      <p><strong>Level:</strong> ${stats.level} | <strong>EXP:</strong> ${stats.exp}/100</p>
+      <p><strong>Jobs Done:</strong> ${stats.jobsDone} | <strong>Total Money:</strong> $${stats.moneyEarned}</p>
+      <p>Income: $${m.money + levelBonus} | Reputation +${m.rep} | Happiness +${m.happy}</p>
+      <div class="button-group">
+        <button id="work-btn">📸 Work Shoot/Event</button>
+        <button id="retire-btn">🚪 Resign/Retire</button>
+      </div>
     </div>
   `;
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
   modal.querySelector("#work-btn").onclick = () => {
-    player.money += m.money;
+    player.money += m.money + levelBonus;
     player.reputation += m.rep;
     player.happiness += m.happy;
     player.health += m.health;
+
+    stats.exp += 25;
+    stats.jobsDone++;
+    stats.moneyEarned += m.money + levelBonus;
+
+    if (stats.exp >= 100) {
+      stats.level++;
+      stats.exp -= 100;
+      showToast(`🏆 ${type} model leveled up to Level ${stats.level}!`);
+    } else {
+      showToast(`📸 You completed a modeling job as ${type}!`);
+    }
+
     updateStats();
-    showToast(`You worked as a ${type} model!`);
+    modal.remove();
+    openSpecificModelTab(type);
   };
 
   modal.querySelector("#retire-btn").onclick = () => {
@@ -644,7 +777,7 @@ function openSpecificModelTab(type) {
 
 // ===================== FREELANCER TAB ===================== //
 function openFreelancerTab(type = null) {
-  if (type) return openSpecificFreelancerTab(type);
+  if (type || player.subProfession) return openSpecificFreelancerTab(type || player.subProfession);
 
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
@@ -665,7 +798,19 @@ function openFreelancerTab(type = null) {
 
   modal.querySelectorAll("[data-free]").forEach(btn => {
     btn.onclick = () => {
+      player.profession = "freelancer";
       player.subProfession = btn.dataset.free;
+
+      if (!player.freelancerSkills) player.freelancerSkills = {};
+      if (!player.freelancerSkills[btn.dataset.free]) {
+        player.freelancerSkills[btn.dataset.free] = {
+          level: 1,
+          exp: 0,
+          projectsDone: 0,
+          moneyEarned: 0
+        };
+      }
+
       modal.remove();
       openSpecificFreelancerTab(btn.dataset.free);
     };
@@ -673,35 +818,55 @@ function openFreelancerTab(type = null) {
 }
 
 function openSpecificFreelancerTab(type) {
-  const data = {
-    developer: { money: +2500, happy: +4, rep: +2, health: -3 },
-    artist: { money: +2000, happy: +6, rep: +3, health: -1 },
-    writer: { money: +1800, happy: +5, rep: +2, health: -1 },
-  };
-  const f = data[type];
-
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
+
+  const data = {
+    developer: { money: 2500, happy: 4, rep: 2, health: -3 },
+    artist: { money: 2000, happy: 6, rep: 3, health: -1 },
+    writer: { money: 1800, happy: 5, rep: 2, health: -1 }
+  };
+  const f = data[type];
+  const stats = player.freelancerSkills[type];
+
+  const levelBonus = stats.level * 200;
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>${capitalize(type)} Freelancer</h2>
-      <p>Work on gigs to earn money and gain experience.</p>
-      <p>Money +${f.money} | Happiness +${f.happy} | Reputation +${f.rep} | Health ${f.health}</p>
-      <button id="work-btn">Do Project</button>
-      <button id="retire-btn">Resign/Retire</button>
+      <p><strong>Level:</strong> ${stats.level} | <strong>EXP:</strong> ${stats.exp}/100</p>
+      <p><strong>Projects Done:</strong> ${stats.projectsDone} | <strong>Total Money:</strong> $${stats.moneyEarned}</p>
+      <p>Income: $${f.money + levelBonus} | Happiness +${f.happy} | Reputation +${f.rep}</p>
+      <div class="button-group">
+        <button id="work-btn">🖋️ Complete Project</button>
+        <button id="retire-btn">🚪 Resign/Retire</button>
+      </div>
     </div>
   `;
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
   modal.querySelector("#work-btn").onclick = () => {
-    player.money += f.money;
+    player.money += f.money + levelBonus;
     player.happiness += f.happy;
     player.reputation += f.rep;
     player.health += f.health;
+
+    stats.exp += 25;
+    stats.projectsDone++;
+    stats.moneyEarned += f.money + levelBonus;
+
+    if (stats.exp >= 100) {
+      stats.level++;
+      stats.exp -= 100;
+      showToast(`🏆 ${type} leveled up to Level ${stats.level}!`);
+    } else {
+      showToast(`🖋️ You completed a project as ${type}!`);
+    }
+
     updateStats();
-    showToast(`You completed a ${type} project!`);
+    modal.remove();
+    openSpecificFreelancerTab(type);
   };
 
   modal.querySelector("#retire-btn").onclick = () => {
