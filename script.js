@@ -42,7 +42,6 @@ const lifeChoices = document.getElementById("life-choices");
 
 const ownedBusinessGrid = document.getElementById("owned-businesses");
 const ownedLuxuryGrid = document.getElementById("owned-luxury-grid");
-const closeLifeTab = document.getElementById("close-life");
 const lifeToggleBtn = document.getElementById("life-toggle");
 lifeToggleBtn.addEventListener("click", openLifeTab);
 
