@@ -2048,6 +2048,6 @@ export {
   displayOwnedBusinesses, 
   openBusinessManagement, 
   collectAllPassive,
-  applyHealthPrograms
+  applyYearlyHealthAndExpenses
 };
 
