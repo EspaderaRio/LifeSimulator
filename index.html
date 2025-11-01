@@ -9,8 +9,6 @@
 <body>
   <div class="game-container">
     <header>
-
-      <!-- HUD bars -->
       <div class="hud">
         <div class="hud-bar">
           <span>Health</span>
@@ -39,7 +37,7 @@
 <section id="player-section">
   <div id="player-character-bg">
     <div id="player-character-display">
-      <img id="playerCharacter" src="assets/male/polo.png" alt="Your Character">
+      <img id="playerCharacter" src="assets/svgs/default.png" alt="Your Character">
     </div>
   </div>
 
@@ -51,24 +49,22 @@
 </section>
 
       
-      <!-- Owned Businesses -->
-      <section id="business-display">
+       <section id="business-display">
         <h3>Your Businesses</h3>
         <div id="owned-businesses" class="business-grid"></div>
         <button id="open-manage-businesses">Manage Businesses</button>
       </section>
 
-      <!-- Owned Luxury Items -->
       <section id="luxury-display">
         <h3>Your Luxury Items</h3>
         <div id="owned-luxury-grid" class="luxury-grid"></div>
       </section>
     </main>
-
-    <footer>
-  <button onclick="openProfessionSelection()"><img src="assets/buttons/profession.svg" alt="Profession"></button>
-  <button id="menu-toggle"><img src="assets/buttons/menu.svg" alt="Menu"></button>
-</footer>
+    
+       <footer>
+      <button id="open-profession-btn"><img src="assets/buttons/profession.svg" alt="Profession"></button>
+      <button id="menu-toggle"><img src="assets/buttons/menu.svg" alt="Menu"></button>
+    </footer>
   </div>
 
   <!-- Modal -->
@@ -169,7 +165,7 @@
 
 
 
-  <script src="script.js"></script>
-  <script src="businessManagement.js"></script>
+   <script type="module" src="script.js"></script>
+  <script type="module" src="businessManagement.js"></script>
 </body>
 </html>
