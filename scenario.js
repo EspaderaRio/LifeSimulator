@@ -9,6 +9,8 @@ import { displayOwnedBusinesses } from './script.js';
 import { showToast } from './script.js';
 import { applyYearlyHealthAndExpenses } from './script.js';
 import { applyYearlyBusinessChanges} from './script.js';
+import { handleLifeProgression } from './script.js' ;
+
 // Utility: clamp number between min and max
 function clamp(num, min, max) {
   return Math.min(Math.max(num, min), max);
@@ -1497,28 +1499,125 @@ function applyChoiceEffects(choice) {
   displayOwnedBusinesses();
 }
 
-// ---------------- Yearly trigger ----------------
-export function checkYearlyScenarioTrigger() {
-  // Existing business profit updates
-  (player.ownedBusinesses || []).forEach(biz => {
-    const variance = (Math.random() - 0.5) * 0.3; // ±15%
-    biz.profitPerYear *= (1 + variance * biz.marketTrend);
-    biz.profitPerYear = Math.max(500, biz.profitPerYear);
-  });
-  // ===================== ATHLETE YEARLY INCOME ===================== //
-if (player.profession === "athlete" && player.subProfession && player.sportsSkills) {
-  const s = player.sportsSkills[player.subProfession];
-  if (s) {
-    const basePay = 2000 + s.level * 800 + s.fame * 20;
+
+// ===================== UNIVERSAL PROFESSION INCOME + PROMOTIONS ===================== //
+function applyYearlyProfessionIncome() {
+  let basePay = 0;
+
+  switch (player.profession) {
+    case "licensed":
+      basePay = 5000 + (player.intelligence || 0) * 30 + (player.reputation || 0) * 10;
+      break;
+
+    case "entrepreneur":
+      basePay = (player.reputation || 0) * 50;
+      break;
+
+    case "model":
+      basePay = 3000 + (player.modelSkill?.level || 0) * 800 + (player.modelSkill?.fame || 0) * 20;
+      break;
+
+    case "freelancer":
+      basePay = 2500 + (player.intelligence || 0) * 25 + (player.reputation || 0) * 5;
+      break;
+
+    case "celebrity":
+      const celeb = player.subProfession && player.celebritySkills?.[player.subProfession];
+      if (celeb) basePay = 4000 + celeb.level * 1000 + celeb.fame * 30;
+      break;
+
+    case "athlete":
+      const sport = player.subProfession && player.sportsSkills?.[player.subProfession];
+      if (sport) basePay = 2000 + sport.level * 800 + sport.fame * 20;
+      break;
+  }
+
+  if (basePay > 0) {
     player.money += basePay;
-    showToast(`🏅 You earned $${basePay.toLocaleString()} from your ${capitalize(player.subProfession)} career.`);
+    showToast(`💼 You earned $${basePay.toLocaleString()} from your ${capitalize(player.profession)} career!`);
+
+    if (!player.yearsInProfession) player.yearsInProfession = 0;
+    player.yearsInProfession++;
+
+    if (player.yearsInProfession % 5 === 0) {
+      const raise = Math.round(basePay * 0.25);
+      player.money += raise;
+      showToast(`🏆 You received a promotion and a $${raise.toLocaleString()} bonus!`);
+    }
   }
 }
 
-applyYearlyBusinessChanges();
-  // Apply Gym & Diet yearly cost/effects
- applyYearlyHealthAndExpenses(); 
+// ===================== YEARLY TRIGGER ===================== //
+export function checkYearlyScenarioTrigger() {
+  // 1️⃣ Natural life progression
+  handleLifeProgression();
 
+  // 2️⃣ Health & lifestyle effects
+  applyYearlyHealthAndExpenses();
+
+  // 3️⃣ Learning & intelligence growth
+  if (player.age >= 3 && player.age < 7) {
+    player.intelligence += 1;
+    showToast("🧩 You’re growing curious and learning basic things!");
+  }
+
+  if (player.age >= 7 && player.age < 22) studyYearly();
+  if (player.age >= 7 && player.age < 18) makeFriends();
+
+  switch (player.educationLevel) {
+    case "elementary": player.intelligence += 1; break;
+    case "highschool": player.intelligence += 2; break;
+    case "college": player.intelligence += 3; break;
+  }
+
+  // 4️⃣ Business income updates
+  (player.ownedBusinesses || []).forEach(biz => {
+    const variance = (Math.random() - 0.5) * 0.3;
+    biz.profitPerYear *= (1 + variance * biz.marketTrend);
+    biz.profitPerYear = Math.max(500, biz.profitPerYear);
+    player.money += biz.profitPerYear;
+  });
+
+  // 5️⃣ Celebrity transition system
+  const fameThreshold = 80;
+  let transitionMsg = "";
+
+  if (player.profession === "actor" && player.actingSkill?.fame >= fameThreshold) {
+    player.profession = "celebrity";
+    player.subProfession = "actor";
+    transitionMsg = "🌟 You’ve become a celebrity actor due to your fame!";
+  } else if (player.musicSkill?.fame >= fameThreshold && player.profession !== "celebrity") {
+    player.profession = "celebrity";
+    player.subProfession = "musician";
+    transitionMsg = "🎤 Your fame as a musician made you a celebrity!";
+  } else if (player.profession === "athlete" && player.sportsSkills?.[player.subProfession]?.fame >= fameThreshold) {
+    player.profession = "celebrity";
+    player.subProfession = "athlete";
+    transitionMsg = "🌟 You’ve become a celebrity athlete due to your fame!";
+  }
+
+  if (transitionMsg) showToast(transitionMsg);
+
+  // 6️⃣ Celebrity passive income
+  if (player.profession === "celebrity" && player.subProfession && player.celebritySkills) {
+    const celeb = player.celebritySkills[player.subProfession];
+    if (celeb) {
+      const passiveIncome = Math.floor(celeb.fame * 40 + celeb.level * 500);
+      player.money += passiveIncome;
+      showToast(`💰 You earned $${passiveIncome.toLocaleString()} from endorsements and royalties!`);
+    }
+  }
+
+  // 7️⃣ Universal profession income (including athletes & celebrities)
+  if (player.profession) applyYearlyProfessionIncome();
+
+  // 8️⃣ Business environment & expenses
+  applyYearlyBusinessChanges();
+  updateExpensesTab?.();
+
+  // 9️⃣ Random yearly event (scenarios)
   if (Math.random() < 0.85) generateScenario();
-}
 
+  // 🔄 Final UI update
+  updateStats();
+}
