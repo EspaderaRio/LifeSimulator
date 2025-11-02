@@ -1169,7 +1169,7 @@ function doLifeAction(a, card) {
 /* ============================================================
 HEALTH PROGRAMS
 ============================================================ */
-export function applyYearlyHealthAndExpenses() {
+function applyYearlyHealthAndExpenses() {
   const gymCost = player.gymMembership ? 2000 : 0;
   const dietCost = player.dietPlan ? 1500 : 0;
   const totalCost = gymCost + dietCost;
