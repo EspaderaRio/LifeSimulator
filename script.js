@@ -1509,50 +1509,47 @@ function applyYearlyHealthAndExpenses() {
 
 
 /* ============================================================
-SHOW EXPENSES
+                          SHOW EXPENSES
 ============================================================ */
+// ===================== EXPENSES MODAL ===================== //
 const openExpensesBtn = document.getElementById("view-expenses");
-const closeExpensesBtn = document.getElementById("close-expenses");
+if (openExpensesBtn) openExpensesBtn.addEventListener("click", openExpensesModal);
 
-openExpensesBtn.addEventListener("click", openExpensesTab);
-closeExpensesBtn.addEventListener("click", closeExpensesTab);
-
-function updateExpensesTab() {
-  const list = document.getElementById("expenses-list");
-  list.innerHTML = "";
-
-  let total = 0;
+function openExpensesModal() {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
 
   const gymCost = player.gymMembership ? 2000 : 0;
   const dietCost = player.dietPlan ? 1500 : 0;
+  const otherCost = player.otherExpenses || 0;
 
-  if (gymCost) {
-    list.innerHTML += `<li>Gym Membership: $${gymCost}</li>`;
-    total += gymCost;
-  }
+  const total = gymCost + dietCost + otherCost;
 
-  if (dietCost) {
-    list.innerHTML += `<li>Diet Plan: $${dietCost}</li>`;
-    total += dietCost;
-  }
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>📊 Yearly Expenses</h2>
+      <p>Here’s a breakdown of your personal yearly costs:</p>
+      <ul id="expenses-list" class="expense-list">
+        ${gymCost ? `<li>🏋️ Gym Membership: <strong>$${gymCost.toLocaleString()}</strong></li>` : ""}
+        ${dietCost ? `<li>🥗 Diet Plan: <strong>$${dietCost.toLocaleString()}</strong></li>` : ""}
+        ${otherCost ? `<li>💸 Other Expenses: <strong>$${otherCost.toLocaleString()}</strong></li>` : ""}
+        ${!gymCost && !dietCost && !otherCost ? `<li>No active expenses at the moment.</li>` : ""}
+      </ul>
+      <hr>
+      <p id="total-expenses"><strong>Total Yearly Expenses:</strong> $${total.toLocaleString()}</p>
+      <div class="button-group">
+        <button id="close-expenses-btn">Close</button>
+      </div>
+    </div>
+  `;
 
-  if (player.otherExpenses) {
-    list.innerHTML += `<li>Other Expenses: $${player.otherExpenses}</li>`;
-    total += player.otherExpenses;
-  }
+  document.body.appendChild(modal);
 
-  document.getElementById("total-expenses").textContent = `Total Yearly Expenses: $${total.toLocaleString()}`;
+  // Close modal on click
+  modal.querySelector(".close").onclick = () => modal.remove();
+  modal.querySelector("#close-expenses-btn").onclick = () => modal.remove();
 }
-
-function openExpensesTab() {
-  updateExpensesTab();
-  document.getElementById("expenses-tab").classList.remove("hidden");
-}
-
-function closeExpensesTab() {
-  document.getElementById("expenses-tab").classList.add("hidden");
-}
-
 
 function calculateTotalExpenses() {
   let total = 0;
@@ -1564,7 +1561,6 @@ function calculateTotalExpenses() {
   if (player.otherExpenses) total += player.otherExpenses;
   return total;
 }
-
 
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
