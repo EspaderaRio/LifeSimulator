@@ -1280,7 +1280,7 @@ if (savedOutfitSrc) {
 
 
 // ===================== LIFE EVENTS ===================== //
-function handleLifeProgression() {
+export function handleLifeProgression() {
   if (player.age === 0) {
     showToast(`You were born into the ${family.surname} family!`);
   } else if (player.age === 3) {
