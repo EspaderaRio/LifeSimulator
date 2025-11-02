@@ -1511,6 +1511,12 @@ function applyYearlyHealthAndExpenses() {
 /* ============================================================
 SHOW EXPENSES
 ============================================================ */
+const openExpensesBtn = document.getElementById("view-expenses");
+const closeExpensesBtn = document.getElementById("close-expenses");
+
+openExpensesBtn.addEventListener("click", openExpensesTab);
+closeExpensesBtn.addEventListener("click", closeExpensesTab);
+
 function updateExpensesTab() {
   const list = document.getElementById("expenses-list");
   list.innerHTML = "";
