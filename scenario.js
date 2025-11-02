@@ -1505,7 +1505,16 @@ export function checkYearlyScenarioTrigger() {
     biz.profitPerYear *= (1 + variance * biz.marketTrend);
     biz.profitPerYear = Math.max(500, biz.profitPerYear);
   });
-  
+  // ===================== ATHLETE YEARLY INCOME ===================== //
+if (player.profession === "athlete" && player.subProfession && player.sportsSkills) {
+  const s = player.sportsSkills[player.subProfession];
+  if (s) {
+    const basePay = 2000 + s.level * 800 + s.fame * 20;
+    player.money += basePay;
+    showToast(`🏅 You earned $${basePay.toLocaleString()} from your ${capitalize(player.subProfession)} career.`);
+  }
+}
+
 applyYearlyBusinessChanges();
   // Apply Gym & Diet yearly cost/effects
  applyYearlyHealthAndExpenses(); 
