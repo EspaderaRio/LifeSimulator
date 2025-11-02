@@ -1500,11 +1500,18 @@ function applyYearlyHealthAndExpenses() {
     player.dietPlan = false;
   }
 
+  // Apply health effects
   if (player.gymMembership) player.health = Math.min(player.health + 5, 100);
   if (player.dietPlan) player.health = Math.min(player.health + 3, 100);
 
   updateStats();
-  updateExpensesTab();
+
+  // If the expenses modal is open, refresh it
+  const existingModal = document.querySelector(".modal-overlay");
+  if (existingModal) {
+    existingModal.remove();
+    openExpensesModal();
+  }
 }
 
 
@@ -1561,6 +1568,7 @@ function calculateTotalExpenses() {
   if (player.otherExpenses) total += player.otherExpenses;
   return total;
 }
+
 
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
