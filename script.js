@@ -207,6 +207,9 @@ function studyYearly() {
     if (player.schoolStage === "high") showCollegeFundingModal();
   }
 }
+// ===================== SCHOOL MODAL ===================== //
+const openSchoolBtn = document.getElementById("study-tab-btn");
+openSchoolBtn.addEventListener("click", openSchoolModal);
 
 function openSchoolModal() {
   if (player.age < 7 || player.age > 22) return showToast("You are not in school.");
