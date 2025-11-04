@@ -2569,7 +2569,6 @@ document.getElementById('toggle-diet').addEventListener('change', e => {
 
 
 document.addEventListener("DOMContentLoaded", () => {
- document.getElementById("open-study-tab").addEventListener("click", openStudyTab);
  document.getElementById("menu-toggle").addEventListener("click", () => openModal(document.getElementById("MenuTab")));
  document.getElementById("close-life").addEventListener("click", closeLifeTab);
  document.getElementById("close-business").addEventListener("click", closeBusinessTab);
