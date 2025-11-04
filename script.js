@@ -2262,6 +2262,10 @@ function updateExpensesTab() {
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
 ============================================================ */
+function safeNum(n, def = 0) {
+  return isNaN(n) || n === null || n === undefined ? def : Number(n);
+}
+
 const openBusinessBtn = document.getElementById("business-toggle");
 const closeBusinessBtn = document.getElementById("close-business");
 
@@ -2286,21 +2290,34 @@ async function loadBusinesses() {
         image: "default.svg",
       }),
     ];
+    player.ownedBusinesses = (player.ownedBusinesses || []).map(normalizeBusiness);
   }
 }
 
 function normalizeBusiness(b) {
-  b.cost = Number(b.cost) || 0;
-  b.level = Number(b.level) || 1;
-  b.efficiency = Number(b.efficiency) || 1;
-  b.marketTrend = Number(b.marketTrend) || 1;
-  b.ownership = Number(b.ownership) || 100;
-  b.profitPerYear = Number(b.profitPerYear) || Math.round(b.cost * 0.2);
-  b.employees = Number(b.employees) || 0;
-  b.stressImpact = Number(b.stressImpact) || 0;
-  b.reputationImpact = Number(b.reputationImpact) || 0;
-  b.image = b.image || "default.svg";
-  return b;
+  const safe = (n, def = 0) => (isNaN(n) || n === null || n === undefined ? def : Number(n));
+
+  return {
+    name: b.name || "Unnamed Business",
+    image: b.image || "default.svg",
+    cost: safe(b.cost, 1000),
+    level: safe(b.level, 1),
+    efficiency: safe(b.efficiency, 1),
+    marketTrend: safe(b.marketTrend, 1),
+    ownership: safe(b.ownership, 100),
+    employees: safe(b.employees, 0),
+    stressImpact: safe(b.stressImpact, 0),
+    reputationImpact: safe(b.reputationImpact, 0),
+    profitPerYear: safe(b.profitPerYear, Math.round((safe(b.cost, 1000) || 1000) * 0.2)),
+    morale: safe(b.morale, 100),
+    satisfaction: safe(b.satisfaction, 100),
+    hasManager: !!b.hasManager,
+    employeeList: Array.isArray(b.employeeList) ? b.employeeList : [],
+    products: Array.isArray(b.products) ? b.products : [],
+    upgrades: Array.isArray(b.upgrades) ? b.upgrades : [],
+    origin: b.origin || "businessTab",
+    lastIncome: safe(b.lastIncome, 0),
+  };
 }
 
 
@@ -2366,7 +2383,8 @@ function buyBusiness(b) {
   upgrades: [],
   origin: "businessTab",
 });
-player.ownedBusinesses.push(newBusiness);
+player.ownedBusinesses.push(normalizeBusiness(newBusiness));
+
 
 
   animateCardPurchase(b.image);
@@ -2416,6 +2434,8 @@ function displayOwnedBusinesses() {
 
 // ----------------------------- Management Modal -----------------------------
 function openBusinessManagement(business) {
+  // Auto-repair any invalid values before doing math
+Object.assign(business, normalizeBusiness(business));
   // normalize
   business.level ??= 1;
   business.efficiency ??= 1;
@@ -2424,16 +2444,19 @@ function openBusinessManagement(business) {
   business.products ??= []; // { name, price, demand }
   business.employees ??= 0;
   business.employeeList ??= []; // [{name, role, salary, productivity}]
+  if (isNaN(business.profitPerYear) || !business.profitPerYear) business.profitPerYear = business.cost * 0.2;
   business.profitPerYear ??= business.cost * 0.3;
   business.ownership ??= 100; // percent
 
-  if (
+if (
   isNaN(business.profitPerYear) ||
   isNaN(business.cost) ||
   isNaN(business.level)
 ) {
-  console.warn("⚠️ Business has invalid number values:", business);
+  console.warn("⚠️ Auto-fixed invalid values for:", business.name);
+  Object.assign(business, normalizeBusiness(business));
 }
+
 
 
   // computed costs
@@ -2441,7 +2464,10 @@ function openBusinessManagement(business) {
   const managerCost = Math.round(business.cost * 0.25);
   const sellValue = Math.round(business.cost * business.level * 0.8 * (business.ownership / 100));
   const investmentCost = Math.round(business.cost * 0.5 * business.level);
-  const collectBase = (business.profitPerYear / 12) * business.level * business.efficiency * business.marketTrend;
+ const collectBase = (safeNum(business.profitPerYear, business.cost * 0.2) / 12)
+  * safeNum(business.level, 1)
+  * safeNum(business.efficiency, 1)
+  * safeNum(business.marketTrend, 1);
   const productCost = Math.round(business.cost * 0.15);
   const surveyCost = Math.round(business.cost * 0.08 * (1 + business.level * 0.02));
   const employeeHireCost = Math.round(business.cost * 0.05);
@@ -2531,17 +2557,20 @@ function openBusinessManagement(business) {
 
     if (score > 0.85) {
       business.marketTrend = clamp(business.marketTrend + 0.2, 0.5, 3);
+      if (isNaN(business.profitPerYear) || !business.profitPerYear) business.profitPerYear = business.cost * 0.2;
       business.profitPerYear *= 1.45;
       player.reputation += 3;
       player.happiness += 3;
       showToast(`Investment succeeded! ${business.name} surged.`);
     } else if (score > 0.55) {
       business.marketTrend = clamp(business.marketTrend + 0.08, 0.5, 2);
+      if (isNaN(business.profitPerYear) || !business.profitPerYear) business.profitPerYear = business.cost * 0.2;
       business.profitPerYear *= 1.18;
       player.reputation += 1;
       showToast('Investment yielded moderate gains.');
     } else {
       business.marketTrend = clamp(business.marketTrend - 0.08, 0.2, 2);
+      if (isNaN(business.profitPerYear) || !business.profitPerYear) business.profitPerYear = business.cost * 0.2;
       business.profitPerYear *= 0.9;
       player.stress += 3;
       player.happiness -= 2;
@@ -2557,6 +2586,7 @@ function openBusinessManagement(business) {
     if (player.money < upgradeCost) return showToast('Not enough money to upgrade.');
     player.money -= upgradeCost;
     business.level++;
+    if (isNaN(business.profitPerYear) || !business.profitPerYear) business.profitPerYear = business.cost * 0.2;
     business.profitPerYear = Math.round(business.profitPerYear * 1.35);
     business.efficiency = clamp(business.efficiency + 0.06, 0.5, 2);
     player.reputation += 2;
