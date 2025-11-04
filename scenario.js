@@ -4,13 +4,6 @@ Triggers yearly profession/business events that affect stats.
 Supports athlete sport specialization.
 ============================================================ */
 
-import { player, updateStats } from './script.js';
-import { displayOwnedBusinesses } from './script.js';
-import { showToast } from './script.js';
-import { applyYearlyHealthAndExpenses } from './script.js';
-import { applyYearlyBusinessChanges} from './script.js';
-import { handleLifeProgression } from './script.js';
-import { studyYearly } from './script.js';
 
 // Utility: clamp number between min and max
 function clamp(num, min, max) {
@@ -1378,7 +1371,7 @@ const scenarioPools = {
 };
 
 // ---------------- Generate and show a scenario ----------------
-export function generateScenario() {
+function generateScenario() {
   const pool = [];
   const prof = (player.profession || '').toLowerCase();
 
@@ -1549,7 +1542,7 @@ function applyYearlyProfessionIncome() {
 }
 
 // ===================== YEARLY TRIGGER ===================== //
-export function checkYearlyScenarioTrigger() {
+function checkYearlyScenarioTrigger() {
   // 1️⃣ Natural life progression
   handleLifeProgression();
 
