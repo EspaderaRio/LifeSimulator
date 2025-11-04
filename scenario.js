@@ -9,7 +9,8 @@ import { displayOwnedBusinesses } from './script.js';
 import { showToast } from './script.js';
 import { applyYearlyHealthAndExpenses } from './script.js';
 import { applyYearlyBusinessChanges} from './script.js';
-import { handleLifeProgression } from './script.js' ;
+import { handleLifeProgression } from './script.js';
+import { studyYearly } from './script.js';
 
 // Utility: clamp number between min and max
 function clamp(num, min, max) {
@@ -1610,7 +1611,8 @@ export function checkYearlyScenarioTrigger() {
 
   // 7️⃣ Universal profession income (including athletes & celebrities)
   if (player.profession) applyYearlyProfessionIncome();
-
+  
+  studyYearly();
   // 8️⃣ Business environment & expenses
   applyYearlyBusinessChanges();
   updateExpensesTab?.();
