@@ -2273,14 +2273,36 @@ async function loadBusinesses() {
   try {
     const res = await fetch("businesses.json");
     if (!res.ok) throw new Error("Failed to load businesses.json");
-    businesses = await res.json();
+    const data = await res.json();
+    businesses = data.map(normalizeBusiness);
   } catch (err) {
     console.warn("⚠️ Using fallback businesses:", err);
     businesses = [
-      { name: "Test Shop", cost: 1000, stressImpact: 2, reputationImpact: 2, image: "default.svg" }
+      normalizeBusiness({
+        name: "Test Shop",
+        cost: 1000,
+        stressImpact: 2,
+        reputationImpact: 2,
+        image: "default.svg",
+      }),
     ];
   }
 }
+
+function normalizeBusiness(b) {
+  b.cost = Number(b.cost) || 0;
+  b.level = Number(b.level) || 1;
+  b.efficiency = Number(b.efficiency) || 1;
+  b.marketTrend = Number(b.marketTrend) || 1;
+  b.ownership = Number(b.ownership) || 100;
+  b.profitPerYear = Number(b.profitPerYear) || Math.round(b.cost * 0.2);
+  b.employees = Number(b.employees) || 0;
+  b.stressImpact = Number(b.stressImpact) || 0;
+  b.reputationImpact = Number(b.reputationImpact) || 0;
+  b.image = b.image || "default.svg";
+  return b;
+}
+
 
 
 
@@ -2331,22 +2353,20 @@ function buyBusiness(b) {
   player.stress += b.stressImpact;
   player.reputation += b.reputationImpact;
 
-  
-  const newBusiness = {
-    ...b,
-    level: 1,           
-    efficiency: 1,     
-    marketTrend: 1,     
-    ownership: 100,    
-    profitPerYear: b.profitPerYear || b.cost * 0.2,
-    lastIncome: 0,     
-    employees: b.employees || 0,
-    upgrades: [],
-    origin: "businessTab",
-  };
 
- 
-  player.ownedBusinesses.push(newBusiness);
+  const newBusiness = normalizeBusiness({
+  ...b,
+  level: 1,
+  efficiency: 1,
+  marketTrend: 1,
+  ownership: 100,
+  profitPerYear: b.profitPerYear || b.cost * 0.2,
+  lastIncome: 0,
+  employees: b.employees || 0,
+  upgrades: [],
+  origin: "businessTab",
+});
+player.ownedBusinesses.push(newBusiness);
 
 
   animateCardPurchase(b.image);
@@ -2406,6 +2426,15 @@ function openBusinessManagement(business) {
   business.employeeList ??= []; // [{name, role, salary, productivity}]
   business.profitPerYear ??= business.cost * 0.3;
   business.ownership ??= 100; // percent
+
+  if (
+  isNaN(business.profitPerYear) ||
+  isNaN(business.cost) ||
+  isNaN(business.level)
+) {
+  console.warn("⚠️ Business has invalid number values:", business);
+}
+
 
   // computed costs
   const upgradeCost = Math.round(business.cost * 0.7 * business.level);
