@@ -2,11 +2,10 @@
 BUSINESSLIFE SIMULATOR (Optimized v3 - Debugged + Refined)
 ============================================================ */
 // ===================== IMPORT FUNCTIONS ===================== //
-import { displayManagedBusinesses } from './businessManagement.js';
-import { checkYearlyScenarioTrigger, generateScenario } from './scenario.js';
+
 
 // ===================== PLAYER DATA ===================== //
-export let player = {
+let player = {
   name: "",
   age: 7,               // start at 7
   month: 1,
@@ -176,7 +175,7 @@ function animateCardPurchase(imageSrc) {
 player.educationStage = player.schoolStage; // always sync stages
 
 // ===================== STUDY YEARLY ===================== //
-export function studyYearly() {
+function studyYearly() {
   if (player.age < 7 || player.age > 22) return;
 
   // auto stage detection
@@ -206,7 +205,7 @@ export function studyYearly() {
 // ===================== OPEN SCHOOL/STUDY MODAL ===================== //
 document.getElementById("study-tab-btn").onclick = () => openSchoolModal();
 
-export function openSchoolModal() {
+function openSchoolModal() {
   if (player.age < 7 || player.age > 22) return showToast("You are not in school.");
 
   // Determine stage
@@ -746,7 +745,7 @@ function openSpecificBusinessTab(bizId = null) {
 
 
 // ===================== YEARLY BUSINESS UPDATES ===================== //
-export function applyYearlyBusinessChanges() {
+function applyYearlyBusinessChanges() {
   if (!player.ownedBusinesses) return;
   player.ownedBusinesses.forEach(biz => {
     // Random yearly event modifier
@@ -1501,7 +1500,7 @@ if (savedOutfitSrc) {
 
 
 // ===================== LIFE EVENTS ===================== //
-export function handleLifeProgression() {
+function handleLifeProgression() {
   if (player.age === 0) {
     showToast(`You were born into the ${family.surname} family!`);
   } else if (player.age === 3) {
@@ -2764,16 +2763,5 @@ window.openProfessionSelection = openProfessionSelection;
 
 // ===================== EXPORT FUNCTIONS ===================== //
 
-export { 
-  updateStats, 
-  showToast, 
-  openSportsTab, 
-  openLicensedTab, 
-  openBusinessTab, 
-  displayOwnedLuxury,
-  displayOwnedBusinesses, 
-  openBusinessManagement, 
-  collectAllPassive,
-  applyYearlyHealthAndExpenses
-};
+
 
