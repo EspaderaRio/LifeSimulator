@@ -366,8 +366,8 @@ function openSchoolModal() {
 
 // ===================== CLASSMATE GENERATOR ===================== //
 function generateClassmates(stage) {
-  const firstNames = ["Alex", "Jamie", "Chris", "Taylor", "Jordan", "Sam", "Riley", "Casey", "Morgan", "Avery"];
-  const personalities = ["Friendly", "Shy", "Outgoing", "Funny", "Serious", "Creative"];
+  const firstNames = ["Alex", "Jamie", "Chris", "Taylor", "Jordan", "Sam", "Riley", "Casey", "Morgan", "Avery", "Blake", "Cameron", "Drew", "Emerson", "Finley", "Harper", "Jesse", "Kai", "Logan", "Micah", "Nico", "Peyton", "Quinn", "Reese", "Sawyer", "Skyler", "Toby", "Zion", "Adrian", "Bailey", "Charlie", "Dakota", "Elliot", "Frankie", "Gray", "Hayden", "Indigo", "Jules", "Kendall", "Luca", "Marley", "Noah", "Oakley", "Phoenix", "River", "Shawn", "Tatum", "Val", "Wren", "Zane", "Aiden", "Beau", "Caleb", "Dallas", "Eli", "Felix", "Gavin", "Hunter", "Isaac", "Jaxon", "Kairos", "Landon", "Milo", "Nash", "Orion", "Parker", "Rowan", "Sterling", "Theo", "Uri", "Victor", "Wyatt", "Xander", "Yuri", "Zeke", "Alana", "Brielle", "Cleo", "Delaney", "Esme", "Freya", "Gia", "Hazel", "Isla", "Jade", "Keira", "Luna", "Maya", "Nora", "Opal", "Paisley", "Quiana", "Ruby", "Sienna", "Talia", "Uma", "Vera", "Willow", "Ximena", "Yara", "Zoey", "Amara", "Blair", "Carmen", "Dahlia", "Eliza", "Fiona", "Greta", "Holly", "Ivy", "Jasmine", "Kira", "Lila", "Melody", "Naomi", "Olive", "Piper", "Queenie", "Raven", "Sage", "Trinity", "Ursula", "Violet", "Wendy", "Xyla", "Yvette", "Zara", "Ari", "Blaise", "Cruz", "Devon", "Eden", "Fallon", "Gale", "Harley", "Indie", "Jory", "Kody", "Lior", "Monroe", "Nicolette", "Ocean", "Presley", "Quest", "Rory", "Sasha", "Toni", "Urban", "Vinnie", "Winter", "Xavi", "Yuki", "Zuri", "Ash", "Bryn", "Cory", "Dane", "Ember", "Flynn", "Gem", "Haven", "Ira", "Juno", "Keenan", "Lex", "Milan", "Nova", "Onyx", "Pax", "Quade", "Remy", "Sky", "Toby", "Unity", "Vail", "West", "Xoe", "Yanis", "Zion", "Aubrey","Brady", "Caden", "Demi", "Elias", "Finch", "Gentry", "Huxley", "Imani", "Jace", "Karter", "Lennon", "Maddox", "Nico", "Oak", "Paxton", "Quinlan", "Ryder", "Soren", "Trey", "Ulysses", "Vaughn", "Wells", "Xion", "Yosef", "Zayden", "Anya", "Beatrix", "Calla", "Daria", "Elodie", "Fallon", "Gianna", "Harlow", "Ines", "Jovie", "Kinsley", "Lyra", "Mira", "Noelle", "Odessa", "Paloma", "Quilla", "Rhea", "Selah", "Tess", "Una", "Vienna", "Willa", "Xenia", "Yasmin", "Zadie", "Ainsley", "Belen", "Celeste", "Dixie", "Emmeline", "Farrah", "Goldie", "Honor", "Isadora", "Jemma", "Kaya", "Lacey", "Maisie", "Nina", "Orla", "Primrose", "Quinby", "Rosalie", "Simone", "Tahlia", "Ula", "Veda", "Whitley", "Xochitl", "Yuna", "Zella", "Ariel", "Brook", "Cali", "Delia", "Elli", "Fern", "Giselle", "Hana", "Ilana", "Jana", "Kali", "Lana", "Macy", "Nala", "Oona", "Penny", "Quorra", "Rumi", "Soleil", "Trixie", "Vita", "Wynne", "Zaria"];
+  const personalities = ["Friendly", "Shy", "Outgoing", "Funny", "Serious", "Creative", "Kind", "Curious", "Optimistic", "Thoughtful", "Loyal", "Adventurous", "Empathetic", "Confident", "Quiet", "Talkative", "Caring", "Ambitious", "Generous", "Polite", "Cheerful", "Sensitive", "Independent", "Reliable", "Playful", "Calm", "Assertive", "Gentle", "Energetic", "Patient", "Charming", "Witty", "Reserved", "Bold", "Sincere", "Tough", "Helpful", "Diligent", "Spontaneous", "Modest", "Wise", "Observant", "Passionate", "Easygoing", "Respectful", "Tactful", "Determined", "Mysterious", "Warm", "Idealistic", "Practical", "Competitive", "Affectionate", "Balanced", "Joyful", "Focused", "Open-minded", "Courageous", "Supportive", "Innovative", "Dependable", "Forgiving", "Grateful", "Resourceful", "Sociable", "Trustworthy", "Honest", "Brave", "Gentle", "Rebellious", "Dreamy", "Organized", "Empowered", "Grounded", "Radiant", "Playful", "Tolerant", "Disciplined", "Curious", "Mature", "Lively", "Sympathetic", "Driven", "Cool-headed", "Perceptive", "Nurturing", "Steady", "Inventive", "Quirky", "Serene", "Hardworking", "Peaceful", "Expressive", "Faithful", "Silly", "Adaptable", "Focused", "Sociable", "Proud", "Reserved", "Clever", "Gentle", "Bold", "Kindhearted", "Persistent", "Radiant", "Playful", "Ambitious", "Humorous", "Trusting", "Cautious", "Loyal", "Tidy", "Respectful", "Selfless", "Tough", "Hopeful", "Chill", "Curious", "Assertive", "Polished", "Eccentric", "Reliable", "Sensitive", "Warmhearted", "Observant", "Peaceful", "Determined", "Sensible", "Compassionate", "Generous", "Courageous", "Inventive", "Gentle", "Witty", "Sincere", "Thoughtful", "Cheerful", "Open", "Balanced", "Affectionate", "Idealistic", "Practical", "Competitive", "Joyful", "Focused", "Open-minded", "Courageous", "Supportive", "Innovative", "Dependable", "Forgiving", "Grateful", "Resourceful", "Sociable", "Trustworthy", "Honest", "Brave", "Gentle", "Rebellious", "Dreamy", "Organized", "Empowered", "Grounded", "Radiant", "Playful", "Tolerant", "Disciplined", "Curious", "Mature", "Lively", "Sympathetic", "Driven", "Cool-headed", "Perceptive", "Nurturing", "Steady", "Inventive", "Quirky", "Serene", "Hardworking", "Peaceful", "Expressive", "Faithful", "Silly", "Adaptable", "Focused", "Sociable", "Proud", "Reserved", "Clever", "Gentle", "Bold", "Kindhearted", "Persistent", "Radiant", "Playful", "Ambitious", "Humorous", "Trusting", "Cautious", "Loyal", "Tidy", "Respectful", "Selfless", "Tough", "Hopeful", "Chill", "Curious", "Assertive", "Polished", "Eccentric", "Reliable", "Sensitive", "Warmhearted", "Observant", "Peaceful", "Determined", "Sensible", "Compassionate", "Generous", "Courageous", "Inventive", "Gentle", "Witty", "Sincere", "Thoughtful", "Cheerful"];
   return Array.from({ length: 5 }, () => ({
     name: firstNames[Math.floor(Math.random() * firstNames.length)],
     personality: personalities[Math.floor(Math.random() * personalities.length)],
@@ -428,21 +428,24 @@ function addOrUpdateFriend(classmate) {
   }
 }
 
-function updateRelationshipsTab() {
-  const tab = document.getElementById("relationships-tab-content");
-  if (!tab) return;
+function refreshRelationshipsTab() {
+  const modal = document.querySelector(".modal-overlay");
+  if (!modal) return;
 
-  tab.innerHTML = `
-    <h3>👪 Family</h3>
-    <ul>${(player.relationships.family || []).map(f => `<li>${f.name} - ❤️ ${f.relationshipScore}</li>`).join("")}</ul>
+  const familySection = modal.querySelector("#family-section");
+  const romanticSection = modal.querySelector("#romantic-section");
+  const friendshipSection = modal.querySelector("#friendship-section");
+  const otherSection = modal.querySelector("#other-section");
 
-    <h3>💖 Romantic</h3>
-    <ul>${(player.relationships.romantic || []).map(r => `<li>${r.name} (${r.type}) - 💞 ${r.relationshipScore}</li>`).join("")}</ul>
+  renderRelationshipList(familySection, player.relationships.family);
+  if (player.relationships.romantic) {
+    renderRelationshipList(romanticSection, [player.relationships.romantic]);
+  } else romanticSection.innerHTML = "<p>You are single</p>";
 
-    <h3>🤝 Friends</h3>
-    <ul>${(player.relationships.friends || []).map(f => `<li>${f.name} - 😊 ${f.relationshipScore}</li>`).join("")}</ul>
-  `;
+  renderRelationshipList(friendshipSection, player.relationships.friends);
+  renderRelationshipList(otherSection, player.relationships.others);
 }
+
 
 // ===================== HELPERS ===================== //
 function gainSkill(skill, amount, msg) {
@@ -461,7 +464,7 @@ function startRelationship(stage) {
   player.partnerType = choice;
   showToast(`You started dating your ${choice} at ${stage}!`);
   updateStats();
-  updateRelationshipsTab();
+  refreshRelationshipsTab();
 }
 
 function joinGreekLife() {
