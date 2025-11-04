@@ -363,7 +363,8 @@ function createNewBusiness(type, fundingType = "self") {
     morale: 80,
     satisfaction: 75,
     happinessImpact: 2,
-    risk: b.risk
+    risk: b.risk,
+    origin: "entrepreneurTab",
   };
 
   // Handle funding type
@@ -1658,7 +1659,8 @@ function buyBusiness(b) {
     profitPerYear: b.profitPerYear || b.cost * 0.2,
     lastIncome: 0,     
     employees: b.employees || 0,
-    upgrades: []       
+    upgrades: [],
+    origin: "businessTab",
   };
 
  
@@ -1689,12 +1691,23 @@ function displayOwnedBusinesses() {
 
   player.ownedBusinesses.forEach(biz => {
     const div = document.createElement("div");
-    div.className = "business-card";
+    div.className = "business-card owned";
     div.innerHTML = `
       <h4>${biz.name}</h4>
-      <p>Profit: $${biz.profitPerYear.toLocaleString()}/yr</p>
+      <p>Profit: $${fmt(biz.profitPerYear)}/yr</p>
       <p>Level: ${biz.level}</p>
     `;
+
+    // ✅ Determine which tab the business came from
+    if (biz.origin === "businessTab") {
+      div.addEventListener("click", () => openBusinessManagement(biz));
+    } else if (biz.origin === "entrepreneurTab") {
+      div.addEventListener("click", () => openSpecificBusinessTab(biz.id));
+    } else {
+      // fallback, just in case
+      div.addEventListener("click", () => openBusinessManagement(biz));
+    }
+
     container.appendChild(div);
   });
 }
@@ -1767,7 +1780,11 @@ function openBusinessManagement(business) {
   document.body.appendChild(modal);
 
   // close handler
-  modal.querySelector('.close').onclick = () => { modal.remove(); displayOwnedBusinesses(); };
+ modal.querySelector('.close').onclick = () => {
+  modal.remove();
+  displayOwnedBusinesses();
+};
+
 
   // ---------- ACTIONS ----------
 
