@@ -1943,6 +1943,33 @@ function calculateTotalExpenses() {
   return total;
 }
 
+function updateExpensesTab() {
+  // Keeps yearly expense data up to date when time progresses
+  const total = calculateTotalExpenses();
+
+  // If the modal is open, refresh it dynamically
+  const modal = document.querySelector(".modal-content");
+  if (modal && modal.querySelector("#expenses-list")) {
+    const gymCost = player.gymMembership ? 2000 : 0;
+    const dietCost = player.dietPlan ? 1500 : 0;
+    const otherCost = player.otherExpenses || 0;
+
+    const list = modal.querySelector("#expenses-list");
+    list.innerHTML = `
+      ${gymCost ? `<li>🏋️ Gym Membership: <strong>$${gymCost.toLocaleString()}</strong></li>` : ""}
+      ${dietCost ? `<li>🥗 Diet Plan: <strong>$${dietCost.toLocaleString()}</strong></li>` : ""}
+      ${otherCost ? `<li>💸 Other Expenses: <strong>$${otherCost.toLocaleString()}</strong></li>` : ""}
+      ${!gymCost && !dietCost && !otherCost ? `<li>No active expenses at the moment.</li>` : ""}
+    `;
+
+    const totalDisplay = modal.querySelector("#total-expenses");
+    if (totalDisplay)
+      totalDisplay.innerHTML = `<strong>Total Yearly Expenses:</strong> $${total.toLocaleString()}`;
+  }
+
+  console.log("Expenses updated:", total);
+}
+
 
 /* ============================================================
 BUSINESS & LUXURY SYSTEMS (Optimized v3.1)
