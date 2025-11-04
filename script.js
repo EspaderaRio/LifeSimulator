@@ -2727,13 +2727,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 window.openProfessionSelection = openProfessionSelection;
 
+
 // ===================== INITIALIZE ===================== //
 (async function init() {
-  generateFamily();
-syncFamilyToPlayer();
+  generateFamily();    // This now automatically syncs family to player.relationships
   clampStats();
   updateStats();
 })();
+
 // ===================== EXPORT FUNCTIONS ===================== //
 
 export { 
