@@ -208,13 +208,10 @@ function studyYearly() {
   }
 }
 
-// ===================== OPEN SCHOOL/STUDY MODAL (EXPANDED) ===================== //
-document.getElementById("study-tab-btn").onclick = () => openSchoolModal();
-
 function openSchoolModal() {
   if (player.age < 7 || player.age > 22) return showToast("You are not in school.");
 
-  // Determine school stage
+  // Determine stage
   let stage;
   if (player.age < 13) stage = "elementary";
   else if (player.age < 16) stage = "middle";
@@ -222,44 +219,92 @@ function openSchoolModal() {
   else stage = "college";
   player.educationStage = stage;
 
+  // Initialize if missing (DON’T reset each time)
+  if (!player.chosenSport) player.chosenSport = null;
+  if (player.sportSkill === undefined) player.sportSkill = 0;
+  if (!player.joinedClubs) player.joinedClubs = [];
+  if (!player.clubSkills) player.clubSkills = {};
+
   // Create modal
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
- replaceModalContent(modal, `
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>${stage === "college" ? "College Life" : "School Life"}</h2>
-      <p>Choose an activity:</p>
-      <div id="school-activities" class="button-group"></div>
-    </div>
-  `);
   document.body.appendChild(modal);
-  modal.querySelector(".close").onclick = () => modal.remove();
 
-  const container = modal.querySelector("#school-activities");
+  function refreshSchoolActivities() {
+    replaceModalContent(
+      modal,
+      `
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>${stage === "college" ? "College Life" : "School Life"}</h2>
+        <p>Choose an activity:</p>
+        <div id="school-activities" class="button-group"></div>
+      </div>
+    `
+    );
 
-  // Main activity buttons
-  const standardActivities = [
-    { label: "📚 Study", action: () => gainSkill("academic", stage === "college" ? 5 : stage === "high" ? 4 : stage === "middle" ? 2 : 1, "You studied and improved your skills!") },
-    { label: "⚽ Play Sports", action: chooseSport },
-    { label: "🎭 Join Club", action: chooseClub },
-    { label: "💬 Interact with Classmate", action: chooseClassmate },
-  ];
+    modal.querySelector(".close").onclick = () => modal.remove();
+    const container = modal.querySelector("#school-activities");
 
-  if (stage === "college") {
-    standardActivities.push({ label: "❤️ Date Someone", action: chooseRomanticInterest });
+    // Add training buttons dynamically
+    const trainingActivities = [];
+    if (player.chosenSport) {
+      trainingActivities.push({
+        label: `🏋️ Train ${player.chosenSport} (${player.sportSkill} skill)`,
+        action: () => {
+          player.sportSkill = Math.min(player.sportSkill + 5, 100);
+          gainSkill("athletic", 3, `You trained ${player.chosenSport}. Sport skill +5!`);
+          refreshSchoolActivities();
+        },
+      });
+    }
+
+    player.joinedClubs.forEach((club) => {
+      trainingActivities.push({
+        label: `📚 Train ${club} Club (${player.clubSkills[club]} skill)`,
+        action: () => {
+          player.clubSkills[club] = Math.min(player.clubSkills[club] + 3, 100);
+          gainSkill("creativity", 2, `You practiced in ${club} Club. Club skill +3!`);
+          refreshSchoolActivities();
+        },
+      });
+    });
+
+    const standardActivities = [
+      {
+        label: "📚 Study",
+        action: () =>
+          gainSkill(
+            "academic",
+            stage === "college" ? 5 : stage === "high" ? 4 : stage === "middle" ? 2 : 1,
+            "You studied and improved your skills!"
+          ),
+      },
+      { label: "⚽ Play Sports", action: chooseSport },
+      { label: "🎭 Join Club", action: chooseClub },
+      { label: "💬 Interact with Classmate", action: chooseClassmate },
+      ...trainingActivities,
+    ];
+
+    if (stage === "college") {
+      standardActivities.push({ label: "❤️ Date Someone", action: chooseRomanticInterest });
+    }
+
+    standardActivities.forEach((act) => {
+      const btn = document.createElement("button");
+      btn.textContent = act.label;
+      btn.onclick = () => act.action();
+      container.appendChild(btn);
+    });
   }
-
-  standardActivities.forEach(act => {
-    const btn = document.createElement("button");
-    btn.textContent = act.label;
-    btn.onclick = () => act.action();
-    container.appendChild(btn);
-  });
 
   // ============ SPORT SELECTION ============ //
   function chooseSport() {
-   replaceModalContent(modal, `
+    if (player.chosenSport) return showToast(`You already chose ${player.chosenSport}!`);
+
+    replaceModalContent(
+      modal,
+      `
       <div class="modal-content">
         <span class="close">&times;</span>
         <h2>🏅 Choose Your Sport</h2>
@@ -270,23 +315,31 @@ function openSchoolModal() {
           <button id="sport-track">🏃 Track & Field</button>
         </div>
       </div>
-    `);
-    modal.querySelector(".close").onclick = () => modal.remove();
+    `
+    );
 
-    modal.querySelectorAll("button[id^='sport']").forEach(btn => {
+    modal.querySelector(".close").onclick = () => refreshSchoolActivities();
+
+    modal.querySelectorAll("button[id^='sport']").forEach((btn) => {
       btn.onclick = () => {
         const sport = btn.textContent.split(" ")[1];
-        gainSkill("athletic", 4, `You practiced ${sport}!`);
-        player.health += 3; player.happiness += 3;
-        showToast(`You had fun playing ${sport}!`);
-        modal.remove();
+        player.chosenSport = sport;
+        player.sportSkill = 0;
+        showToast(`You joined ${sport}!`);
+        refreshSchoolActivities();
       };
     });
   }
 
   // ============ CLUB SELECTION ============ //
   function chooseClub() {
-   replaceModalContent(modal, `
+    const maxClubs = 2;
+    if (player.joinedClubs.length >= maxClubs)
+      return showToast("You can’t join more clubs!");
+
+    replaceModalContent(
+      modal,
+      `
       <div class="modal-content">
         <span class="close">&times;</span>
         <h2>🎭 Join a Club</h2>
@@ -295,25 +348,29 @@ function openSchoolModal() {
           <button id="club-art">🎨 Art Club</button>
           <button id="club-science">🔬 Science Club</button>
           <button id="club-drama">🎭 Drama Club</button>
-          <button id="club-sports">🏅 Sports Club</button>
         </div>
       </div>
-    `);
-    modal.querySelector(".close").onclick = () => modal.remove();
+    `
+    );
 
-    modal.querySelectorAll("button[id^='club']").forEach(btn => {
+    modal.querySelector(".close").onclick = () => refreshSchoolActivities();
+
+    modal.querySelectorAll("button[id^='club']").forEach((btn) => {
       btn.onclick = () => {
         const club = btn.textContent.split(" ")[1];
-        player.club = club;
-        player.happiness += 4;
-        gainSkill("creativity", 3, `You joined the ${club} club!`);
-        gainSkill("social", 2, "You met new people at your club.");
-        showToast(`You are now a member of the ${club} club!`);
-        modal.remove();
+        if (player.joinedClubs.includes(club))
+          return showToast(`You’re already in ${club} Club!`);
+        player.joinedClubs.push(club);
+        player.clubSkills[club] = 0;
+        showToast(`You joined the ${club} Club!`);
+        refreshSchoolActivities();
       };
-      
     });
   }
+
+  refreshSchoolActivities();
+}
+
 
   // ============ CLASSMATE INTERACTION ============ //
   function chooseClassmate() {
