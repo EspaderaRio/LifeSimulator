@@ -162,6 +162,18 @@ function animateCardPurchase(imageSrc) {
   }, 50);
   setTimeout(() => img.remove(), 600);
 }
+// ===================== STUDY YEARLY ===================== //
+function studyYearly() {
+  // Example: progress the player's education each year
+  if (!player.education) player.education = { level: 1, progress: 0 };
+
+  player.education.progress += 1;
+  if (player.education.progress >= 4) {
+    player.education.level++;
+    player.education.progress = 0;
+    showToast("You completed another year of studies!");
+  }
+}
 
 // ===================== PROFESSION SELECTION ===================== //
 function openProfessionSelection() {
