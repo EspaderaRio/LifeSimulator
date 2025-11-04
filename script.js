@@ -269,17 +269,20 @@ function openRetirementOption() {
   };
 }
 
-// ===================== ENTREPRENEUR TAB (Realistic Expanded Version) ===================== //
-function openEntrepreneurTab(currentBusiness = null) {
+// ===================== HELPER FUNCTION ===================== //
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+// ===================== ENTREPRENEUR TAB ===================== //
+function openEntrepreneurTab(currentBusiness = null, forceNew = false) {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
 
-  // If the player already owns businesses, show management view
-  if (currentBusiness || (player.ownedBusinesses && player.ownedBusinesses.length > 0)) {
+  // Only open management if not forcing new and already have businesses
+  if (!forceNew && (currentBusiness || (player.ownedBusinesses && player.ownedBusinesses.length > 0))) {
     return openSpecificBusinessTab(currentBusiness);
   }
 
-  // Otherwise choose what type to start
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
@@ -295,8 +298,8 @@ function openEntrepreneurTab(currentBusiness = null) {
     </div>
   `;
   document.body.appendChild(modal);
-  modal.querySelector(".close").onclick = () => modal.remove();
 
+  modal.querySelector(".close").onclick = () => modal.remove();
   modal.querySelectorAll("[data-business]").forEach(btn => {
     btn.onclick = () => {
       const type = btn.dataset.business;
@@ -306,12 +309,11 @@ function openEntrepreneurTab(currentBusiness = null) {
   });
 }
 
-// ===================== BUSINESS FUNDING DECISION ===================== //
+// ===================== FUNDING DECISION ===================== //
 function openBusinessFundingDecision(type) {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
-
-  const fundingOptions = `
+  modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Funding Your ${capitalize(type)} Business</h2>
@@ -323,22 +325,12 @@ function openBusinessFundingDecision(type) {
       </div>
     </div>
   `;
-  modal.innerHTML = fundingOptions;
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
-  modal.querySelector("#self-fund").onclick = () => {
-    modal.remove();
-    createNewBusiness(type, "self");
-  };
-  modal.querySelector("#loan").onclick = () => {
-    modal.remove();
-    createNewBusiness(type, "loan");
-  };
-  modal.querySelector("#investor").onclick = () => {
-    modal.remove();
-    createNewBusiness(type, "investor");
-  };
+  modal.querySelector("#self-fund").onclick = () => { modal.remove(); createNewBusiness(type, "self"); };
+  modal.querySelector("#loan").onclick = () => { modal.remove(); createNewBusiness(type, "loan"); };
+  modal.querySelector("#investor").onclick = () => { modal.remove(); createNewBusiness(type, "investor"); };
 }
 
 // ===================== CREATE NEW BUSINESS ===================== //
@@ -388,16 +380,17 @@ function createNewBusiness(type, fundingType = "self") {
   player.ownedBusinesses.push(newBiz);
   showToast(`You founded a ${b.name}!`);
   updateStats();
-  openSpecificBusinessTab(type);
+  displayOwnedBusinesses();
+  openSpecificBusinessTab();
 }
 
 // ===================== BUSINESS MANAGEMENT TAB ===================== //
-function openSpecificBusinessTab(businessType = null) {
+function openSpecificBusinessTab(bizId = null) {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
 
   // If showing all businesses
-  if (!businessType) {
+  if (!bizId) {
     modal.innerHTML = `
       <div class="modal-content">
         <span class="close">&times;</span>
@@ -405,10 +398,7 @@ function openSpecificBusinessTab(businessType = null) {
         <p>Manage or expand your business empire:</p>
         <div class="business-list">
           ${(player.ownedBusinesses || [])
-            .map(
-              biz =>
-                `<button data-biz="${biz.type}">🏢 ${biz.name} (Lvl ${biz.level}) - $${biz.profitPerYear}/yr</button>`
-            )
+            .map(biz => `<button data-biz="${biz.id}">🏢 ${biz.name} (Lvl ${biz.level}) - $${biz.profitPerYear}/yr</button>`)
             .join("")}
         </div>
         <button id="new-business-btn">➕ Start New Business</button>
@@ -419,27 +409,29 @@ function openSpecificBusinessTab(businessType = null) {
 
     modal.querySelectorAll("[data-biz]").forEach(btn => {
       btn.onclick = () => {
-        const type = btn.dataset.biz;
+        const id = parseInt(btn.dataset.biz);
         modal.remove();
-        openSpecificBusinessTab(type);
+        openSpecificBusinessTab(id);
       };
     });
+
     modal.querySelector("#new-business-btn").onclick = () => {
       modal.remove();
-      openEntrepreneurTab();
+      openEntrepreneurTab(null, true);
     };
+
     return;
   }
 
-  // Find specific business
-  const biz = player.ownedBusinesses.find(b => b.type === businessType);
+  // Find business by id
+  const biz = player.ownedBusinesses.find(b => b.id === bizId);
   if (!biz) return showToast("Business not found!");
 
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>${biz.name}</h2>
-      <p><strong>Level:</strong> ${biz.level} | <strong>Profit/Year:</strong> $${biz.profitPerYear}</p>
+      <p><strong>Level:</strong> ${biz.level} | <strong>Profit/Year:</strong> $${biz.profitPerYear.toFixed(0)}</p>
       <p><strong>Market Trend:</strong> ${biz.marketTrend.toFixed(2)} | <strong>Reputation:</strong> ${biz.reputation}</p>
       <p><strong>Employees:</strong> ${biz.employees} | <strong>Morale:</strong> ${biz.morale}% | <strong>Customer Sat.:</strong> ${biz.satisfaction}%</p>
       <hr>
@@ -467,8 +459,9 @@ function openSpecificBusinessTab(businessType = null) {
     biz.reputation += 3;
     showToast(`${biz.name} expanded successfully!`);
     updateStats();
+    displayOwnedBusinesses();
     modal.remove();
-    openSpecificBusinessTab(businessType);
+    openSpecificBusinessTab(bizId);
   };
 
   // Hire employees
@@ -482,8 +475,9 @@ function openSpecificBusinessTab(businessType = null) {
     biz.profitPerYear += 400;
     showToast(`You hired new staff for ${biz.name}.`);
     updateStats();
+    displayOwnedBusinesses();
     modal.remove();
-    openSpecificBusinessTab(businessType);
+    openSpecificBusinessTab(bizId);
   };
 
   // Train employees
@@ -496,8 +490,9 @@ function openSpecificBusinessTab(businessType = null) {
     biz.reputation += 2;
     showToast(`Employee training improved morale and satisfaction!`);
     updateStats();
+    displayOwnedBusinesses();
     modal.remove();
-    openSpecificBusinessTab(businessType);
+    openSpecificBusinessTab(bizId);
   };
 
   // Marketing
@@ -510,8 +505,9 @@ function openSpecificBusinessTab(businessType = null) {
     biz.profitPerYear += 500;
     showToast(`${biz.name} gained public attention!`);
     updateStats();
+    displayOwnedBusinesses();
     modal.remove();
-    openSpecificBusinessTab(businessType);
+    openSpecificBusinessTab(bizId);
   };
 
   // Sell business
@@ -521,6 +517,7 @@ function openSpecificBusinessTab(businessType = null) {
     player.ownedBusinesses = player.ownedBusinesses.filter(b => b.id !== biz.id);
     showToast(`You sold ${biz.name} for $${value.toLocaleString()}.`);
     updateStats();
+    displayOwnedBusinesses();
     modal.remove();
     openSpecificBusinessTab();
   };
@@ -531,6 +528,7 @@ function openSpecificBusinessTab(businessType = null) {
     openSpecificBusinessTab();
   };
 }
+
 
 // ===================== YEARLY BUSINESS UPDATES ===================== //
 export function applyYearlyBusinessChanges() {
@@ -1211,10 +1209,6 @@ function openSpecificFreelancerTab(type) {
   };
 }
 
-// ===================== HELPER FUNCTION ===================== //
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
 // ===================== CONTROL MODAL ===================== //
 
 openMenuTab.onclick = () => openModal(document.getElementById("MenuTab"));
@@ -1684,19 +1678,24 @@ function fmt(n) { return n?.toLocaleString?.() ?? String(n); }
 
 // ----------------------------- Business UI -----------------------------
 function displayOwnedBusinesses() {
-  if (!ownedBusinessGrid) return;
-  ownedBusinessGrid.innerHTML = '';
-  (player.ownedBusinesses || []).forEach(b => {
-    const card = document.createElement('div');
-    card.className = 'business-card';
-    card.innerHTML = `
-      <img src="assets/svgs/${b.image || 'default.svg'}" alt="${b.name}">
-      <p class="biz-name">${b.name}</p>
-      <p>Lvl: ${b.level ?? 1} • Employees: ${b.employees ?? 0}</p>
-      <p>Market: ${(b.marketTrend * 100).toFixed(0)}% • Eff: ${(b.efficiency * 100).toFixed(0)}%</p>
+  const container = document.getElementById("owned-businesses");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (!player.ownedBusinesses || player.ownedBusinesses.length === 0) {
+    container.innerHTML = "<p>No businesses yet.</p>";
+    return;
+  }
+
+  player.ownedBusinesses.forEach(biz => {
+    const div = document.createElement("div");
+    div.className = "business-card";
+    div.innerHTML = `
+      <h4>${biz.name}</h4>
+      <p>Profit: $${biz.profitPerYear.toLocaleString()}/yr</p>
+      <p>Level: ${biz.level}</p>
     `;
-    card.addEventListener('click', () => openBusinessManagement(b));
-    ownedBusinessGrid.appendChild(card);
+    container.appendChild(div);
   });
 }
 
