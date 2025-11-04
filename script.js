@@ -419,7 +419,7 @@ function openSchoolModal() {
       list.appendChild(btn);
     });
   }
-}
+
 
 // ===================== CLASSMATE GENERATOR ===================== //
 function generateClassmates(stage) {
