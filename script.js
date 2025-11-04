@@ -426,7 +426,11 @@ function addOrUpdateFriend(classmate) {
   } else {
     player.relationships.friends.push({ name: classmate.name, relationshipScore: classmate.relationshipScore });
   }
+
+  // Refresh modal if open
+  refreshRelationshipsTab();
 }
+
 
 function refreshRelationshipsTab() {
   const modal = document.querySelector(".modal-overlay");
@@ -464,8 +468,11 @@ function startRelationship(stage) {
   player.partnerType = choice;
   showToast(`You started dating your ${choice} at ${stage}!`);
   updateStats();
+
+  // Refresh modal if open
   refreshRelationshipsTab();
 }
+
 
 function joinGreekLife() {
   if (player.gender === "male" && !player.fraternity) {
@@ -1973,7 +1980,11 @@ function handleRelationshipInteraction(person, action) {
 
   updateStats();
   showToast(`You ${action}ed with ${person.name}. Happiness +${effect.happiness}, Relationship +${effect.relationship}`);
+
+  // Refresh modal if open
+  refreshRelationshipsTab();
 }
+
 
 
 // ===================== PERSONAL LIFE ===================== //
