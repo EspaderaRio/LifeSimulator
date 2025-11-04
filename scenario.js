@@ -1563,7 +1563,6 @@ export function checkYearlyScenarioTrigger() {
   }
 
   if (player.age >= 7 && player.age < 22) studyYearly();
-  if (player.age >= 7 && player.age < 18) makeFriends();
 
   switch (player.educationLevel) {
     case "elementary": player.intelligence += 1; break;
