@@ -132,6 +132,18 @@ function closeModal(modalElement) {
   modalElement.classList.add("hidden");
 }
 
+// ======== CUSTOM MODAL ======== //
+const openCustomBtn = document.getElementById("open-custom-btn");
+const customModal = document.getElementById("customModal");
+const closeCustomBtn = document.getElementById("close-custom");
+
+openCustomBtn.addEventListener("click", () => {
+  customModal.classList.remove("hidden");
+});
+
+closeCustomBtn.addEventListener("click", () => {
+  customModal.classList.add("hidden");
+});
 
 // ===================== CARD PURCHASE ANIMATION ===================== //
 function animateCardPurchase(imageSrc) {
