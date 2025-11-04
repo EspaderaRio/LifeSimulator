@@ -7,13 +7,22 @@ import { checkYearlyScenarioTrigger, generateScenario } from './scenario.js';
 
 // ===================== PLAYER DATA ===================== //
 export let player = {
-  stress: 0,
-  money: 10000,
-  reputation: 0,
-  health: 100,
-  happiness: 50,
-  age: 18,
+  name: "",
+  age: 7,               // start at 7
   month: 1,
+  schoolStage: "elementary", // elementary, middle, high, college
+  skills: {
+    academic: 0,
+    athletic: 0,
+    social: 0,
+    creativity: 0,
+  },
+  health: 100,
+  happiness: 60,
+  reputation: 0,
+  stress: 0,
+  educationLevel: 0,
+  money: 10000,
   ownedBusinesses: [],
   ownedLuxury: [],
   profession: null
@@ -162,22 +171,215 @@ function animateCardPurchase(imageSrc) {
   }, 50);
   setTimeout(() => img.remove(), 600);
 }
-// ===================== STUDY YEARLY ===================== //
-function studyYearly() {
-  // Example: progress the player's education each year
-  if (!player.education) player.education = { level: 1, progress: 0 };
+// ===================== SYNC EDUCATION STAGES ===================== //
+player.educationStage = player.schoolStage; // always sync stages
 
-  player.education.progress += 1;
-  if (player.education.progress >= 4) {
-    player.education.level++;
-    player.education.progress = 0;
-    showToast("You completed another year of studies!");
+// ===================== STUDY YEARLY ===================== //
+export function studyYearly() {
+  if (player.age < 7 || player.age > 22) return;
+
+  // auto stage detection
+  if (player.age < 13) player.schoolStage = "elementary";
+  else if (player.age < 16) player.schoolStage = "middle";
+  else if (player.age < 19) player.schoolStage = "high";
+  else player.schoolStage = "college";
+
+  player.educationStage = player.schoolStage;
+
+  // yearly skill growth
+  const focus = Math.random();
+  if (focus < 0.4) player.skills.academic += 2;
+  else if (focus < 0.7) player.skills.social += 2;
+  else player.skills.creativity += 2;
+
+  if (Math.random() < 0.3) player.skills.athletic += 2;
+
+  // milestone completions
+  if ([12, 16, 19, 22].includes(player.age)) {
+    player.educationLevel++;
+    showToast(`🎓 You completed ${player.schoolStage} school!`);
+    if (player.schoolStage === "high") showCollegeFundingModal();
   }
 }
 
+// ===================== OPEN SCHOOL/STUDY MODAL ===================== //
+document.getElementById("study-tab-btn").onclick = () => openSchoolModal();
+
+export function openSchoolModal() {
+  if (player.age < 7 || player.age > 22) return showToast("You are not in school.");
+
+  // Determine stage
+  let stage;
+  if (player.age < 13) stage = "elementary";
+  else if (player.age < 16) stage = "middle";
+  else if (player.age < 19) stage = "high";
+  else stage = "college";
+
+  player.educationStage = stage;
+
+  // Create modal
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>${stage === "college" ? "College Life" : "School Life"}</h2>
+      <p>Choose an activity:</p>
+      <div id="school-activities" class="button-group"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector(".close").onclick = () => modal.remove();
+
+  const container = modal.querySelector("#school-activities");
+
+  // Standard school activities
+  const standardActivities = [
+    { label: "📚 Study", action: () => gainSkill("academic", stage === "college" ? 5 : stage === "high" ? 4 : stage === "middle" ? 2 : 1, "You studied and improved your skills!") },
+    { label: "⚽ Play Sports", action: () => { gainSkill("athletic", stage === "college" ? 4 : stage === "high" ? 3 : stage === "middle" ? 2 : 1, "You played sports!"); player.health += 2; player.happiness += 2; } },
+    { label: "🎭 Join Club", action: () => { gainSkill("creativity", stage === "college" ? 3 : stage === "high" ? 3 : stage === "middle" ? 2 : 1, "You joined a club!"); gainSkill("social", stage === "college" ? 3 : stage === "high" ? 2 : stage === "middle" ? 2 : 1, "You made friends!"); } },
+    { label: "💬 Socialize", action: () => { gainSkill("social", stage === "college" ? 3 : stage === "high" ? 3 : stage === "middle" ? 2 : 1, "You socialized!"); player.happiness += 2; } },
+  ];
+
+  // College-specific options
+  if (stage === "college") {
+    standardActivities.push(
+      { label: "🏛️ Join Fraternity/Sorority", action: joinGreekLife },
+      { label: "❤️ Date Someone", action: () => startRelationship("college") }
+    );
+  }
+
+  // Render buttons
+  standardActivities.forEach(act => {
+    const btn = document.createElement("button");
+    btn.textContent = act.label;
+    btn.onclick = () => act.action();
+    container.appendChild(btn);
+  });
+}
+
+// ===================== HELPERS ===================== //
+function gainSkill(skill, amount, msg) {
+  if (!player.skills) player.skills = {};
+  player.skills[skill] = (player.skills[skill] || 0) + amount;
+  player.happiness += 1;
+  showToast(msg);
+  updateStats();
+}
+
+function startRelationship(stage) {
+  if (player.relationshipStatus === "in a relationship") return showToast("You're already in a relationship!");
+  const partnerTypes = ["girlfriend", "boyfriend", "best friend"];
+  const choice = partnerTypes[Math.floor(Math.random() * partnerTypes.length)];
+  player.relationshipStatus = "in a relationship";
+  player.partnerType = choice;
+  showToast(`You started dating your ${choice} at ${stage}!`);
+  updateStats();
+}
+
+function joinGreekLife() {
+  if (player.gender === "male" && !player.fraternity) {
+    player.fraternity = true;
+    player.social += 5;
+    showToast("You joined a fraternity!");
+  } else if (player.gender === "female" && !player.sorority) {
+    player.sorority = true;
+    player.social += 5;
+    showToast("You joined a sorority!");
+  } else {
+    showToast("You're already in a group!");
+  }
+  updateStats();
+}
+
+// ===================== COLLEGE FUNDING MODAL ===================== //
+function showCollegeFundingModal() {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h2>College Funding Options</h2>
+      <p>How would you like to fund your college education?</p>
+      <div class="funding-grid">
+        <button id="option-athletic">🏈 Athletic Scholarship</button>
+        <button id="option-academic">📚 Academic Scholarship</button>
+        <button id="option-parttime">💼 Part-time Job</button>
+        <button id="option-parents">👪 Parents' Support</button>
+        <button id="option-loan">💳 Student Loan</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector("#option-athletic").onclick = () => {
+    if (player.skills.athletic < 60) return showToast("You need 60+ athletic skill!");
+    player.tuition = 0; player.collegeFunding = "athletic"; startCollege("Athletic Scholarship"); modal.remove();
+  };
+  modal.querySelector("#option-academic").onclick = () => {
+    if (player.skills.academic < 70 && player.intelligence < 70) return showToast("You need higher academic/intelligence stats!");
+    player.tuition = 0; player.collegeFunding = "academic"; startCollege("Academic Scholarship"); modal.remove();
+  };
+  modal.querySelector("#option-parttime").onclick = () => {
+    player.tuition = 10000; player.collegeFunding = "parttime"; player.collegeDuration = 5;
+    startCollege("Part-time Job"); modal.remove();
+  };
+  modal.querySelector("#option-parents").onclick = () => {
+    if (player.relationshipWithParents < 60) return showToast("Your parents aren’t ready to support you.");
+    player.tuition = 0; player.collegeFunding = "parents"; startCollege("Parents' Support"); modal.remove();
+  };
+  modal.querySelector("#option-loan").onclick = () => {
+    player.debt = (player.debt || 0) + 30000; player.tuition = 0; player.collegeFunding = "loan";
+    startCollege("Student Loan"); modal.remove();
+  };
+}
+
+function startCollege(fundingType) {
+  player.educationLevel = 3;
+  player.inCollege = true;
+  showToast(`You started college through ${fundingType}.`);
+  updateStats();
+}
+
+
 // ===================== PROFESSION SELECTION ===================== //
 function openProfessionSelection() {
-  // If player already has a profession, open its tab
+  const professionRequirements = {
+    athlete: { skills: { athletic: 50 }, age: 16 },
+    licensed: { educationLevel: 4 }, // college graduate
+    entrepreneur: { skills: { creativity: 20, social: 20 } },
+    model: { skills: { social: 25, creativity: 15 }, age: 18 },
+    freelancer: { skills: { academic: 15 }, age: 16 },
+    celebrity: { skills: { social: 40, creativity: 25 }, age: 18 },
+  };
+
+  // ✅ Helper function to check if player meets requirements
+  function canChooseProfession(type) {
+    const req = professionRequirements[type];
+    if (!req) return true;
+
+    if (req.age && player.age < req.age) {
+      showToast(`You're too young to become a ${type}.`);
+      return false;
+    }
+
+    if (req.educationLevel && (player.educationLevel || 0) < req.educationLevel) {
+      showToast(`You need higher education to become a ${type}.`);
+      return false;
+    }
+
+    if (req.skills) {
+      for (const [skill, value] of Object.entries(req.skills)) {
+        if ((player.skills?.[skill] || 0) < value) {
+          showToast(`You need more ${skill} skill (${value} required) to be a ${type}.`);
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  // ✅ If player already has a profession, open its tab
   if (player.profession) {
     switch (player.profession) {
       case "entrepreneur": return openEntrepreneurTab();
@@ -190,7 +392,7 @@ function openProfessionSelection() {
     }
   }
 
-  // Otherwise show profession selection modal
+  // ✅ Otherwise, show profession selection modal
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
   modal.innerHTML = `
@@ -209,11 +411,11 @@ function openProfessionSelection() {
     </div>
   `;
   document.body.appendChild(modal);
-
   modal.querySelector(".close").onclick = () => modal.remove();
 
-  // Helper function to select profession
+  // ✅ Helper to finalize selection
   const selectProfession = (prof, displayName, openTabFn) => {
+    if (!canChooseProfession(prof)) return; // <--- Check before proceeding
     player.profession = prof.toLowerCase();
     player.professionDisplay = displayName;
     player.subProfession = null;
@@ -224,7 +426,7 @@ function openProfessionSelection() {
     openTabFn();
   };
 
-  // Bind profession buttons
+  // ✅ Bind buttons with requirement checks
   modal.querySelector("#choose-entrepreneur").onclick = () =>
     selectProfession("entrepreneur", "Entrepreneur", openEntrepreneurTab);
   modal.querySelector("#choose-athlete").onclick = () =>
@@ -238,7 +440,6 @@ function openProfessionSelection() {
   modal.querySelector("#choose-freelancer").onclick = () =>
     selectProfession("freelancer", "Freelancer", openFreelancerTab);
 }
-
 
 // ===================== RETIREMENT ===================== //
 function openRetirementOption() {
@@ -1319,23 +1520,30 @@ function advanceTime(type) {
   const monthsPassed = type === "year" ? 12 : 1;
   player.month += monthsPassed;
 
-  // Handle month rollover and age increase
+  // Update education stage automatically by age
+  if (player.age >= 7 && player.age < 13) player.educationStage = "elementary";
+  else if (player.age >= 13 && player.age < 16) player.educationStage = "middle";
+  else if (player.age >= 16 && player.age < 19) player.educationStage = "high";
+  else if (player.age === 18 && player.educationStage === "high") { onHighSchoolGraduation(); }
+  else if (player.age >= 19 && player.choseCollege) player.educationStage = "college";
+  else if (player.age >= 23 && player.educationStage === "college") player.educationStage = "graduate";
+
+  // Handle month rollover
   if (player.month > 12) {
     player.month = 1;
     player.age++;
     handleLifeProgression();
   }
 
-  // Trigger yearly scenario events
+  // Trigger yearly scenarios
   if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
     checkYearlyScenarioTrigger();
   }
 
   let totalIncome = 0;
 
-  // Calculate business income
+  // Calculate business income safely
   player.ownedBusinesses.forEach(b => {
-    // Ensure business properties exist to prevent NaN
     if (!b.level) b.level = 1;
     if (!b.efficiency) b.efficiency = 1;
     if (!b.marketTrend) b.marketTrend = 1;
@@ -1350,39 +1558,31 @@ function advanceTime(type) {
       (b.ownership / 100);
 
     totalIncome += incomeForBiz;
-
-    // Apply impacts per business
-    player.health -= (b.stressImpact / 12) * monthsPassed;
     player.reputation += (b.reputationImpact / 12) * monthsPassed;
   });
 
-  // Profession-based income and impacts
+  // Profession-based income
   if (player.profession === "entrepreneur") {
     player.money += 12000 * (monthsPassed / 12);
-    player.health -= 2 * (monthsPassed / 12);
     player.reputation += 1 * (monthsPassed / 12);
   } else if (player.profession === "athlete") {
     player.money += 8000 * (monthsPassed / 12);
-    player.health -= 4 * (monthsPassed / 12);
     player.happiness += 3 * (monthsPassed / 12);
   } else if (player.profession === "licensed") {
     player.money += 6000 * (monthsPassed / 12);
-    player.health -= 1 * (monthsPassed / 12);
     player.reputation += 2 * (monthsPassed / 12);
   }
 
-  // Add total passive income from businesses
+  // Apply passive income
   player.money += Math.round(totalIncome);
 
-  // Finalize stats
+  // Update UI
   clampStats();
   updateStats();
 
-  // Toast feedback
   if (player.profession)
     showToast(`You earned income from your ${player.profession} career! Age: ${player.age}`);
 }
-
 
 
 // ===================== STATS UPDATE ===================== //
@@ -2369,6 +2569,8 @@ document.getElementById('toggle-diet').addEventListener('change', e => {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+ document.getElementById("school-tab-btn").onclick = openSchoolTab;
+ document.getElementById("open-study-tab").addEventListener("click", openStudyTab);
  document.getElementById("menu-toggle").addEventListener("click", () => openModal(document.getElementById("MenuTab")));
  document.getElementById("close-life").addEventListener("click", closeLifeTab);
  document.getElementById("close-business").addEventListener("click", closeBusinessTab);
