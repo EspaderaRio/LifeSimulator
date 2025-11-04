@@ -491,19 +491,23 @@ function addOrUpdateFriend(classmate) {
 }
 
 
+// ===================== REFRESH RELATIONSHIP TAB ===================== //
 function refreshRelationshipsTab() {
-  const modal = document.querySelector(".modal-overlay");
-  if (!modal) return;
+  const tab = document.getElementById("open-relationships-tab");
+  if (!tab) return; // ✅ Skip if the tab isn't open yet
 
-  const familySection = modal.querySelector("#family-section");
-  const romanticSection = modal.querySelector("#romantic-section");
-  const friendshipSection = modal.querySelector("#friendship-section");
-  const otherSection = modal.querySelector("#other-section");
+  // Safely render each section if its container exists
+  const familySection = document.getElementById("family-section");
+  const romanticSection = document.getElementById("romantic-section");
+  const friendshipSection = document.getElementById("friendship-section");
+  const otherSection = document.getElementById("other-section");
 
   renderRelationshipList(familySection, player.relationships.family);
   if (player.relationships.romantic) {
     renderRelationshipList(romanticSection, [player.relationships.romantic]);
-  } else romanticSection.innerHTML = "<p>You are single</p>";
+  } else if (romanticSection) {
+    romanticSection.innerHTML = "<p>You are single</p>";
+  }
 
   renderRelationshipList(friendshipSection, player.relationships.friends);
   renderRelationshipList(otherSection, player.relationships.others);
@@ -1932,11 +1936,11 @@ openRelationshipsBtn.addEventListener("click", openRelationshipsTab);
 
 function openRelationshipsTab() {
   ensureRelationships();
-  
+
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
   modal.innerHTML = `
-    <div class="modal-content">
+    <div class="modal-content" id="relationships-tab-content">
       <span class="close">&times;</span>
       <h2>👥 Your Relationships</h2>
       <div id="family-section"><h3>Family</h3></div>
@@ -1948,24 +1952,42 @@ function openRelationshipsTab() {
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
-  renderRelationshipList(modal.querySelector("#family-section"), player.relationships.family);
-  if (player.relationships.romantic) {
-    renderRelationshipList(modal.querySelector("#romantic-section"), [player.relationships.romantic]);
-  } else modal.querySelector("#romantic-section").innerHTML += "<p>You are single</p>";
+  refreshRelationshipsTab(); // ✅ Auto-render when opening
+}
 
-  renderRelationshipList(modal.querySelector("#friendship-section"), player.relationships.friends);
-  renderRelationshipList(modal.querySelector("#other-section"), player.relationships.others);
+// ===================== REFRESH RELATIONSHIP TAB ===================== //
+function refreshRelationshipsTab() {
+  const tab = document.getElementById("relationships-tab-content");
+  if (!tab) return; // ✅ Skip if modal not open
+
+  // Safely get sections
+  const familySection = tab.querySelector("#family-section");
+  const romanticSection = tab.querySelector("#romantic-section");
+  const friendshipSection = tab.querySelector("#friendship-section");
+  const otherSection = tab.querySelector("#other-section");
+
+  renderRelationshipList(familySection, player.relationships.family);
+  if (player.relationships.romantic) {
+    renderRelationshipList(romanticSection, [player.relationships.romantic]);
+  } else if (romanticSection) {
+    romanticSection.innerHTML = "<p>You are single</p>";
+  }
+
+  renderRelationshipList(friendshipSection, player.relationships.friends);
+  renderRelationshipList(otherSection, player.relationships.others);
 }
 
 // ===================== RENDER RELATIONSHIP LIST ===================== //
 function renderRelationshipList(container, list) {
+  if (!container) return; // ✅ Prevent null crash
+
   container.innerHTML = "";
   if (!list || list.length === 0) {
     container.innerHTML = "<p>No relationships here</p>";
     return;
   }
 
-  list.forEach(person => {
+  list.forEach((person) => {
     const wrapper = document.createElement("div");
     wrapper.style.display = "flex";
     wrapper.style.alignItems = "center";
@@ -1988,8 +2010,11 @@ function renderRelationshipList(container, list) {
     progressBar.style.borderRadius = "6px";
     progressBar.style.transition = "width 0.5s ease";
     progressBar.style.backgroundColor =
-      person.relationshipScore > 70 ? "#4CAF50" :
-      person.relationshipScore > 40 ? "#FFC107" : "#E53935";
+      person.relationshipScore > 70
+        ? "#4CAF50"
+        : person.relationshipScore > 40
+        ? "#FFC107"
+        : "#E53935";
 
     progressContainer.appendChild(progressBar);
     wrapper.appendChild(nameLabel);
@@ -2023,24 +2048,29 @@ function openRelationshipActions(person) {
   modal.querySelector("#compliment-btn").onclick = () => { handleRelationshipInteraction(person, "compliment"); modal.remove(); };
 }
 
+// ===================== HANDLE RELATIONSHIP INTERACTION ===================== //
 function handleRelationshipInteraction(person, action) {
   const effects = {
     hangout: { happiness: 5, relationship: 5 },
     gift: { happiness: 10, relationship: 10, money: -500 },
-    compliment: { happiness: 3, relationship: 7 }
+    compliment: { happiness: 3, relationship: 7 },
   };
   const effect = effects[action];
 
-  if (effect.money && player.money < Math.abs(effect.money)) return showToast("Not enough money to give a gift!");
+  if (effect.money && player.money < Math.abs(effect.money))
+    return showToast("Not enough money to give a gift!");
   if (effect.money) player.money += effect.money;
 
   player.happiness = Math.min(player.happiness + (effect.happiness || 0), 100);
-  person.relationshipScore = Math.min((person.relationshipScore || 50) + (effect.relationship || 0), 100);
+  person.relationshipScore = Math.min(
+    (person.relationshipScore || 50) + (effect.relationship || 0),
+    100
+  );
 
   updateStats();
   showToast(`You ${action}ed with ${person.name}. Happiness +${effect.happiness}, Relationship +${effect.relationship}`);
 
-  // Refresh modal if open
+  // ✅ Refresh if tab is open
   refreshRelationshipsTab();
 }
 
