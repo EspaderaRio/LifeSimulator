@@ -47,25 +47,44 @@
     <button id="advance-year">📆</button>
   </div>
 </section>
-
-      
-       <section id="business-display">
-        <h3>Your Businesses</h3>
-        <div id="owned-businesses" class="business-grid"></div>
-        <button id="open-manage-businesses">Manage Businesses</button>
-      </section>
-
-      <section id="luxury-display">
-        <h3>Your Luxury Items</h3>
-        <div id="owned-luxury-grid" class="luxury-grid"></div>
-      </section>
     </main>
     
-       <footer>
-      <button id="open-profession-btn"><img src="assets/buttons/profession.svg" alt="Profession"></button>
-      <button id="menu-toggle"><img src="assets/buttons/menu.svg" alt="Menu"></button>
-    </footer>
+    <footer>
+  <button id="open-custom-btn"><img src="assets/buttons/add.svg" alt="Open Custom"></button>
+  <button id="open-profession-btn"><img src="assets/buttons/profession.svg" alt="Profession"></button>
+  <button id="menu-toggle"><img src="assets/buttons/menu.svg" alt="Menu"></button>
+</footer>
+
   </div>
+  <!-- Custom Modal -->
+<div id="customModal" class="modal hidden">
+  <div class="modal-content">
+    <!-- Close button -->
+    <button class="close-btn" id="close-custom">
+      <img src="assets/buttons/close.svg" alt="Close">
+    </button>
+
+    <h2>Your Portfolio</h2>
+
+    <!-- Businesses Section -->
+    <section id="business-display-modal">
+      <h3>Your Businesses</h3>
+      <div id="owned-businesses" class="business-grid"></div>
+      <button id="open-manage-businesses">Manage Businesses</button>
+    </section>
+
+    <hr style="margin: 20px 0; border: none; border-top: 1px solid #555;" />
+
+    <!-- Luxury Section -->
+    <section id="luxury-display-modal">
+      <h3>Your Luxury Items</h3>
+      <div id="owned-luxury-grid" class="luxury-grid"></div>
+    </section>
+
+  </div>
+</div>
+
+
 
   <!-- Modal -->
 <div id="MenuTab" class="modal hidden">
