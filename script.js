@@ -3266,24 +3266,28 @@ if (!player.sportSkill) player.sportSkill = 0;
 if (!player.stamina) player.stamina = 100;
 if (!player.stats) player.stats = { points: 0, assists: 0, rebounds: 0 };
 
+let currentSportActive = player.subProfession || null;
+
 // ===================== OPEN SPORTS TAB ===================== //
-// Rename this version to something else:
 function openAthleteTrainingTab() {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
 
+  const stats = player.sportsSkills[currentSportActive];
+  if (!stats) return alert("Please select a sport first!");
+
   modal.innerHTML = `
     <div class="modal-content sport-modal">
       <span class="close">&times;</span>
-      <h2>🏀 Athlete Training (${player.sportType || "None"})</h2>
+      <h2>🏀 Athlete Training (${capitalize(currentSportActive)})</h2>
 
       <div class="hud-sports">
         <div class="hud-bar-sports">
-          <span>Skill (${player.sportSkill || 0})</span>
+          <span>Skill (${Math.floor((stats.strength + stats.endurance + stats.skill)/3)})</span>
           <div class="bar-sports"><div class="fill" id="skill-fill"></div></div>
         </div>
         <div class="hud-bar-sports">
-          <span>Stamina (${player.stamina || 100})</span>
+          <span>Stamina (${player.stamina})</span>
           <div class="bar-sports"><div class="fill" id="stamina-fill"></div></div>
         </div>
       </div>
@@ -3299,22 +3303,30 @@ function openAthleteTrainingTab() {
   document.body.appendChild(modal);
 
   modal.querySelector(".close").onclick = () => modal.remove();
-  modal.querySelector("#train-btn").onclick = () => trainSport();
-  modal.querySelector("#simulate-btn").onclick = () => simulateSportGame();
+  modal.querySelector("#train-btn").onclick = () => trainSport(stats);
+  modal.querySelector("#simulate-btn").onclick = () => simulateSportGame(stats);
 
-  updateSportBars();
+  updateSportBars(stats);
 }
+
 
 
 // ===================== TRAINING ===================== //
-function trainSport() {
+function trainSport(stats) {
   const gain = Math.floor(Math.random() * 3) + 1;
-  player.sportSkill = Math.min(100, player.sportSkill + gain);
+
+  // Randomly improve one stat
+  const rand = Math.random();
+  if (rand < 0.33) stats.strength += gain;
+  else if (rand < 0.66) stats.endurance += gain;
+  else stats.skill += gain;
+
   player.stamina = Math.max(0, player.stamina - 5);
 
   logSport(`You trained hard and improved your skill by ${gain} points!`);
-  updateSportBars();
+  updateSportBars(stats);
 }
+
 
 // ===================== SIMULATE GAME ===================== //
 function simulateSportGame() {
@@ -3341,11 +3353,13 @@ function logSport(text) {
   if (log) log.innerHTML += `<br>${text}`;
 }
 
-function updateSportBars() {
+function updateSportBars(stats) {
   const skillFill = document.getElementById("skill-fill");
   const staminaFill = document.getElementById("stamina-fill");
 
-  if (skillFill) skillFill.style.width = `${player.sportSkill}%`;
+  const totalSkill = Math.floor((stats.strength + stats.endurance + stats.skill)/3);
+
+  if (skillFill) skillFill.style.width = `${totalSkill}%`;
   if (staminaFill) staminaFill.style.width = `${player.stamina}%`;
 }
 
