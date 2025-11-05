@@ -2314,22 +2314,33 @@ function calculateBusinessExpenses() {
 
 
 function updateExpensesTab() {
-  // Keeps yearly expense data up to date when time progresses
-  const total = calculateTotalExpenses();
+  // Recalculate all player-related expenses
+  const gymCost = player.gymMembership ? 2000 : 0;
+  const dietCost = player.dietPlan ? 1500 : 0;
+  const otherCost = player.otherExpenses || 0;
+  const businessCost = (player.ownedBusinesses || []).reduce(
+    (sum, b) => sum + (b.maintenanceCost || 0),
+    0
+  );
 
-  // If the modal is open, refresh it dynamically
+  // Calculate total expenses
+  const total = gymCost + dietCost + otherCost + businessCost;
+
+  // Store the latest total in player for reference
+  player.totalExpenses = total;
+
+  // ✅ If the expenses modal is open, refresh it live
   const modal = document.querySelector(".modal-content");
   if (modal && modal.querySelector("#expenses-list")) {
-    const gymCost = player.gymMembership ? 2000 : 0;
-    const dietCost = player.dietPlan ? 1500 : 0;
-    const otherCost = player.otherExpenses || 0;
-
     const list = modal.querySelector("#expenses-list");
     list.innerHTML = `
       ${gymCost ? `<li>🏋️ Gym Membership: <strong>$${gymCost.toLocaleString()}</strong></li>` : ""}
       ${dietCost ? `<li>🥗 Diet Plan: <strong>$${dietCost.toLocaleString()}</strong></li>` : ""}
+      ${businessCost ? `<li>🏢 Business Maintenance: <strong>$${businessCost.toLocaleString()}</strong></li>` : ""}
       ${otherCost ? `<li>💸 Other Expenses: <strong>$${otherCost.toLocaleString()}</strong></li>` : ""}
-      ${!gymCost && !dietCost && !otherCost ? `<li>No active expenses at the moment.</li>` : ""}
+      ${!gymCost && !dietCost && !businessCost && !otherCost
+        ? `<li>No active expenses at the moment.</li>`
+        : ""}
     `;
 
     const totalDisplay = modal.querySelector("#total-expenses");
@@ -2337,29 +2348,9 @@ function updateExpensesTab() {
       totalDisplay.innerHTML = `<strong>Total Yearly Expenses:</strong> $${total.toLocaleString()}`;
   }
 
-  const businessExpense = calculateBusinessExpenses();
-
-modal.innerHTML = `
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2>📊 Yearly Expenses</h2>
-    <p>Here’s a breakdown of your yearly costs:</p>
-    <ul id="expenses-list" class="expense-list">
-      ${gymCost ? `<li>🏋️ Gym Membership: <strong>$${gymCost.toLocaleString()}</strong></li>` : ""}
-      ${dietCost ? `<li>🥗 Diet Plan: <strong>$${dietCost.toLocaleString()}</strong></li>` : ""}
-      ${otherCost ? `<li>💸 Other Personal Expenses: <strong>$${otherCost.toLocaleString()}</strong></li>` : ""}
-      ${businessExpense ? `<li>🏭 Business Operations: <strong>$${businessExpense.toLocaleString()}</strong></li>` : ""}
-      ${!gymCost && !dietCost && !otherCost && !businessExpense ? `<li>No active expenses at the moment.</li>` : ""}
-    </ul>
-    <hr>
-    <p id="total-expenses"><strong>Total Yearly Expenses:</strong> $${(total + businessExpense).toLocaleString()}</p>
-    <div class="button-group">
-      <button id="close-expenses-btn">Close</button>
-    </div>
-  </div>
-`;
   console.log("Expenses updated:", total);
 }
+
 
 
 /* ============================================================
