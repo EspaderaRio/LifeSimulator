@@ -2784,8 +2784,13 @@ openLuxuryBtn.addEventListener("click", async () => {
   if (!luxuryItems || Object.keys(luxuryItems).length === 0) {
     await loadLuxuryItems();
   }
-  openLuxuryTab();
+
+  // 🖼️ Preload all SVGs before showing modal
+  preloadLuxuryImages(luxuryItems).then(() => {
+    openLuxuryTab();
+  });
 });
+
 
 closeLuxuryBtn.addEventListener("click", closeLuxuryTab);
 
@@ -2797,6 +2802,35 @@ luxuryItems = await res.json();
 } catch (err) {
 console.error(err);
 }
+}
+
+async function preloadLuxuryImages(itemsData) {
+  const allImages = [];
+
+  Object.keys(itemsData).forEach(category => {
+    const cat = itemsData[category];
+    if (cat.icon) allImages.push(`assets/svgs/${cat.icon}`);
+    if (cat.items && Array.isArray(cat.items)) {
+      cat.items.forEach(item => {
+        if (item.image) allImages.push(`assets/svgs/${item.image}`);
+      });
+    }
+  });
+
+  // Remove duplicates
+  const uniqueImages = [...new Set(allImages)];
+
+  // Preload all images in parallel
+  const preloadPromises = uniqueImages.map(src => {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = img.onerror = resolve;
+      img.src = src;
+    });
+  });
+
+  await Promise.all(preloadPromises);
+  console.log(`🖼️ Preloaded ${uniqueImages.length} luxury SVGs`);
 }
 
 function openLuxuryTab() {
