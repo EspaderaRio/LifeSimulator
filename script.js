@@ -2805,6 +2805,7 @@ console.error(err);
 }
 
 async function preloadLuxuryImages(itemsData) {
+  if (!itemsData) return;
   const allImages = [];
 
   Object.keys(itemsData).forEach(category => {
@@ -2817,21 +2818,17 @@ async function preloadLuxuryImages(itemsData) {
     }
   });
 
-  // Remove duplicates
   const uniqueImages = [...new Set(allImages)];
 
-  // Preload all images in parallel
-  const preloadPromises = uniqueImages.map(src => {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.onload = img.onerror = resolve;
-      img.src = src;
-    });
+  // Preload quietly in the background
+  uniqueImages.forEach(src => {
+    const img = new Image();
+    img.src = src;
   });
 
-  await Promise.all(preloadPromises);
-  console.log(`🖼️ Preloaded ${uniqueImages.length} luxury SVGs`);
+  console.log(`🖼️ Preloaded ${uniqueImages.length} luxury SVGs on startup`);
 }
+
 
 function openLuxuryTab() {
 luxuryChoices.innerHTML = "";
@@ -3163,6 +3160,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 window.openProfessionSelection = openProfessionSelection;
+
+// ===================== EARLY LUXURY PRELOAD ON PAGE LOAD ===================== //
+window.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // Load the luxury data quietly
+    const res = await fetch("luxury.json");
+    if (!res.ok) throw new Error("Failed to preload luxury.json");
+    luxuryItems = await res.json();
+
+    // Preload all SVGs right after the game starts
+    preloadLuxuryImages(luxuryItems);
+  } catch (err) {
+    console.warn("Luxury preload skipped:", err);
+  }
+});
+
 
 
 // ===================== INITIALIZE ===================== //
