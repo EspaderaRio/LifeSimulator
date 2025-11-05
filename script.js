@@ -106,19 +106,7 @@ function clampStats() {
   player.reputation = Math.min(Math.max(player.reputation, 0), 100);
 }
 
-function updateSportHUD() {
-  const fill = document.getElementById("sport-fill");
-  const name = document.getElementById("sport-name");
-  if (!fill || !name) return;
 
-  // update sport name
-  name.textContent = player.chosenSport || "None";
-
-  // update skill bar
-  const percent = clamp(player.sportSkill || 0, 0, 100);
-  fill.style.width = `${percent}%`;
-  fill.style.background = "linear-gradient(90deg, #00c6ff, #0072ff)";
-}
 function showToast(message) {
   const toast = document.createElement("div");
   toast.className = "toast";
@@ -217,6 +205,9 @@ function studyYearly() {
   if (player.chosenSport) {
     player.sportSkill = Math.min((player.sportSkill || 0) + 2, 100);
   }
+if (!player.chosenSport) player.chosenSport = null;
+if (player.sportSkill === undefined) player.sportSkill = 0;
+  updateSportHUD();
 
   // 🎨 Club skill benefit
   if (player.joinedClubs && player.joinedClubs.length > 0) {
@@ -253,6 +244,8 @@ function openSchoolModal() {
   // Initialize player school data if missing
   if (!player.chosenSport) player.chosenSport = null;
   if (player.sportSkill === undefined) player.sportSkill = 0;
+  updateSportHUD();
+
   if (!player.joinedClubs) player.joinedClubs = [];
   if (!player.clubSkills) player.clubSkills = {};
 
@@ -286,6 +279,7 @@ function openSchoolModal() {
         player.chosenSport = sport;
         player.sportSkill = 0;
         showToast(`You joined ${sport}!`);
+        updateSportHUD();
         refreshSchoolActivities();
       };
     });
@@ -400,6 +394,7 @@ function openSchoolModal() {
         action: () => {
           player.sportSkill = Math.min(player.sportSkill + 5, 100);
           gainSkill("athletic", 3, `You trained ${player.chosenSport}. Sport skill +5!`);
+          updateSportHUD();
           refreshSchoolActivities();
         },
       });
@@ -1900,6 +1895,21 @@ function updateStats() {
   updateSportHUD();
 }
 
+// ===================== UPDATE SPORT BAR ===================== //
+function updateSportHUD() {
+  const sportFill = document.getElementById("sport-fill");
+  const sportLabel = document.querySelector(".hud-bar span");
+
+  if (!sportFill || !sportLabel) return;
+
+  // Update width and label safely
+  const percent = Math.min(Math.max(player.sportSkill || 0, 0), 100);
+  sportFill.style.width = `${percent}%`;
+  sportLabel.textContent = `Sport (${player.chosenSport || "None"})`;
+}
+
+
+
 // ===================== INITIALIZE RELATIONSHIPS ===================== //
 function ensureRelationships() {
   if (!player.relationships) {
@@ -3116,6 +3126,100 @@ function surrenderLife() {
   showToast("You surrendered your life. Everything has been reset.");
 }
 
+// ===================== ATHLETE / SPORTS SYSTEM ===================== //
+
+// Initialize sport-related player data
+if (!player.sportType) player.sportType = null;
+if (!player.sportSkill) player.sportSkill = 0;
+if (!player.stamina) player.stamina = 100;
+if (!player.stats) player.stats = { points: 0, assists: 0, rebounds: 0 };
+
+// ===================== OPEN SPORTS TAB ===================== //
+function openSportsTab() {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+
+  modal.innerHTML = `
+    <div class="modal-content sport-modal">
+      <span class="close">&times;</span>
+      <h2>🏀 Athlete Career (${player.sportType || "None"})</h2>
+
+      <div class="hud">
+        <div class="hud-bar">
+          <span>Skill (${player.sportSkill || 0})</span>
+          <div class="bar"><div class="fill" id="skill-fill"></div></div>
+        </div>
+        <div class="hud-bar">
+          <span>Stamina (${player.stamina || 100})</span>
+          <div class="bar"><div class="fill" id="stamina-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="train-btn">🏋️ Train</button>
+        <button id="simulate-btn">🏆 Play Game</button>
+      </div>
+
+      <div id="sport-log" class="scroll-box"></div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector(".close").onclick = () => modal.remove();
+  modal.querySelector("#train-btn").onclick = () => trainSport();
+  modal.querySelector("#simulate-btn").onclick = () => simulateSportGame();
+
+  updateSportBars();
+}
+
+// ===================== TRAINING ===================== //
+function trainSport() {
+  const gain = Math.floor(Math.random() * 3) + 1;
+  player.sportSkill = Math.min(100, player.sportSkill + gain);
+  player.stamina = Math.max(0, player.stamina - 5);
+
+  logSport(`You trained hard and improved your skill by ${gain} points!`);
+  updateSportBars();
+}
+
+// ===================== SIMULATE GAME ===================== //
+function simulateSportGame() {
+  const log = document.getElementById("sport-log");
+  log.innerHTML = "🏀 Simulating game...<br>";
+
+  const playerScore = Math.floor(Math.random() * (player.sportSkill / 2 + 10));
+  const opponentScore = Math.floor(Math.random() * 40 + 20);
+
+  const result = playerScore > opponentScore ? "won" : "lost";
+
+  player.stats.points = playerScore;
+  player.happiness += result === "won" ? 10 : 3;
+  player.reputation += result === "won" ? 5 : 1;
+  player.stamina = Math.max(0, player.stamina - 10);
+
+  log.innerHTML += `<br>You scored ${playerScore} points and ${result} the game!`;
+  updateSportBars();
+}
+
+// ===================== UTILITIES ===================== //
+function logSport(text) {
+  const log = document.getElementById("sport-log");
+  if (log) log.innerHTML += `<br>${text}`;
+}
+
+function updateSportBars() {
+  const skillFill = document.getElementById("skill-fill");
+  const staminaFill = document.getElementById("stamina-fill");
+
+  if (skillFill) skillFill.style.width = `${player.sportSkill}%`;
+  if (staminaFill) staminaFill.style.width = `${player.stamina}%`;
+}
+
+// ===================== OPTIONAL AUTOLOAD ===================== //
+window.addEventListener("load", () => {
+  const sportBar = document.getElementById("sport-fill");
+  if (sportBar) sportBar.style.width = `${player.sportSkill}%`;
+});
 
 
 
@@ -3182,6 +3286,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 (async function init() {
   generateFamily();    // This now automatically syncs family to player.relationships
   clampStats();
+  updateSportHUD(); 
   updateStats();
 })();
 
