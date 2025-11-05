@@ -3277,18 +3277,18 @@ function openAthleteTrainingTab() {
       <span class="close">&times;</span>
       <h2>🏀 Athlete Training (${player.sportType || "None"})</h2>
 
-      <div class="hud">
-        <div class="hud-bar">
+      <div class="hud-sports">
+        <div class="hud-bar-sports">
           <span>Skill (${player.sportSkill || 0})</span>
-          <div class="bar"><div class="fill" id="skill-fill"></div></div>
+          <div class="bar-sports"><div class="fill" id="skill-fill"></div></div>
         </div>
-        <div class="hud-bar">
+        <div class="hud-bar-sports">
           <span>Stamina (${player.stamina || 100})</span>
-          <div class="bar"><div class="fill" id="stamina-fill"></div></div>
+          <div class="bar-sports"><div class="fill" id="stamina-fill"></div></div>
         </div>
       </div>
 
-      <div class="actions">
+      <div class="actions-sports">
         <button id="train-btn">🏋️ Train</button>
         <button id="simulate-btn">🏆 Play Game</button>
       </div>
