@@ -1161,6 +1161,7 @@ function openSpecificSportTab(sport) {
       <p>Train to improve skills or Play to earn money and fame.</p>
       <div class="button-group">
         <button id="train-btn">🏋️ Train ($${s.cost})</button>
+        <button id="training-tab-btn">🏋️ Open Training Tab</button>
         <button id="play-btn">🎮 Play Match</button>
         <button id="retire-btn">🚪 Retire</button>
       </div>
@@ -1169,30 +1170,35 @@ function openSpecificSportTab(sport) {
   document.body.appendChild(modal);
   modal.querySelector(".close").onclick = () => modal.remove();
 
-  // TRAIN ACTION
-  modal.querySelector("#train-btn").onclick = () => {
-    if (player.money < s.cost) return showToast("Not enough money to train!");
-    player.money -= s.cost;
-    player.health -= 5;
-    player.happiness += 3;
+modal.querySelector("#train-btn").onclick = () => {
+  // No money check, training is free
+  player.health -= 5;
+  player.happiness += 3;
 
-    // Improve random skill
-    const rand = Math.random();
-    if (rand < 0.33) stats.strength += 2;
-    else if (rand < 0.66) stats.endurance += 2;
-    else stats.skill += 2;
+  // Improve random skill
+  const rand = Math.random();
+  if (rand < 0.33) stats.strength += 2;
+  else if (rand < 0.66) stats.endurance += 2;
+  else stats.skill += 2;
 
-    if (totalSkill >= stats.level * 30) {
-      stats.level++;
-      showToast(`🏅 You leveled up to Level ${stats.level}!`);
-    } else {
-      showToast("💪 Training improved your stats!");
-    }
+  // Level-up logic
+  const totalSkill = Math.floor((stats.strength + stats.endurance + stats.skill) / 3);
+  if (totalSkill >= stats.level * 30) {
+    stats.level++;
+    showToast(`🏅 You leveled up to Level ${stats.level}!`);
+  } else {
+    showToast("💪 Training improved your stats!");
+  }
 
-    updateStats();
-    modal.remove();
-    openSpecificSportTab(sport);
-  };
+  updateStats();
+  modal.remove();
+  openSpecificSportTab(sport);
+};
+
+modal.querySelector("#training-tab-btn").onclick = () => {
+  modal.remove();
+  openAthleteTrainingTab();
+};
 
   // PLAY MATCH ACTION
   modal.querySelector("#play-btn").onclick = () => {
@@ -3135,14 +3141,15 @@ if (!player.stamina) player.stamina = 100;
 if (!player.stats) player.stats = { points: 0, assists: 0, rebounds: 0 };
 
 // ===================== OPEN SPORTS TAB ===================== //
-function openSportsTab() {
+// Rename this version to something else:
+function openAthleteTrainingTab() {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
 
   modal.innerHTML = `
     <div class="modal-content sport-modal">
       <span class="close">&times;</span>
-      <h2>🏀 Athlete Career (${player.sportType || "None"})</h2>
+      <h2>🏀 Athlete Training (${player.sportType || "None"})</h2>
 
       <div class="hud">
         <div class="hud-bar">
@@ -3171,6 +3178,7 @@ function openSportsTab() {
 
   updateSportBars();
 }
+
 
 // ===================== TRAINING ===================== //
 function trainSport() {
