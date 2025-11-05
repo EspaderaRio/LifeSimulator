@@ -1084,6 +1084,7 @@ function applyYearlyBusinessChanges() {
 
 // ===================== ATHLETE TAB (Expanded) ===================== //
 function openSportsTab(currentSport = null) {
+  
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
 
@@ -1134,6 +1135,7 @@ function openSportsTab(currentSport = null) {
 }
 
 function openSpecificSportTab(sport) {
+  currentSportActive = sport; 
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
 
@@ -3270,11 +3272,11 @@ let currentSportActive = player.subProfession || null;
 
 // ===================== OPEN SPORTS TAB ===================== //
 function openAthleteTrainingTab() {
-  const modal = document.createElement("div");
-  modal.className = "modal-overlay";
+  if (!currentSportActive) return alert("Please select a sport first!");
 
   const stats = player.sportsSkills[currentSportActive];
-  if (!stats) return alert("Please select a sport first!");
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
 
   modal.innerHTML = `
     <div class="modal-content sport-modal">
@@ -3308,7 +3310,6 @@ function openAthleteTrainingTab() {
 
   updateSportBars(stats);
 }
-
 
 
 // ===================== TRAINING ===================== //
