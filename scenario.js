@@ -1460,39 +1460,60 @@ function showScenarioModal(scenario) {
   });
 }
 
-// ---------------- Apply effects ----------------
 function applyChoiceEffects(choice) {
   const effects = choice.effects || {};
+
   for (const key in effects) {
     const v = effects[key];
-    if (key === 'marketImpact') {
-      (player.ownedBusinesses || []).forEach(b => b.marketTrend = clamp(b.marketTrend + v, 0.2, 3));
-    } else if (key === 'ownershipDelta') {
-      const target = player.ownedBusinesses?.[0];
-      if (target) target.ownership = clamp((target.ownership || 100) + v, 0, 100);
-    } else if (key === 'risk') {
-      player.lastRisk = (player.lastRisk || 0) + v;
-    } else if (key === 'profitImpact') {
-      (player.ownedBusinesses || []).forEach(b => {
-        b.profitPerYear = Math.max(1000, b.profitPerYear * (1 + v));
-      });
-    } else if (key === 'efficiencyImpact') {
-      (player.ownedBusinesses || []).forEach(b => {
-        b.efficiency = clamp(b.efficiency + v, 0.5, 2);
-      });
-    } else if (key in player) {
-      player[key] = (player[key] || 0) + v;
-    } else if (!isNaN(Number(v)) && player.ownedBusinesses?.length) {
-      player.ownedBusinesses[0][key] = (player.ownedBusinesses[0][key] || 0) + Number(v);
+
+    switch (key) {
+      case "marketImpact":
+        (player.ownedBusinesses || []).forEach(b => 
+          b.marketTrend = clamp(b.marketTrend + v, 0.2, 3)
+        );
+        break;
+
+      case "ownershipDelta":
+        const target = player.ownedBusinesses?.[0];
+        if (target) target.ownership = clamp((target.ownership || 100) + v, 0, 100);
+        break;
+
+      case "risk":
+        player.lastRisk = (player.lastRisk || 0) + v;
+        break;
+
+      case "profitImpact":
+        (player.ownedBusinesses || []).forEach(b => {
+          b.profitPerYear = Math.max(500, b.profitPerYear * (1 + v));
+        });
+        break;
+
+      case "efficiencyImpact":
+        (player.ownedBusinesses || []).forEach(b => {
+          b.efficiency = clamp(b.efficiency + v, 0.5, 2);
+        });
+        break;
+
+      default:
+        // Applies directly to player stats (can go below zero)
+        if (key in player) {
+          player[key] = (player[key] || 0) + v;
+        } else if (!isNaN(Number(v)) && player.ownedBusinesses?.length) {
+          // fallback for modifying business stats
+          player.ownedBusinesses[0][key] = (player.ownedBusinesses[0][key] || 0) + Number(v);
+        }
+        break;
     }
   }
 
-  player.happiness = clamp(player.happiness || 0, -100, 100);
+  // Just clamp critical stats like happiness/health to stay within limits
+  player.happiness = clamp(player.happiness || 0, 0, 100);
   player.stress = clamp(player.stress || 0, 0, 500);
+  player.health = clamp(player.health || 0, 0, 100);
+
   updateStats();
   displayOwnedBusinesses();
 }
-
 
 // ===================== UNIVERSAL PROFESSION INCOME + PROMOTIONS ===================== //
 function applyYearlyProfessionIncome() {
