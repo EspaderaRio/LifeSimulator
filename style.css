@@ -81,6 +81,8 @@ h2, h3 {
 .stress-bar .fill { background: linear-gradient(90deg, #ff416c, #ff4b2b); }
 .happiness-bar .fill { background: linear-gradient(90deg, #f9d423, #ff4e50); }
 .reputation-bar .fill { background: linear-gradient(90deg, #24c6dc, #514a9d); }
+.sport-bar .fill { background: linear-gradient(90deg, #00c6ff, #0072ff); }
+
 
 .business-grid, .luxury-grid {
   display: grid;
