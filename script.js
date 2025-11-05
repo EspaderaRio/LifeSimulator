@@ -1808,29 +1808,29 @@ function advanceTime(type) {
   const monthsPassed = type === "year" ? 12 : 1;
   player.month += monthsPassed;
 
-  // Update education stage automatically by age
+  // ===================== EDUCATION STAGE SYNC ===================== //
   if (player.age >= 7 && player.age < 13) player.educationStage = "elementary";
   else if (player.age >= 13 && player.age < 16) player.educationStage = "middle";
   else if (player.age >= 16 && player.age < 19) player.educationStage = "high";
-  else if (player.age === 18 && player.educationStage === "high") { onHighSchoolGraduation(); }
-  else if (player.age >= 19 && player.choseCollege) player.educationStage = "college";
+  else if (player.age === 18 && player.educationStage === "high") {
+    onHighSchoolGraduation();
+  } else if (player.age >= 19 && player.choseCollege) player.educationStage = "college";
   else if (player.age >= 23 && player.educationStage === "college") player.educationStage = "graduate";
 
-  // Handle month rollover
+  // ===================== MONTH ROLLOVER ===================== //
   if (player.month > 12) {
     player.month = 1;
     player.age++;
     handleLifeProgression();
   }
 
-  // Trigger yearly scenarios
+  // ===================== YEARLY SCENARIOS ===================== //
   if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
     checkYearlyScenarioTrigger();
   }
 
+  // ===================== BUSINESS INCOME ===================== //
   let totalIncome = 0;
-
-  // Calculate business income safely
   player.ownedBusinesses.forEach(b => {
     if (!b.level) b.level = 1;
     if (!b.efficiency) b.efficiency = 1;
@@ -1849,7 +1849,7 @@ function advanceTime(type) {
     player.reputation += (b.reputationImpact / 12) * monthsPassed;
   });
 
-  // Profession-based income
+  // ===================== PROFESSION INCOME ===================== //
   if (player.profession === "entrepreneur") {
     player.money += 12000 * (monthsPassed / 12);
     player.reputation += 1 * (monthsPassed / 12);
@@ -1861,16 +1861,25 @@ function advanceTime(type) {
     player.reputation += 2 * (monthsPassed / 12);
   }
 
-  // Apply passive income
+  // ===================== APPLY INCOME ===================== //
   player.money += Math.round(totalIncome);
 
-  // Update UI
+  // ===================== YEARLY EXPENSE DEDUCTION ===================== //
+  if (type === "year") {
+    const yearlyExpenses = calculateTotalExpenses();
+    player.money -= yearlyExpenses;
+    showToast(`💸 Paid yearly expenses: $${yearlyExpenses.toLocaleString()}`);
+    updateExpensesTab(); // 🔄 keeps modal up-to-date
+  }
+
+  // ===================== UPDATE UI ===================== //
   clampStats();
   updateStats();
 
   if (player.profession)
     showToast(`You earned income from your ${player.profession} career! Age: ${player.age}`);
 }
+
 
 
 // ===================== STATS UPDATE ===================== //
@@ -2269,12 +2278,40 @@ function calculateTotalExpenses() {
   let total = 0;
   if (player.gymMembership) total += 2000;
   if (player.dietPlan) total += 1500;
-  if (player.ownedBusinesses) {
-    total += player.ownedBusinesses.reduce((sum, b) => sum + (b.maintenanceCost || 0), 0);
-  }
   if (player.otherExpenses) total += player.otherExpenses;
+
+  // Add all business expenses
+  total += calculateBusinessExpenses();
+
   return total;
 }
+
+
+function calculateBusinessExpenses() {
+  if (!player.ownedBusinesses?.length) return 0;
+
+  return player.ownedBusinesses.reduce((sum, biz) => {
+    // baseline company overhead (maintenance)
+    const maintenance = Math.round(biz.cost * 0.05); // 5% yearly maintenance
+
+    // payroll if employees exist
+    const payroll = biz.employeeList?.reduce((s, e) => s + (e.salary || 0) * 12, 0) || 0;
+
+    // manager salary if applicable
+    const managerSalary = biz.hasManager ? Math.round(biz.cost * 0.02) * 12 : 0;
+
+    // product R&D/operations
+    const productOps = (biz.products?.length || 0) * Math.round(biz.cost * 0.01);
+
+    const yearlyCompanyExpense = maintenance + payroll + managerSalary + productOps;
+
+    // store internally for reporting
+    biz.maintenanceCost = yearlyCompanyExpense;
+
+    return sum + yearlyCompanyExpense;
+  }, 0);
+}
+
 
 function updateExpensesTab() {
   // Keeps yearly expense data up to date when time progresses
@@ -2300,6 +2337,27 @@ function updateExpensesTab() {
       totalDisplay.innerHTML = `<strong>Total Yearly Expenses:</strong> $${total.toLocaleString()}`;
   }
 
+  const businessExpense = calculateBusinessExpenses();
+
+modal.innerHTML = `
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>📊 Yearly Expenses</h2>
+    <p>Here’s a breakdown of your yearly costs:</p>
+    <ul id="expenses-list" class="expense-list">
+      ${gymCost ? `<li>🏋️ Gym Membership: <strong>$${gymCost.toLocaleString()}</strong></li>` : ""}
+      ${dietCost ? `<li>🥗 Diet Plan: <strong>$${dietCost.toLocaleString()}</strong></li>` : ""}
+      ${otherCost ? `<li>💸 Other Personal Expenses: <strong>$${otherCost.toLocaleString()}</strong></li>` : ""}
+      ${businessExpense ? `<li>🏭 Business Operations: <strong>$${businessExpense.toLocaleString()}</strong></li>` : ""}
+      ${!gymCost && !dietCost && !otherCost && !businessExpense ? `<li>No active expenses at the moment.</li>` : ""}
+    </ul>
+    <hr>
+    <p id="total-expenses"><strong>Total Yearly Expenses:</strong> $${(total + businessExpense).toLocaleString()}</p>
+    <div class="button-group">
+      <button id="close-expenses-btn">Close</button>
+    </div>
+  </div>
+`;
   console.log("Expenses updated:", total);
 }
 
@@ -2778,16 +2836,93 @@ if (
 }
 
 // ----------------------------- Passive collection helper -----------------------------
-function collectAllPassive() {
-  (player.ownedBusinesses || []).forEach(b => {
-    if (b.hasManager) {
-      const monthly = Math.round((b.profitPerYear/12) * (b.level||1) * (b.efficiency||1) * (b.marketTrend||1));
-      // small random fluctuation
-      const got = Math.round(monthly * (0.9 + Math.random()*0.2));
-      player.money += got;
+// ===================== REALISTIC COMPANY FINANCES ===================== //
+function calculateBusinessIncome(biz) {
+  // calculate real monthly profit based on factors
+  const baseMonthly = (biz.profitPerYear / 12) || (biz.cost * 0.2 / 12);
+  const employeesFactor = 1 + (biz.employeeList.length * 0.03);
+  const trendFactor = biz.marketTrend || 1;
+  const efficiencyFactor = biz.efficiency || 1;
+  const randomFactor = 0.9 + Math.random() * 0.2; // ±10%
+
+  let profit = baseMonthly * employeesFactor * trendFactor * efficiencyFactor * randomFactor;
+
+  // apply manager boost
+  if (biz.hasManager) profit *= 1.1;
+
+  // minor stress penalty
+  profit *= 1 - Math.min((player.stress || 0) / 300, 0.3);
+
+  // ensure valid
+  if (isNaN(profit) || profit < 0) profit = 0;
+
+  return Math.round(profit);
+}
+
+// Called every month or every year depending on your system
+function syncBusinessFinances() {
+  if (!player.ownedBusinesses?.length) return;
+
+  player.ownedBusinesses.forEach(biz => {
+    Object.assign(biz, normalizeBusiness(biz));
+
+    // Initialize balance if not present
+    biz.balance = safeNum(biz.balance, 0);
+
+    // Calculate profit and add to balance
+    const monthlyProfit = calculateBusinessIncome(biz);
+    biz.balance += monthlyProfit;
+
+    // Optional: record last income for analytics
+    biz.lastIncome = monthlyProfit;
+  });
+}
+
+// ===================== YEARLY SYNC (INTEGRATION) ===================== //
+function yearlyScenarioSync() {
+  // collect passive income first
+  syncBusinessFinances();
+
+  // simulate growth, morale, and market trends
+  player.ownedBusinesses.forEach(biz => {
+    // Random market drift
+    biz.marketTrend = clamp(biz.marketTrend * (0.95 + Math.random() * 0.1), 0.5, 2.5);
+
+    // morale affects next year profit
+    const moraleEffect = (biz.morale || 100) / 100;
+    biz.profitPerYear = Math.round(biz.profitPerYear * moraleEffect * (0.9 + Math.random() * 0.2));
+
+    // employees' turnover risk
+    if (biz.employeeList.length > 0 && Math.random() < 0.05) {
+      biz.employeeList.pop(); // random resignation
+      showToast(`${biz.name} lost an employee this year.`);
     }
   });
+
+  const yearlyExpenses = calculateTotalExpenses();
+player.money -= yearlyExpenses;
+showToast(`💸 Paid yearly expenses: $${yearlyExpenses.toLocaleString()}`);
+updateStats();
+
+  // optionally call other yearly scenario functions
+  if (typeof checkYearlyScenarioTrigger === "function") checkYearlyScenarioTrigger();
   updateStats();
+}
+
+// ===================== PLAYER COLLECT PROFITS ===================== //
+function collectCompanyProfit(biz) {
+  if (!biz.balance || biz.balance <= 0) {
+    return showToast(`No available profits in ${biz.name} yet.`);
+  }
+
+  const collected = Math.round(biz.balance);
+  player.money += collected;
+  biz.balance = 0;
+
+  player.happiness += 1;
+  showToast(`Collected $${fmt(collected)} from ${biz.name}'s available profits.`);
+  updateStats();
+  displayOwnedBusinesses();
 }
 
 
