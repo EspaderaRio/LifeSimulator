@@ -106,6 +106,19 @@ function clampStats() {
   player.reputation = Math.min(Math.max(player.reputation, 0), 100);
 }
 
+function updateSportHUD() {
+  const fill = document.getElementById("sport-fill");
+  const name = document.getElementById("sport-name");
+  if (!fill || !name) return;
+
+  // update sport name
+  name.textContent = player.chosenSport || "None";
+
+  // update skill bar
+  const percent = clamp(player.sportSkill || 0, 0, 100);
+  fill.style.width = `${percent}%`;
+  fill.style.background = "linear-gradient(90deg, #00c6ff, #0072ff)";
+}
 function showToast(message) {
   const toast = document.createElement("div");
   toast.className = "toast";
@@ -200,12 +213,27 @@ function studyYearly() {
 
   if (Math.random() < 0.3) player.skills.athletic += 2;
 
+  // 🎯 Sport practice benefit
+  if (player.chosenSport) {
+    player.sportSkill = Math.min((player.sportSkill || 0) + 2, 100);
+  }
+
+  // 🎨 Club skill benefit
+  if (player.joinedClubs && player.joinedClubs.length > 0) {
+    player.joinedClubs.forEach(club => {
+      player.clubSkills[club] = Math.min((player.clubSkills[club] || 0) + 1, 100);
+    });
+  }
+
   // milestone completions
   if ([12, 16, 19, 22].includes(player.age)) {
     player.educationLevel++;
     showToast(`🎓 You completed ${player.schoolStage} school!`);
     if (player.schoolStage === "high") showCollegeFundingModal();
   }
+
+  // 👁️ Update all HUD stats after yearly gain
+  updateStats();
 }
 // ===================== SCHOOL MODAL ===================== //
 const openSchoolBtn = document.getElementById("study-tab-btn");
@@ -1869,6 +1897,7 @@ function updateStats() {
 
   displayOwnedBusinesses();
   displayOwnedLuxury();
+  updateSportHUD();
 }
 
 // ===================== INITIALIZE RELATIONSHIPS ===================== //
