@@ -239,7 +239,6 @@ if (player.sportSkill === undefined) player.sportSkill = 0;
   if ([12, 16, 19, 22].includes(player.age)) {
     player.educationLevel++;
     showToast(`🎓 You completed ${player.schoolStage} school!`);
-    if (player.schoolStage === "high") showCollegeFundingModal();
   }
 
   // 👁️ Update all HUD stats after yearly gain
