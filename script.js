@@ -579,6 +579,7 @@ function joinGreekLife() {
 function showCollegeFundingModal() {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
+  document.body.appendChild(modal);
   replaceModalContent(modal, `
     <div class="modal-content">
       <h2>College Funding Options</h2>
@@ -592,7 +593,6 @@ function showCollegeFundingModal() {
       </div>
     </div>
   `);
-  document.body.appendChild(modal);
 
   modal.querySelector("#option-athletic").onclick = () => {
     if (player.skills.athletic < 60) return showToast("You need 60+ athletic skill!");
