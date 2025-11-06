@@ -1898,23 +1898,27 @@ function advanceTime(type) {
   player.month += monthsPassed;
 
   // ===================== EDUCATION STAGE SYNC ===================== //
-  if (player.age >= 7 && player.age < 13) player.educationStage = "elementary";
-  else if (player.age >= 13 && player.age < 16) player.educationStage = "middle";
-  else if (player.age >= 16 && player.age < 19) player.educationStage = "high";
-  else if (player.age >= 16 && player.age < 19) player.educationStage = "high";
-  else if (player.age >= 19 && player.choseCollege) player.educationStage = "college";
-  else if (player.age >= 23 && player.educationStage === "college") player.educationStage = "graduate";
+  if (player.age < 7) {
+    player.educationStage = "none"; // too young for school
+  } else if (player.age < 13) {
+    player.educationStage = "elementary";
+  } else if (player.age < 16) {
+    player.educationStage = "middle";
+  } else if (player.age < 19) {
+    player.educationStage = "high";
+  } else if (player.age < 23) {
+    player.educationStage = player.choseCollege ? "college" : "finished";
+  } else if (player.age >= 23 && player.educationStage === "college") {
+    player.educationStage = "graduate";
+  } else if (player.age >= 23) {
+    player.educationStage = "finished";
+  }
 
   // ===================== MONTH ROLLOVER ===================== //
   if (player.month > 12) {
     player.month = 1;
     player.age++;
     handleLifeProgression();
-  }
-
-  // ===================== YEARLY SCENARIOS ===================== //
-  if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
-    checkYearlyScenarioTrigger();
   }
 
   // ===================== BUSINESS INCOME ===================== //
@@ -1938,18 +1942,22 @@ function advanceTime(type) {
   });
 
   // ===================== PROFESSION INCOME ===================== //
-  if (player.profession === "entrepreneur") {
-    player.money += 12000 * (monthsPassed / 12);
-    player.reputation += 1 * (monthsPassed / 12);
-  } else if (player.profession === "athlete") {
-    player.money += 8000 * (monthsPassed / 12);
-    player.happiness += 3 * (monthsPassed / 12);
-  } else if (player.profession === "licensed") {
-    player.money += 6000 * (monthsPassed / 12);
-    player.reputation += 2 * (monthsPassed / 12);
+  switch (player.profession) {
+    case "entrepreneur":
+      player.money += 12000 * (monthsPassed / 12);
+      player.reputation += 1 * (monthsPassed / 12);
+      break;
+    case "athlete":
+      player.money += 8000 * (monthsPassed / 12);
+      player.happiness += 3 * (monthsPassed / 12);
+      break;
+    case "licensed":
+      player.money += 6000 * (monthsPassed / 12);
+      player.reputation += 2 * (monthsPassed / 12);
+      break;
   }
 
-  // ===================== APPLY INCOME ===================== //
+  // ===================== APPLY BUSINESS INCOME ===================== //
   player.money += Math.round(totalIncome);
 
   // ===================== YEARLY EXPENSE DEDUCTION ===================== //
@@ -1957,7 +1965,7 @@ function advanceTime(type) {
     const yearlyExpenses = calculateTotalExpenses();
     player.money -= yearlyExpenses;
     showToast(`💸 Paid yearly expenses: $${yearlyExpenses.toLocaleString()}`);
-    updateExpensesTab(); // 🔄 keeps modal up-to-date
+    updateExpensesTab(); // keeps modal up-to-date
   }
 
   // ===================== UPDATE UI ===================== //
@@ -1967,7 +1975,6 @@ function advanceTime(type) {
   if (player.profession)
     showToast(`You earned income from your ${player.profession} career! Age: ${player.age}`);
 }
-
 
 
 // ===================== STATS UPDATE ===================== //
