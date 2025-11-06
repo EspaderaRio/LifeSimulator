@@ -1891,6 +1891,7 @@ function handleLifeProgression() {
 }
 
 
+
 // ===================== TIME PROGRESSION ===================== //
 function advanceTime(type) {
   const monthsPassed = type === "year" ? 12 : 1;
@@ -1900,9 +1901,8 @@ function advanceTime(type) {
   if (player.age >= 7 && player.age < 13) player.educationStage = "elementary";
   else if (player.age >= 13 && player.age < 16) player.educationStage = "middle";
   else if (player.age >= 16 && player.age < 19) player.educationStage = "high";
-  else if (player.age === 18 && player.educationStage === "high") {
-    onHighSchoolGraduation();
-  } else if (player.age >= 19 && player.choseCollege) player.educationStage = "college";
+  else if (player.age >= 16 && player.age < 19) player.educationStage = "high";
+  else if (player.age >= 19 && player.choseCollege) player.educationStage = "college";
   else if (player.age >= 23 && player.educationStage === "college") player.educationStage = "graduate";
 
   // ===================== MONTH ROLLOVER ===================== //
