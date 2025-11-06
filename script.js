@@ -1945,14 +1945,13 @@ function updateStats() {
 // ===================== UPDATE SPORT BAR ===================== //
 function updateSportHUD() {
   const sportFill = document.getElementById("sport-fill");
-  const sportLabel = document.querySelector(".hud-bar span");
+  const sportLabel = document.getElementById("sport-label");
 
   if (!sportFill || !sportLabel) return;
 
-  // Update width and label safely
   const percent = Math.min(Math.max(player.sportSkill || 0, 0), 100);
   sportFill.style.width = `${percent}%`;
-  sportLabel.textContent = `Sport (${player.chosenSport || "None"})`;
+  sportLabel.textContent = `SKILLS (${player.chosenSport || "None"})`;
 }
 
 
