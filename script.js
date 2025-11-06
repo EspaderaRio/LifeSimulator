@@ -1897,35 +1897,52 @@ function advanceTime(type) {
   const monthsPassed = type === "year" ? 12 : 1;
   player.month += monthsPassed;
 
- // ===================== EDUCATION STAGE SYNC ===================== //
-if (player.age < 7) {
-    player.educationStage = "none"; // too young for school
-} else if (player.age < 13) {
-    player.educationStage = "elementary";
-} else if (player.age < 16) {
-    player.educationStage = "middle";
-} else if (player.age < 19) {
-    player.educationStage = "high";
-} else if (player.age < 23) {
-    player.educationStage = player.choseCollege ? "college" : "finished";
-} else if (player.age >= 23 && player.educationStage === "college") {
-    player.educationStage = "graduate";
-} else if (player.age >= 23) {
-    player.educationStage = "finished";
-}
+  // ===================== MONTH ROLLOVER ===================== //
+  if (player.month > 12) {
+    player.month = 1;
+    player.age++;
+  }
 
-  // ===================== YEARLY SCENARIOS ===================== //
-  if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
-    checkYearlyScenarioTrigger();
+  // ===================== EDUCATION STAGE DYNAMIC SYNC ===================== //
+  const previousStage = player.educationStage; // save old stage
+
+  const educationStages = [
+    { name: "none", maxAge: 6 },
+    { name: "elementary", maxAge: 12 },
+    { name: "middle", maxAge: 15 },
+    { name: "high", maxAge: 18 },
+  ];
+
+  if (player.age < 19) {
+    for (const stage of educationStages) {
+      if (player.age <= stage.maxAge) {
+        player.educationStage = stage.name;
+        break;
+      }
+    }
+  } else if (player.age >= 19 && player.age < 23) {
+    player.educationStage = player.choseCollege ? "college" : "finished";
+  } else if (player.age >= 23 && player.educationStage === "college") {
+    player.educationStage = "graduate";
+  } else if (player.age >= 23) {
+    player.educationStage = "finished";
+  }
+
+  // ===================== STAGE TRANSITION EVENTS ===================== //
+  if (previousStage === "high" && player.educationStage !== "high") {
+    onHighSchoolGraduation(); // triggers once
+  }
+  if (previousStage === "college" && player.educationStage === "graduate") {
+    onCollegeGraduation();
   }
 
   // ===================== BUSINESS INCOME ===================== //
   let totalIncome = 0;
-  player.ownedBusinesses.forEach(b => {
-    if (!b.level) b.level = 1;
-    if (!b.efficiency) b.efficiency = 1;
-    if (!b.marketTrend) b.marketTrend = 1;
-    if (!b.ownership) b.ownership = 100;
+  (player.ownedBusinesses || []).forEach(b => {
+    b.level ||= 1;
+    b.efficiency ||= 1;
+    b.marketTrend ||= 1;
+    b.ownership ||= 100;
 
     const incomeForBiz =
       (b.profitPerYear / 12) *
@@ -1940,39 +1957,29 @@ if (player.age < 7) {
   });
 
   // ===================== PROFESSION INCOME ===================== //
-  switch (player.profession) {
-    case "entrepreneur":
-      player.money += 12000 * (monthsPassed / 12);
-      player.reputation += 1 * (monthsPassed / 12);
-      break;
-    case "athlete":
-      player.money += 8000 * (monthsPassed / 12);
-      player.happiness += 3 * (monthsPassed / 12);
-      break;
-    case "licensed":
-      player.money += 6000 * (monthsPassed / 12);
-      player.reputation += 2 * (monthsPassed / 12);
-      break;
-  }
+  if (player.profession) applyYearlyProfessionIncome();
 
   // ===================== APPLY BUSINESS INCOME ===================== //
   player.money += Math.round(totalIncome);
 
-  // ===================== YEARLY EXPENSE DEDUCTION ===================== //
+  // ===================== YEARLY TRIGGER ===================== //
+  if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
+    checkYearlyScenarioTrigger(); // now safe, no double graduation
+  }
+
+  // ===================== YEARLY EXPENSES ===================== //
   if (type === "year") {
     const yearlyExpenses = calculateTotalExpenses();
     player.money -= yearlyExpenses;
     showToast(`💸 Paid yearly expenses: $${yearlyExpenses.toLocaleString()}`);
-    updateExpensesTab(); // keeps modal up-to-date
+    updateExpensesTab?.();
   }
 
-  // ===================== UPDATE UI ===================== //
+  // ===================== FINAL UI UPDATE ===================== //
   clampStats();
   updateStats();
-
-  if (player.profession)
-    showToast(`You earned income from your ${player.profession} career! Age: ${player.age}`);
 }
+
 
 // ===================== STATS UPDATE ===================== //
 function updateStats() {
