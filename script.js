@@ -594,12 +594,51 @@ function joinGreekLife() {
   updateStats();
 }
 
+// ===================== HIGH SCHOOL GRADUATION ===================== //
+function onHighSchoolGraduation() {
+  // Create the modal first
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  document.body.appendChild(modal);
+
+  // Replace its content with options
+  replaceModalContent(modal, `
+    <div class="modal-content">
+      <h2>College Options</h2>
+      <p>Congratulations on finishing high school! What will you do next?</p>
+      <div class="button-group">
+        <button id="accept-scholarship">🎓 Attend College</button>
+        <button id="skip-college">💼 Skip College</button>
+      </div>
+    </div>
+  `);
+
+  // Handle buttons
+  modal.querySelector("#accept-scholarship").onclick = () => {
+    player.choseCollege = true;
+    player.educationStage = "college";
+    showToast("You’re starting college!");
+    modal.remove();
+
+    // 👉 Go to the funding options next
+    showCollegeFundingModal();
+  };
+
+  modal.querySelector("#skip-college").onclick = () => {
+    player.choseCollege = false;
+    modal.remove();
+    showToast("You decided to skip college.");
+    openProfessionSelection(); // 🧩 Only open profession if skipping college
+  };
+}
+
 // ===================== COLLEGE FUNDING MODAL ===================== //
+
 function showCollegeFundingModal() {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
+  document.body.appendChild(modal);
 
-  // Append first, then replace content
   replaceModalContent(modal, `
     <div class="modal-content">
       <h2>College Funding Options</h2>
@@ -614,37 +653,48 @@ function showCollegeFundingModal() {
     </div>
   `);
 
-  // ✅ No more double clicks — these attach instantly
   modal.querySelector("#option-athletic").onclick = () => {
     if (player.skills.athletic < 60) return showToast("You need 60+ athletic skill!");
-    player.tuition = 0; player.collegeFunding = "athletic";
-    startCollege("Athletic Scholarship"); modal.remove();
+    player.tuition = 0;
+    player.collegeFunding = "athletic";
+    startCollege("Athletic Scholarship");
+    modal.remove();
   };
 
   modal.querySelector("#option-academic").onclick = () => {
     if (player.skills.academic < 70 && player.intelligence < 70)
       return showToast("You need higher academic/intelligence stats!");
-    player.tuition = 0; player.collegeFunding = "academic";
-    startCollege("Academic Scholarship"); modal.remove();
+    player.tuition = 0;
+    player.collegeFunding = "academic";
+    startCollege("Academic Scholarship");
+    modal.remove();
   };
 
   modal.querySelector("#option-parttime").onclick = () => {
-    player.tuition = 10000; player.collegeFunding = "parttime"; player.collegeDuration = 5;
-    startCollege("Part-time Job"); modal.remove();
+    player.tuition = 10000;
+    player.collegeFunding = "parttime";
+    player.collegeDuration = 5;
+    startCollege("Part-time Job");
+    modal.remove();
   };
 
   modal.querySelector("#option-parents").onclick = () => {
-    if (player.relationshipWithParents < 60) return showToast("Your parents aren’t ready to support you.");
-    player.tuition = 0; player.collegeFunding = "parents";
-    startCollege("Parents' Support"); modal.remove();
+    if (player.relationshipWithParents < 60)
+      return showToast("Your parents aren’t ready to support you.");
+    player.tuition = 0;
+    player.collegeFunding = "parents";
+    startCollege("Parents' Support");
+    modal.remove();
   };
 
   modal.querySelector("#option-loan").onclick = () => {
-    player.debt = (player.debt || 0) + 30000; player.tuition = 0; player.collegeFunding = "loan";
-    startCollege("Student Loan"); modal.remove();
+    player.debt = (player.debt || 0) + 30000;
+    player.tuition = 0;
+    player.collegeFunding = "loan";
+    startCollege("Student Loan");
+    modal.remove();
   };
 }
-
 
 function startCollege(fundingType) {
   player.educationLevel = 3;
@@ -1827,13 +1877,20 @@ function handleLifeProgression() {
     showToast(`You learned to talk and play with ${family.siblings[0]?.name || "your toys"}.`);
   } else if (player.age === 6) {
     showToast("You started school!");
-  }else if (player.age === 12) {
-  showToast("You discovered a hobby — maybe sports or studying!");
-} else if (player.age === 18 && !player.profession) {
-  showToast("You’re now an adult! Choose your profession!");
-  openProfessionSelection();
+  } else if (player.age === 12) {
+    showToast("You discovered a hobby — maybe sports or studying!");
+  } else if (player.age === 18) {
+    showToast("You’ve finished high school! Time to plan your next step.");
+
+    // 🏫 Show college scholarship modal instead of profession
+    if (typeof onHighSchoolGraduation === "function") {
+      setTimeout(() => {
+        onHighSchoolGraduation();
+      }, 500);
+    }
+  }
 }
-}
+
 
 // ===================== TIME PROGRESSION ===================== //
 function advanceTime(type) {
