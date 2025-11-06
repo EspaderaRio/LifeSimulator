@@ -1914,14 +1914,6 @@ if (player.age < 7) {
     player.educationStage = "finished";
 }
 
-
-  // ===================== MONTH ROLLOVER ===================== //
-  if (player.month > 12) {
-    player.month = 1;
-    player.age++;
-    handleLifeProgression();
-  }
-
   // ===================== YEARLY SCENARIOS ===================== //
   if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
     checkYearlyScenarioTrigger();
