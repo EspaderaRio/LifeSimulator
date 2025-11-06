@@ -1576,23 +1576,35 @@ function checkYearlyScenarioTrigger() {
     showToast("🧩 You’re growing curious and learning basic things!");
   }
 
-  if (player.age >= 7 && player.age < 22) studyYearly();
-
-  switch (player.educationLevel) {
-    case "elementary": player.intelligence += 1; break;
-    case "highschool": player.intelligence += 2; break;
-    case "college": player.intelligence += 3; break;
+  if (player.age >= 7 && player.age < 22) {
+    studyYearly(); // ensures school/college learning applies
   }
 
-  // 4️⃣ Business income updates
+  switch (player.educationStage) { // use educationStage for consistency
+    case "elementary":
+      player.intelligence += 1;
+      break;
+    case "middle":
+      player.intelligence += 1;
+      break;
+    case "high":
+      player.intelligence += 2;
+      break;
+    case "college":
+      player.intelligence += 3;
+      break;
+    case "graduate":
+      player.intelligence += 2;
+      break;
+  }
+
+  // 4️⃣ Business profit variance only (actual income handled in advanceTime)
   (player.ownedBusinesses || []).forEach(biz => {
     const variance = (Math.random() - 0.5) * 0.3;
-    biz.profitPerYear *= (1 + variance * biz.marketTrend);
-    biz.profitPerYear = Math.max(500, biz.profitPerYear);
-    player.money += biz.profitPerYear;
+    biz.profitPerYear *= Math.max(0.5, 1 + variance * biz.marketTrend);
   });
 
-  // 5️⃣ Celebrity transition system
+  // 5️⃣ Celebrity promotion
   const fameThreshold = 80;
   let transitionMsg = "";
 
@@ -1622,17 +1634,17 @@ function checkYearlyScenarioTrigger() {
     }
   }
 
-  // 7️⃣ Universal profession income (including athletes & celebrities)
+  // 7️⃣ Profession income (athlete/entrepreneur/licensed/celebrity)
   if (player.profession) applyYearlyProfessionIncome();
-  
-  studyYearly();
+
   // 8️⃣ Business environment & expenses
   applyYearlyBusinessChanges();
   updateExpensesTab?.();
 
-  // 9️⃣ Random yearly event (scenarios)
+  // 9️⃣ Random yearly event
   if (Math.random() < 0.85) generateScenario();
 
   // 🔄 Final UI update
   updateStats();
 }
+
