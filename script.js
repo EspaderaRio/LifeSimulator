@@ -651,7 +651,7 @@ function refreshSchoolActivities() {
     `
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>${stage === "college" ? "College Life" : stage === "high" ? "High School Life" : "School Life"}</h2>
+      <h2>${player.educationStage === "college" ? "College Life" : "School Life"}</h2>
       <p>Choose an activity:</p>
       <div id="school-activities" class="button-group"></div>
     </div>
@@ -924,6 +924,10 @@ function startCollege(fundingType) {
   updateStats();
 }
 
+function onCollegeGraduation() {
+  showToast("Congratulations! You graduated from college! 🎓");
+  openProfessionSelection();
+}
 
 // ===================== PROFESSION SELECTION ===================== //
 function openProfessionSelection() {
@@ -2123,39 +2127,36 @@ function advanceTime(type) {
   if (player.month > 12) {
     player.month = 1;
     player.age++;
+    handleLifeProgression(); // optional: trigger age-based events
   }
 
   // ===================== EDUCATION STAGE DYNAMIC SYNC ===================== //
-  const previousStage = player.educationStage; // save old stage
+  const previousStage = player.educationStage;
 
-  const educationStages = [
-    { name: "none", maxAge: 6 },
-    { name: "elementary", maxAge: 12 },
-    { name: "middle", maxAge: 15 },
-    { name: "high", maxAge: 18 },
-  ];
-
-  if (player.age < 19) {
-    for (const stage of educationStages) {
-      if (player.age <= stage.maxAge) {
-        player.educationStage = stage.name;
-        break;
-      }
-    }
-  } else if (player.age >= 19 && player.age < 23) {
+  // Elementary → Middle → High → College → Graduate → Finished
+  if (player.age <= 6) {
+    player.educationStage = "none";
+  } else if (player.age <= 12) {
+    player.educationStage = "elementary";
+  } else if (player.age <= 15) {
+    player.educationStage = "middle";
+  } else if (player.age <= 18) {
+    player.educationStage = "high";
+  } else if (player.age <= 22) {
     player.educationStage = player.choseCollege ? "college" : "finished";
-  } else if (player.age >= 23 && player.educationStage === "college") {
+  } else if (player.age === 23 && previousStage === "college") {
     player.educationStage = "graduate";
-  } else if (player.age >= 23) {
+  } else {
     player.educationStage = "finished";
   }
 
   // ===================== STAGE TRANSITION EVENTS ===================== //
   if (previousStage === "high" && player.educationStage !== "high") {
-    onHighSchoolGraduation(); // triggers once
+    if (typeof onHighSchoolGraduation === "function") onHighSchoolGraduation();
   }
+
   if (previousStage === "college" && player.educationStage === "graduate") {
-    onCollegeGraduation();
+    if (typeof onCollegeGraduation === "function") onCollegeGraduation();
   }
 
   // ===================== BUSINESS INCOME ===================== //
@@ -2186,7 +2187,7 @@ function advanceTime(type) {
 
   // ===================== YEARLY TRIGGER ===================== //
   if (type === "year" && typeof checkYearlyScenarioTrigger === "function") {
-    checkYearlyScenarioTrigger(); // now safe, no double graduation
+    checkYearlyScenarioTrigger();
   }
 
   // ===================== YEARLY EXPENSES ===================== //
