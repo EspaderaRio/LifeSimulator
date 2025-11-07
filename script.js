@@ -2119,7 +2119,6 @@ function handleLifeProgression() {
   if (event.message) showToast(event.message);
   if (event.action) event.action();
 }
-}
 
 // ===================== ADVANCE TIME ===================== //
 function advanceTime(type) {
