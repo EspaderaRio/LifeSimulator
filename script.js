@@ -1733,9 +1733,9 @@ function openSpecificLicensedTab(career) {
 
   // Career base data
   const data = {
-    doctor: { health: -10, rep: +5, baseMoney: 5000, happiness: -3 },
-    engineer: { health: -5, rep: +3, baseMoney: 4000, happiness: -2 },
-    lawyer: { health: -7, rep: +4, baseMoney: 4500, happiness: -2 }
+    doctor: { health: -1, rep: +5, baseMoney: 5000, happiness: -1 },
+    engineer: { health: -1, rep: +3, baseMoney: 4000, happiness: -1 },
+    lawyer: { health: -1, rep: +4, baseMoney: 4500, happiness: -1 }
   };
   const c = data[career];
   const stats = player.licensedSkills[career];
@@ -1830,6 +1830,7 @@ function openCelebrityTab(type = null) {
         <button data-celeb="actor">🎬 Actor</button>
         <button data-celeb="musician">🎤 Musician</button>
         <button data-celeb="influencer">📱 Influencer</button>
+        <button data-celeb="athlete"> Athlete </button>
       </div>
     </div>
   `;
@@ -1859,18 +1860,25 @@ function openCelebrityTab(type = null) {
 }
 
 function openSpecificCelebrityTab(type) {
-  const modal = document.createElement("div");
-  modal.className = "modal-overlay";
+  // Ensure celebritySkills object exists
+  player.celebritySkills ||= {};
+  player.celebritySkills[type] ||= { level: 1, exp: 0, fame: 0, gigsDone: 0, moneyEarned: 0 };
 
-  const data = {
-    actor: { money: 5000, fame: 5, happy: 8, health: -3 },
-    musician: { money: 4000, fame: 6, happy: 9, health: -4 },
-    influencer: { money: 3000, fame: 4, happy: 7, health: -2 }
-  };
-  const c = data[type];
   const stats = player.celebritySkills[type];
 
+  const data = {
+    actor: { money: 500000, fame: 5, happy: 8, health: -1 },
+    musician: { money: 400000, fame: 6, happy: 9, health: -1 },
+    influencer: { money: 300000, fame: 4, happy: 7, health: -1 },
+    athlete: { money: 400000, fame: 6, happy: 9, health: -1 }
+  };
+
+  const c = data[type];
+
   const levelBonus = stats.level * 500;
+
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
   modal.innerHTML = `
     <div class="modal-content">
       <span class="close">&times;</span>
@@ -1916,6 +1924,7 @@ function openSpecificCelebrityTab(type) {
     openRetirementOption();
   };
 }
+
 
 // ===================== MODEL TAB ===================== //
 function openModelTab(type = null) {
@@ -1964,8 +1973,8 @@ function openSpecificModelTab(type) {
   modal.className = "modal-overlay";
 
   const data = {
-    runway: { money: 4000, rep: 5, happy: 6, health: -3 },
-    fashion: { money: 3500, rep: 4, happy: 7, health: -2 },
+    runway: { money: 4000, rep: 5, happy: 6, health: -1 },
+    fashion: { money: 3500, rep: 4, happy: 7, health: -1 },
     commercial: { money: 3000, rep: 3, happy: 5, health: -1 }
   };
   const m = data[type];
@@ -2064,9 +2073,9 @@ function openSpecificFreelancerTab(type) {
   modal.className = "modal-overlay";
 
   const data = {
-    developer: { money: 2500, happy: 4, rep: 2, health: -3 },
-    artist: { money: 2000, happy: 6, rep: 3, health: -1 },
-    writer: { money: 1800, happy: 5, rep: 2, health: -1 }
+    developer: { money: 25000, happy: 4, rep: 2, health: -1 },
+    artist: { money: 20000, happy: 6, rep: 3, health: -1 },
+    writer: { money: 18000, happy: 5, rep: 2, health: -1 }
   };
   const f = data[type];
   const stats = player.freelancerSkills[type];
@@ -2858,7 +2867,7 @@ async function loadBusinesses() {
       normalizeBusiness({
         name: "Test Shop",
         cost: 1000,
-        stressImpact: 2,
+        stressImpact: 1,
         reputationImpact: 2,
         image: "default.svg",
       }),
