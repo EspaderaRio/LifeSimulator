@@ -383,10 +383,14 @@ function chooseRomanticInterest(stage, candidates) {
   candidates.forEach(c => {
     const btn = document.createElement("button");
     btn.textContent = `${c.name} (${c.personality})`;
-    btn.onclick = () => interactWithRomanticInterest(c); // Opens romantic interaction modal
+    btn.onclick = () => {
+      startRomanticRelationship(c, "college sweetheart");
+      interactWithRomanticInterest(c); // immediately open interaction modal
+    };
     list.appendChild(btn);
   });
 }
+
 
 // ===================== INTERACT WITH ROMANTIC INTEREST ===================== //
 function interactWithRomanticInterest(partner) {
@@ -595,7 +599,6 @@ function generateClassmates(stage) {
   });
 }
 
-
 // ===================== INTERACT WITH CLASSMATE ===================== //
 function interactWithClassmate(classmate) {
   const modal = document.createElement("div");
@@ -606,7 +609,7 @@ function interactWithClassmate(classmate) {
     replaceModalContent(modal, `
       <div class="modal-content">
         <span class="close">&times;</span>
-        <h3>Interact with ${classmate.name}</h3>
+        <h3>Interact with ${classmate.name} (${classmate.gender})</h3>
         <p><strong>Personality:</strong> ${classmate.personality}</p>
         <p><strong>Interests:</strong> ${classmate.interests}</p>
         <p><strong>Relationship Score:</strong> ${classmate.relationshipScore}</p>
@@ -2257,10 +2260,26 @@ function addFriend(name) {
   updateStats();
 }
 
-function startRomanticRelationship(name, type = "girlfriend") {
+function startRomanticRelationship(partnerObj) {
   ensureRelationships();
-  player.relationships.romantic = { name, type, relationshipScore: 50 };
-  showToast(`You are now in a relationship with ${name} (${type})!`);
+
+  // Determine relationship type based on gender
+  let type;
+  if (partnerObj.gender === "male") {
+    type = "boyfriend";
+  } else if (partnerObj.gender === "female") {
+    type = "girlfriend";
+  } else {
+    type = "partner"; // fallback
+  }
+
+  player.relationships.romantic = {
+    ...partnerObj,  // full partner object
+    type,
+    relationshipScore: partnerObj.relationshipScore || 50
+  };
+
+  showToast(`You are now in a relationship with ${partnerObj.name} (${type})!`);
   updateStats();
 }
 
@@ -2368,6 +2387,12 @@ function renderRelationshipList(container, list) {
 
 // ===================== RELATIONSHIP ACTIONS ===================== //
 function openRelationshipActions(person) {
+  if (person.type === "romantic") {
+    interactWithRomanticInterest(person); // Open romantic interaction modal
+    return;
+  }
+
+  // Otherwise, show normal relationship modal
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
   modal.innerHTML = `
@@ -2388,6 +2413,7 @@ function openRelationshipActions(person) {
   modal.querySelector("#gift-btn").onclick = () => { handleRelationshipInteraction(person, "gift"); modal.remove(); };
   modal.querySelector("#compliment-btn").onclick = () => { handleRelationshipInteraction(person, "compliment"); modal.remove(); };
 }
+
 
 // ===================== HANDLE RELATIONSHIP INTERACTION ===================== //
 function handleRelationshipInteraction(person, action) {
