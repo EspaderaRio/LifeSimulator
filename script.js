@@ -3663,7 +3663,6 @@ function trainSport(stats) {
   updateSportBars(stats);
 }
 
-
 // ===================== SIMULATE GAME ===================== //
 function simulateSportGame() {
   const log = document.getElementById("sport-log");
@@ -3680,7 +3679,13 @@ function simulateSportGame() {
   player.stamina = Math.max(0, player.stamina - 10);
 
   log.innerHTML += `<br>You scored ${playerScore} points and ${result} the game!`;
-  updateSportBars();
+
+  // ✅ Pass the correct stats object
+  updateSportBars({
+    strength: player.strength || 0,
+    endurance: player.endurance || 0,
+    skill: player.sportSkill || 0
+  });
 }
 
 // ===================== UTILITIES ===================== //
@@ -3693,7 +3698,7 @@ function updateSportBars(stats) {
   const skillFill = document.getElementById("skill-fill");
   const staminaFill = document.getElementById("stamina-fill");
 
-  const totalSkill = Math.floor((stats.strength + stats.endurance + stats.skill)/3);
+  const totalSkill = Math.floor((stats.strength + stats.endurance + stats.skill) / 3);
 
   if (skillFill) skillFill.style.width = `${totalSkill}%`;
   if (staminaFill) staminaFill.style.width = `${player.stamina}%`;
@@ -3704,6 +3709,7 @@ window.addEventListener("load", () => {
   const sportBar = document.getElementById("sport-fill");
   if (sportBar) sportBar.style.width = `${player.sportSkill}%`;
 });
+
 
 
 
