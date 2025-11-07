@@ -1564,10 +1564,10 @@ function applyYearlyProfessionIncome() {
 
 // ===================== YEARLY TRIGGER ===================== //
 function checkYearlyScenarioTrigger() {
-  // 1️⃣ Natural life progression
+  // 1️⃣ Life progression messages (birth, age 3, school start, hobbies)
   handleLifeProgression();
 
-  // 2️⃣ Health & lifestyle effects
+  // 2️⃣ Health & lifestyle yearly effects
   applyYearlyHealthAndExpenses();
 
   // 3️⃣ Learning & intelligence growth
@@ -1577,34 +1577,25 @@ function checkYearlyScenarioTrigger() {
   }
 
   if (player.age >= 7 && player.age < 22) {
-    studyYearly(); // ensures school/college learning applies
+    studyYearly(); // school/college skill learning
   }
 
-  switch (player.educationStage) { // use educationStage for consistency
-    case "elementary":
-      player.intelligence += 1;
-      break;
-    case "middle":
-      player.intelligence += 1;
-      break;
-    case "high":
-      player.intelligence += 2;
-      break;
-    case "college":
-      player.intelligence += 3;
-      break;
-    case "graduate":
-      player.intelligence += 2;
-      break;
+  // Extra intelligence boosts per education stage
+  switch (player.educationStage) {
+    case "elementary": player.intelligence += 1; break;
+    case "middle": player.intelligence += 1; break;
+    case "high": player.intelligence += 2; break;
+    case "college": player.intelligence += 3; break;
+    case "graduate": player.intelligence += 2; break;
   }
 
-  // 4️⃣ Business profit variance only (actual income handled in advanceTime)
+  // 4️⃣ Business profit variance (simulation only, income handled in advanceTime)
   (player.ownedBusinesses || []).forEach(biz => {
     const variance = (Math.random() - 0.5) * 0.3;
     biz.profitPerYear *= Math.max(0.5, 1 + variance * biz.marketTrend);
   });
 
-  // 5️⃣ Celebrity promotion
+  // 5️⃣ Celebrity promotion logic
   const fameThreshold = 80;
   let transitionMsg = "";
 
@@ -1646,5 +1637,9 @@ function checkYearlyScenarioTrigger() {
 
   // 🔄 Final UI update
   updateStats();
+
+  // ⚠️ Note: High school / college graduation modals are now ONLY triggered
+  // inside advanceTime() when educationStage changes, to avoid double modal.
 }
+
 
