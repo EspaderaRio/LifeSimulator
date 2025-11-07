@@ -551,14 +551,50 @@ function interactWithRomanticInterest(partner) {
 
 // ===================== CLASSMATE GENERATOR ===================== //
 function generateClassmates(stage) {
-  const firstNames = ["Alex", "Jamie", "Chris", "Taylor", "Jordan", "Sam", "Riley", "Casey", "Morgan", "Avery", "Blake", "Cameron", "Drew", "Emerson", "Finley", "Harper", "Jesse", "Kai", "Logan", "Micah", "Nico", "Peyton", "Quinn", "Reese", "Sawyer", "Skyler", "Toby", "Zion", "Adrian", "Bailey", "Charlie", "Dakota", "Elliot", "Frankie", "Gray", "Hayden", "Indigo", "Jules", "Kendall", "Luca", "Marley", "Noah", "Oakley", "Phoenix", "River", "Shawn", "Tatum", "Val", "Wren", "Zane", "Aiden", "Beau", "Caleb", "Dallas", "Eli", "Felix", "Gavin", "Hunter", "Isaac", "Jaxon", "Kairos", "Landon", "Milo", "Nash", "Orion", "Parker", "Rowan", "Sterling", "Theo", "Uri", "Victor", "Wyatt", "Xander", "Yuri", "Zeke", "Alana", "Brielle", "Cleo", "Delaney", "Esme", "Freya", "Gia", "Hazel", "Isla", "Jade", "Keira", "Luna", "Maya", "Nora", "Opal", "Paisley", "Quiana", "Ruby", "Sienna", "Talia", "Uma", "Vera", "Willow", "Ximena", "Yara", "Zoey", "Amara", "Blair", "Carmen", "Dahlia", "Eliza", "Fiona", "Greta", "Holly", "Ivy", "Jasmine", "Kira", "Lila", "Melody", "Naomi", "Olive", "Piper", "Queenie", "Raven", "Sage", "Trinity", "Ursula", "Violet", "Wendy", "Xyla", "Yvette", "Zara", "Ari", "Blaise", "Cruz", "Devon", "Eden", "Fallon", "Gale", "Harley", "Indie", "Jory", "Kody", "Lior", "Monroe", "Nicolette", "Ocean", "Presley", "Quest", "Rory", "Sasha", "Toni", "Urban", "Vinnie", "Winter", "Xavi", "Yuki", "Zuri", "Ash", "Bryn", "Cory", "Dane", "Ember", "Flynn", "Gem", "Haven", "Ira", "Juno", "Keenan", "Lex", "Milan", "Nova", "Onyx", "Pax", "Quade", "Remy", "Sky", "Toby", "Unity", "Vail", "West", "Xoe", "Yanis", "Zion", "Aubrey","Brady", "Caden", "Demi", "Elias", "Finch", "Gentry", "Huxley", "Imani", "Jace", "Karter", "Lennon", "Maddox", "Nico", "Oak", "Paxton", "Quinlan", "Ryder", "Soren", "Trey", "Ulysses", "Vaughn", "Wells", "Xion", "Yosef", "Zayden", "Anya", "Beatrix", "Calla", "Daria", "Elodie", "Fallon", "Gianna", "Harlow", "Ines", "Jovie", "Kinsley", "Lyra", "Mira", "Noelle", "Odessa", "Paloma", "Quilla", "Rhea", "Selah", "Tess", "Una", "Vienna", "Willa", "Xenia", "Yasmin", "Zadie", "Ainsley", "Belen", "Celeste", "Dixie", "Emmeline", "Farrah", "Goldie", "Honor", "Isadora", "Jemma", "Kaya", "Lacey", "Maisie", "Nina", "Orla", "Primrose", "Quinby", "Rosalie", "Simone", "Tahlia", "Ula", "Veda", "Whitley", "Xochitl", "Yuna", "Zella", "Ariel", "Brook", "Cali", "Delia", "Elli", "Fern", "Giselle", "Hana", "Ilana", "Jana", "Kali", "Lana", "Macy", "Nala", "Oona", "Penny", "Quorra", "Rumi", "Soleil", "Trixie", "Vita", "Wynne", "Zaria"];
-  const personalities = ["Friendly", "Shy", "Outgoing", "Funny", "Serious", "Creative", "Kind", "Curious", "Optimistic", "Thoughtful", "Loyal", "Adventurous", "Empathetic", "Confident", "Quiet", "Talkative", "Caring", "Ambitious", "Generous", "Polite", "Cheerful", "Sensitive", "Independent", "Reliable", "Playful", "Calm", "Assertive", "Gentle", "Energetic", "Patient", "Charming", "Witty", "Reserved", "Bold", "Sincere", "Tough", "Helpful", "Diligent", "Spontaneous", "Modest", "Wise", "Observant", "Passionate", "Easygoing", "Respectful", "Tactful", "Determined", "Mysterious", "Warm", "Idealistic", "Practical", "Competitive", "Affectionate", "Balanced", "Joyful", "Focused", "Open-minded", "Courageous", "Supportive", "Innovative", "Dependable", "Forgiving", "Grateful", "Resourceful", "Sociable", "Trustworthy", "Honest", "Brave", "Gentle", "Rebellious", "Dreamy", "Organized", "Empowered", "Grounded", "Radiant", "Playful", "Tolerant", "Disciplined", "Curious", "Mature", "Lively", "Sympathetic", "Driven", "Cool-headed", "Perceptive", "Nurturing", "Steady", "Inventive", "Quirky", "Serene", "Hardworking", "Peaceful", "Expressive", "Faithful", "Silly", "Adaptable", "Focused", "Sociable", "Proud", "Reserved", "Clever", "Gentle", "Bold", "Kindhearted", "Persistent", "Radiant", "Playful", "Ambitious", "Humorous", "Trusting", "Cautious", "Loyal", "Tidy", "Respectful", "Selfless", "Tough", "Hopeful", "Chill", "Curious", "Assertive", "Polished", "Eccentric", "Reliable", "Sensitive", "Warmhearted", "Observant", "Peaceful", "Determined", "Sensible", "Compassionate", "Generous", "Courageous", "Inventive", "Gentle", "Witty", "Sincere", "Thoughtful", "Cheerful", "Open", "Balanced", "Affectionate", "Idealistic", "Practical", "Competitive", "Joyful", "Focused", "Open-minded", "Courageous", "Supportive", "Innovative", "Dependable", "Forgiving", "Grateful", "Resourceful", "Sociable", "Trustworthy", "Honest", "Brave", "Gentle", "Rebellious", "Dreamy", "Organized", "Empowered", "Grounded", "Radiant", "Playful", "Tolerant", "Disciplined", "Curious", "Mature", "Lively", "Sympathetic", "Driven", "Cool-headed", "Perceptive", "Nurturing", "Steady", "Inventive", "Quirky", "Serene", "Hardworking", "Peaceful", "Expressive", "Faithful", "Silly", "Adaptable", "Focused", "Sociable", "Proud", "Reserved", "Clever", "Gentle", "Bold", "Kindhearted", "Persistent", "Radiant", "Playful", "Ambitious", "Humorous", "Trusting", "Cautious", "Loyal", "Tidy", "Respectful", "Selfless", "Tough", "Hopeful", "Chill", "Curious", "Assertive", "Polished", "Eccentric", "Reliable", "Sensitive", "Warmhearted", "Observant", "Peaceful", "Determined", "Sensible", "Compassionate", "Generous", "Courageous", "Inventive", "Gentle", "Witty", "Sincere", "Thoughtful", "Cheerful"];
-  return Array.from({ length: 5 }, () => ({
-    name: firstNames[Math.floor(Math.random() * firstNames.length)],
-    personality: personalities[Math.floor(Math.random() * personalities.length)],
-    relationshipScore: Math.floor(Math.random() * 40) + 30
-  }));
+  const firstNamesMale = ["Alex", "Chris", "Jordan", "Logan", "Milo", "Nash"];
+  const firstNamesFemale = ["Emma", "Sophia", "Olivia", "Ava", "Mia", "Luna"];
+  const personalities = ["Friendly", "Shy", "Outgoing", "Funny", "Serious", "Creative"];
+  const lifeStories = [
+    "Loves painting and drawing.",
+    "Has a part-time job at the local cafe.",
+    "Enjoys sports and fitness.",
+    "A top student in academics.",
+    "Dreams of traveling the world.",
+    "Plays in a local band."
+  ];
+  const familyBackgrounds = [
+    "Comes from a wealthy family with a strong academic tradition.",
+    "Grew up in a small town with supportive parents.",
+    "Has a single parent who works two jobs.",
+    "Comes from a family of artists and musicians.",
+    "Grew up with siblings and enjoys family gatherings.",
+    "Parents are both teachers, very focused on education.",
+    "Has a large extended family and is very social.",
+    "Family struggled financially but values hard work and perseverance."
+  ];
+  const interestsList = ["Sports", "Music", "Art", "Science", "Drama"];
+
+  return Array.from({ length: 5 }, () => {
+    const gender = Math.random() < 0.5 ? "male" : "female";
+    const name = gender === "male"
+      ? firstNamesMale[Math.floor(Math.random() * firstNamesMale.length)]
+      : firstNamesFemale[Math.floor(Math.random() * firstNamesFemale.length)];
+    const personality = personalities[Math.floor(Math.random() * personalities.length)];
+    const bio = lifeStories[Math.floor(Math.random() * lifeStories.length)];
+    const family = familyBackgrounds[Math.floor(Math.random() * familyBackgrounds.length)];
+    const interests = interestsList[Math.floor(Math.random() * interestsList.length)];
+    return {
+      name,
+      personality,
+      gender,
+      lifeStory: bio,
+      familyBackground: family,
+      interests,
+      relationshipScore: Math.floor(Math.random() * 40) + 30
+    };
+  });
 }
+
 
 // ===================== INTERACT WITH CLASSMATE ===================== //
 function interactWithClassmate(classmate) {
