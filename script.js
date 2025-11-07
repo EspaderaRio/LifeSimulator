@@ -338,57 +338,140 @@ function openSchoolModal() {
     });
   }
 
- // ===================== CLASSMATE INTERACTION ===================== //
-  function chooseClassmate(stage) {
-    const classmates = generateClassmates(stage);
-    replaceModalContent(
-      modal,
-      `
+// ===================== CHOOSE CLASSMATE ===================== //
+function chooseClassmate(stage, classmates) {
+  replaceModalContent(
+    modal,
+    `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Classmates</h2>
+      <div class="button-group" id="classmate-list"></div>
+    </div>
+    `
+  );
+
+  modal.querySelector(".close").onclick = () => refreshSchoolActivities();
+
+  const list = modal.querySelector("#classmate-list");
+
+  classmates.forEach((c) => {
+    const btn = document.createElement("button");
+    btn.textContent = `${c.name} (${c.personality})`;
+    btn.onclick = () => interactWithClassmate(c); // Opens interaction modal
+    list.appendChild(btn);
+  });
+}
+
+// ===================== CHOOSE ROMANTIC INTEREST ===================== //
+function chooseRomanticInterest(stage, candidates) {
+  replaceModalContent(
+    modal,
+    `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>❤️ Choose Someone to Date</h2>
+      <p>Select someone you want to spend more time with:</p>
+      <div class="button-group" id="romantic-list"></div>
+    </div>
+    `
+  );
+
+  modal.querySelector(".close").onclick = () => refreshSchoolActivities();
+  const list = modal.querySelector("#romantic-list");
+
+  candidates.forEach(c => {
+    const btn = document.createElement("button");
+    btn.textContent = `${c.name} (${c.personality})`;
+    btn.onclick = () => interactWithRomanticInterest(c); // Opens romantic interaction modal
+    list.appendChild(btn);
+  });
+}
+
+// ===================== INTERACT WITH ROMANTIC INTEREST ===================== //
+function interactWithRomanticInterest(partner) {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  document.body.appendChild(modal);
+
+  function renderActivityButtons() {
+    replaceModalContent(modal, `
       <div class="modal-content">
         <span class="close">&times;</span>
-        <h2>💬 Interact with a Classmate</h2>
-        <p>Who would you like to talk to?</p>
-        <div class="button-group" id="classmate-list"></div>
+        <h3>Interact with ${partner.name}</h3>
+        <p><strong>Personality:</strong> ${partner.personality}</p>
+        <p><strong>Relationship Score:</strong> ${partner.relationshipScore}</p>
+        <div class="button-group" id="activity-buttons"></div>
       </div>
-      `
-    );
-    modal.querySelector(".close").onclick = () => refreshSchoolActivities();
-    const list = modal.querySelector("#classmate-list");
-    classmates.forEach((c) => {
+    `);
+
+    modal.querySelector(".close").onclick = () => modal.remove();
+
+    const container = modal.querySelector("#activity-buttons");
+
+    const activities = [
+      {
+        label: "💬 Chat",
+        action: () => {
+          partner.relationshipScore += 10;
+          player.happiness += 5;
+          showToast(`You had a nice chat with ${partner.name}! Relationship +10`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "📖 Study Together",
+        action: () => {
+          gainSkill("academic", 3, `You studied with ${partner.name}.`);
+          partner.relationshipScore += 7;
+          showToast(`You studied together. Relationship +7`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "🎉 Hang Out",
+        action: () => {
+          partner.relationshipScore += 15;
+          player.happiness += 8;
+          showToast(`You hung out with ${partner.name}. Relationship +15`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "🎁 Give a Gift",
+        action: () => {
+          partner.relationshipScore += 12;
+          player.happiness += 5;
+          showToast(`You gave a gift to ${partner.name}. Relationship +12`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "💏 Flirt / Kiss",
+        action: () => {
+          if (player.age < 16) {
+            showToast("You're too young for this action.");
+            return;
+          }
+          partner.relationshipScore += 20;
+          player.happiness += 10;
+          showToast(`You flirted with ${partner.name}. Relationship +20`);
+          renderActivityButtons();
+        },
+      }
+    ];
+
+    activities.forEach(act => {
       const btn = document.createElement("button");
-      btn.textContent = `${c.name} (${c.personality})`;
-      btn.onclick = () => interactWithClassmate(c);
-      list.appendChild(btn);
+      btn.textContent = act.label;
+      btn.onclick = act.action;
+      container.appendChild(btn);
     });
   }
 
-  // ===================== ROMANTIC INTEREST ===================== //
-  function chooseRomanticInterest(stage) {
-    const candidates = generateClassmates("college");
-    replaceModalContent(
-      modal,
-      `
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>❤️ Choose Who to Date</h2>
-        <p>Select someone you have a good bond with:</p>
-        <div class="button-group" id="romantic-list"></div>
-      </div>
-      `
-    );
-    modal.querySelector(".close").onclick = () => refreshSchoolActivities();
-    const list = modal.querySelector("#romantic-list");
-    candidates.forEach((c) => {
-      const btn = document.createElement("button");
-      btn.textContent = `${c.name} (${c.personality})`;
-      btn.onclick = () => {
-        startRomanticRelationship(c.name, "college sweetheart");
-        showToast(`You're now dating ${c.name}! ❤️`);
-        refreshSchoolActivities();
-      };
-      list.appendChild(btn);
-    });
-  }
+  renderActivityButtons();
+}
+
  // ===================== REFRESH MAIN SCHOOL SCREEN ===================== //
   function refreshSchoolActivities() {
     replaceModalContent(
@@ -440,7 +523,7 @@ function openSchoolModal() {
       },
       { label: "⚽ Play Sports", action: chooseSport },
       { label: "🎭 Join Club", action: chooseClub },
-      { label: "💬 Interact with Classmate", action: () => chooseClassmate(stage) },
+      { label: "Classmates", action: () => chooseClassmate(stage) },
       ...trainingActivities,
     ];
 
@@ -479,42 +562,110 @@ function generateClassmates(stage) {
 function interactWithClassmate(classmate) {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
-  replaceModalContent(modal, `
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h3>Interact with ${classmate.name}</h3>
-      <div class="button-group">
-        <button id="talk">💬 Talk</button>
-        <button id="study">📖 Study Together</button>
-        <button id="invite">🎉 Hang Out</button>
-      </div>
-    </div>
-  `);
   document.body.appendChild(modal);
-  modal.querySelector(".close").onclick = () => modal.remove();
 
-  modal.querySelector("#talk").onclick = () => {
-    classmate.relationshipScore += 10;
-    player.happiness += 3;
-    addOrUpdateFriend(classmate);
-    showToast(`You had a nice chat with ${classmate.name}!`);
-    modal.remove();
-  };
+  function renderActivityButtons() {
+    replaceModalContent(modal, `
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Interact with ${classmate.name}</h3>
+        <p><strong>Personality:</strong> ${classmate.personality}</p>
+        <p><strong>Interests:</strong> ${classmate.interests}</p>
+        <p><strong>Relationship Score:</strong> ${classmate.relationshipScore}</p>
+        <div class="button-group" id="activity-buttons"></div>
+      </div>
+    `);
 
-  modal.querySelector("#study").onclick = () => {
-    gainSkill("academic", 3, `You studied with ${classmate.name}.`);
-    classmate.relationshipScore += 5;
-    addOrUpdateFriend(classmate);
-    modal.remove();
-  };
+    modal.querySelector(".close").onclick = () => modal.remove();
 
-  modal.querySelector("#invite").onclick = () => {
-    classmate.relationshipScore += 15;
-    player.happiness += 5;
-    addOrUpdateFriend(classmate);
-    showToast(`You and ${classmate.name} had a fun time together!`);
-    modal.remove();
-  };
+    const container = modal.querySelector("#activity-buttons");
+
+    const activities = [
+      {
+        label: "💬 Chat",
+        action: () => {
+          classmate.relationshipScore += 8;
+          player.happiness += 3;
+          addOrUpdateFriend(classmate);
+          showToast(`You had a nice chat with ${classmate.name}! Relationship +8`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "📖 Study Together",
+        action: () => {
+          gainSkill("academic", 3, `You studied with ${classmate.name}.`);
+          classmate.relationshipScore += 5;
+          addOrUpdateFriend(classmate);
+          showToast(`You studied with ${classmate.name}. Relationship +5`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "🎉 Hang Out",
+        action: () => {
+          classmate.relationshipScore += 12;
+          player.happiness += 5;
+          addOrUpdateFriend(classmate);
+          showToast(`You had a fun hangout with ${classmate.name}! Relationship +12`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "🎁 Give a Gift",
+        action: () => {
+          classmate.relationshipScore += 10;
+          player.happiness += 2;
+          addOrUpdateFriend(classmate);
+          showToast(`You gave a gift to ${classmate.name}. Relationship +10`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "📝 Help with Homework",
+        action: () => {
+          gainSkill("academic", 2, `You helped ${classmate.name} with homework.`);
+          classmate.relationshipScore += 7;
+          addOrUpdateFriend(classmate);
+          showToast(`You helped ${classmate.name}. Relationship +7`);
+          renderActivityButtons();
+        },
+      },
+      {
+        label: "🎭 Join Activity/Club",
+        action: () => {
+          classmate.relationshipScore += 6;
+          player.happiness += 2;
+          addOrUpdateFriend(classmate);
+          showToast(`You joined an activity with ${classmate.name}. Relationship +6`);
+          renderActivityButtons();
+        },
+      }
+    ];
+
+    // Flirt option for age >= 16
+    if (player.age >= 16) {
+      activities.push({
+        label: "❤️ Flirt",
+        action: () => {
+          classmate.relationshipScore += 5;
+          player.happiness += 1;
+          addOrUpdateFriend(classmate);
+          showToast(`You flirted with ${classmate.name}. Relationship +5`);
+          renderActivityButtons();
+        },
+      });
+    }
+
+    activities.forEach(act => {
+      const btn = document.createElement("button");
+      btn.textContent = act.label;
+      btn.onclick = act.action;
+      container.appendChild(btn);
+    });
+  }
+
+  renderActivityButtons();
 }
 
 // ===================== ADD FRIEND TO RELATIONSHIP TAB ===================== //
