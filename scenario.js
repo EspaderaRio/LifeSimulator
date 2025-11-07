@@ -1370,53 +1370,62 @@ const scenarioPools = {
 ]
 };
 
-// ---------------- Generate and show a scenario ----------------
+// ===================== SCENARIO GENERATOR ===================== //
 function generateScenario() {
   const pool = [];
-  const prof = (player.profession || '').toLowerCase();
+  const prof = (player.profession || "").toLowerCase();
 
-  // Profession-specific pools
+  // Profession-based scenarios
   switch (prof) {
-    case 'entrepreneur':
+    case "entrepreneur":
       pool.push(...scenarioPools.entrepreneur);
       break;
-    case 'licensed':
+
+    case "licensed":
       const career = player.licensedCareer;
       pool.push(...scenarioPools.licensed.filter(s => !s.career || s.career === career));
       break;
-    case 'athlete':
+
+    case "athlete":
       const sport = player.sport;
       pool.push(...scenarioPools.athlete.filter(s => !s.sport || s.sport === sport));
       break;
-    case 'celebrity':
+
+    case "celebrity":
       pool.push(...scenarioPools.celebrity);
       break;
-    case 'model':
+
+    case "model":
       pool.push(...scenarioPools.model);
       break;
-    case 'freelancer':
+
+    case "freelancer":
       const freeCareer = player.freelancerCareer;
       pool.push(...scenarioPools.freelancer.filter(s => !s.career || s.career === freeCareer));
       break;
-    default:
-      break;
   }
 
-  // Business-based scenarios
+  // Business-owner scenarios
   if ((player.ownedBusinesses || []).length) {
     pool.push(...scenarioPools.businessOwner);
-    const totalBusinessValue = player.ownedBusinesses.reduce((sum, b) => sum + (b.cost * b.level), 0);
-    if (totalBusinessValue > 50000 && Math.random() < 0.5) pool.push(...scenarioPools.businessOwner);
+
+    const totalBusinessValue = player.ownedBusinesses.reduce(
+      (sum, b) => sum + (b.cost * b.level),
+      0
+    );
+
+    if (totalBusinessValue > 50000 && Math.random() < 0.5)
+      pool.push(...scenarioPools.businessOwner);
   }
 
-  // Neutral fallback scenario
+  // Default fallback scenario
   pool.push({
-    id: 'personal_break',
-    title: 'Take a Break?',
-    description: 'You feel burnt out. How do you respond?',
+    id: "personal_break",
+    title: "Take a Break?",
+    description: "You feel burnt out. How do you respond?",
     choices: [
-      { text: 'Take a short vacation', effects: { happiness: +4, stress: -3, money: -1000 }, note: 'Recharge.' },
-      { text: 'Push through', effects: { stress: +3, reputation: +1 }, note: 'Work hard, risk burnout.' }
+      { text: "Take a short vacation", effects: { happiness: +4, stress: -3, money: -1000 }, note: "Recharge your mind." },
+      { text: "Push through", effects: { stress: +3, reputation: +1 }, note: "You stayed productive despite fatigue." }
     ]
   });
 
@@ -1425,221 +1434,180 @@ function generateScenario() {
   showScenarioModal(scenario);
 }
 
-// ---------------- Modal UI ----------------
+// ===================== SCENARIO MODAL ===================== //
 function showScenarioModal(scenario) {
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay scenario-modal';
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay scenario-modal";
   modal.innerHTML = `
     <div class="modal-content scenario-box">
       <h2>${scenario.title}</h2>
       <p>${scenario.description}</p>
       <div class="scenario-choices">
-        ${scenario.choices.map((c, i) => `<button class="choice-btn" data-i="${i}">${c.text}</button>`).join('')}
+        ${scenario.choices.map((c, i) => `
+          <button class="choice-btn" data-i="${i}">${c.text}</button>
+        `).join("")}
       </div>
     </div>
   `;
   document.body.appendChild(modal);
 
-  modal.querySelectorAll('.choice-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.i, 10);
+  modal.querySelectorAll(".choice-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.dataset.i);
       const choice = scenario.choices[idx];
+
       applyChoiceEffects(choice);
+
       if (choice.note) showToast(choice.note);
+
+      // Random flavor feedback
       if (Math.random() < 0.4) {
-        const randomOutcome = [
+        const feedback = [
           "The media praised your decision.",
-          "Employees felt motivated.",
+          "Your employees appreciated it.",
           "Competitors took notice.",
-          "You gained insights for the future."
+          "You gained valuable insights."
         ];
-        showToast(randomOutcome[Math.floor(Math.random() * randomOutcome.length)]);
+        showToast(feedback[Math.floor(Math.random() * feedback.length)]);
       }
+
       modal.remove();
     });
   });
 }
 
+// ===================== APPLY CHOICE EFFECTS ===================== //
 function applyChoiceEffects(choice) {
   const effects = choice.effects || {};
 
   for (const key in effects) {
-    const v = effects[key];
+    const value = effects[key];
 
     switch (key) {
       case "marketImpact":
         (player.ownedBusinesses || []).forEach(b => 
-          b.marketTrend = clamp(b.marketTrend + v, 0.2, 3)
+          b.marketTrend = clamp(b.marketTrend + value, 0.2, 3)
         );
         break;
 
       case "ownershipDelta":
         const target = player.ownedBusinesses?.[0];
-        if (target) target.ownership = clamp((target.ownership || 100) + v, 0, 100);
+        if (target) target.ownership = clamp((target.ownership || 100) + value, 0, 100);
         break;
 
       case "risk":
-        player.lastRisk = (player.lastRisk || 0) + v;
+        player.lastRisk = (player.lastRisk || 0) + value;
         break;
 
       case "profitImpact":
         (player.ownedBusinesses || []).forEach(b => {
-          b.profitPerYear = Math.max(500, b.profitPerYear * (1 + v));
+          b.profitPerYear = Math.max(500, b.profitPerYear * (1 + value));
         });
         break;
 
       case "efficiencyImpact":
         (player.ownedBusinesses || []).forEach(b => {
-          b.efficiency = clamp(b.efficiency + v, 0.5, 2);
+          b.efficiency = clamp(b.efficiency + value, 0.5, 2);
         });
         break;
 
       default:
-        // Applies directly to player stats (can go below zero)
-        if (key in player) {
-          player[key] = (player[key] || 0) + v;
-        } else if (!isNaN(Number(v)) && player.ownedBusinesses?.length) {
-          // fallback for modifying business stats
-          player.ownedBusinesses[0][key] = (player.ownedBusinesses[0][key] || 0) + Number(v);
+        // 🟢 Normal stat handling (like happiness, stress, money, etc.)
+        if (typeof player[key] === "number") {
+          player[key] += value; // ✅ Add or subtract correctly
+        } else if (player.ownedBusinesses?.length && typeof value === "number") {
+          // apply to first business if it's a business stat
+          player.ownedBusinesses[0][key] =
+            (player.ownedBusinesses[0][key] || 0) + value;
         }
         break;
     }
   }
 
-  // Just clamp critical stats like happiness/health to stay within limits
+  // 🧭 Clamp important stats to safe ranges
   player.happiness = clamp(player.happiness || 0, 0, 100);
   player.stress = clamp(player.stress || 0, 0, 500);
   player.health = clamp(player.health || 0, 0, 100);
+  player.money = Math.max(0, player.money || 0); // 🟢 No negative money
 
   updateStats();
   displayOwnedBusinesses();
 }
 
-// ===================== UNIVERSAL PROFESSION INCOME + PROMOTIONS ===================== //
-function applyYearlyProfessionIncome() {
-  let basePay = 0;
 
-  switch (player.profession) {
-    case "licensed":
-      basePay = 5000 + (player.intelligence || 0) * 30 + (player.reputation || 0) * 10;
-      break;
-
-    case "entrepreneur":
-      basePay = (player.reputation || 0) * 50;
-      break;
-
-    case "model":
-      basePay = 3000 + (player.modelSkill?.level || 0) * 800 + (player.modelSkill?.fame || 0) * 20;
-      break;
-
-    case "freelancer":
-      basePay = 2500 + (player.intelligence || 0) * 25 + (player.reputation || 0) * 5;
-      break;
-
-    case "celebrity":
-      const celeb = player.subProfession && player.celebritySkills?.[player.subProfession];
-      if (celeb) basePay = 4000 + celeb.level * 1000 + celeb.fame * 30;
-      break;
-
-    case "athlete":
-      const sport = player.subProfession && player.sportsSkills?.[player.subProfession];
-      if (sport) basePay = 2000 + sport.level * 800 + sport.fame * 20;
-      break;
-  }
-
-  if (basePay > 0) {
-    player.money += basePay;
-    showToast(`💼 You earned $${basePay.toLocaleString()} from your ${capitalize(player.profession)} career!`);
-
-    if (!player.yearsInProfession) player.yearsInProfession = 0;
-    player.yearsInProfession++;
-
-    if (player.yearsInProfession % 5 === 0) {
-      const raise = Math.round(basePay * 0.25);
-      player.money += raise;
-      showToast(`🏆 You received a promotion and a $${raise.toLocaleString()} bonus!`);
-    }
-  }
-}
-
-// ===================== YEARLY TRIGGER ===================== //
+// ===================== YEARLY CHECKER ===================== //
 function checkYearlyScenarioTrigger() {
-  // 1️⃣ Life progression messages (birth, age 3, school start, hobbies)
-  handleLifeProgression();
+  handleLifeProgression();  // Age events
+  applyYearlyHealthAndExpenses(); // Deduct lifestyle costs
 
-  // 2️⃣ Health & lifestyle yearly effects
-  applyYearlyHealthAndExpenses();
-
-  // 3️⃣ Learning & intelligence growth
+  // Learning logic
   if (player.age >= 3 && player.age < 7) {
     player.intelligence += 1;
-    showToast("🧩 You’re growing curious and learning basic things!");
+    showToast("🧩 You're learning basic things!");
   }
+  if (player.age >= 7 && player.age < 22) studyYearly();
 
-  if (player.age >= 7 && player.age < 22) {
-    studyYearly(); // school/college skill learning
-  }
+  // Education bonuses
+  const eduBonus = {
+    "elementary": 1,
+    "middle": 1,
+    "high": 2,
+    "college": 3,
+    "graduate": 2
+  };
+  player.intelligence += eduBonus[player.educationStage] || 0;
 
-  // Extra intelligence boosts per education stage
-  switch (player.educationStage) {
-    case "elementary": player.intelligence += 1; break;
-    case "middle": player.intelligence += 1; break;
-    case "high": player.intelligence += 2; break;
-    case "college": player.intelligence += 3; break;
-    case "graduate": player.intelligence += 2; break;
-  }
-
-  // 4️⃣ Business profit variance (simulation only, income handled in advanceTime)
+  // Business random profit variance
   (player.ownedBusinesses || []).forEach(biz => {
     const variance = (Math.random() - 0.5) * 0.3;
     biz.profitPerYear *= Math.max(0.5, 1 + variance * biz.marketTrend);
   });
 
-  // 5️⃣ Celebrity promotion logic
+  // Fame-to-celebrity promotion logic
+  handleCelebrityPromotion();
+
+  // Celebrity passive income
+  if (player.profession === "celebrity" && player.subProfession && player.celebritySkills) {
+    const celeb = player.celebritySkills[player.subProfession];
+    if (celeb) {
+      const passive = Math.floor(celeb.fame * 40 + celeb.level * 500);
+      player.money += passive;
+      showToast(`💰 Earned $${passive.toLocaleString()} in royalties!`);
+    }
+  }
+
+  // Apply job income
+  if (player.profession) applyYearlyProfessionIncome();
+
+  // Update businesses & expenses
+  applyYearlyBusinessChanges();
+  updateExpensesTab?.();
+
+  // Random yearly event chance
+  if (Math.random() < 0.85) generateScenario();
+
+  // Update UI
+  updateStats();
+}
+
+// ===================== CELEBRITY TRANSITION HANDLER ===================== //
+function handleCelebrityPromotion() {
+  let msg = "";
   const fameThreshold = 80;
-  let transitionMsg = "";
 
   if (player.profession === "actor" && player.actingSkill?.fame >= fameThreshold) {
     player.profession = "celebrity";
     player.subProfession = "actor";
-    transitionMsg = "🌟 You’ve become a celebrity actor due to your fame!";
+    msg = "🌟 You became a celebrity actor!";
   } else if (player.musicSkill?.fame >= fameThreshold && player.profession !== "celebrity") {
     player.profession = "celebrity";
     player.subProfession = "musician";
-    transitionMsg = "🎤 Your fame as a musician made you a celebrity!";
+    msg = "🎤 Your music fame made you a celebrity!";
   } else if (player.profession === "athlete" && player.sportsSkills?.[player.subProfession]?.fame >= fameThreshold) {
     player.profession = "celebrity";
     player.subProfession = "athlete";
-    transitionMsg = "🌟 You’ve become a celebrity athlete due to your fame!";
+    msg = "🌟 You became a celebrity athlete!";
   }
 
-  if (transitionMsg) showToast(transitionMsg);
-
-  // 6️⃣ Celebrity passive income
-  if (player.profession === "celebrity" && player.subProfession && player.celebritySkills) {
-    const celeb = player.celebritySkills[player.subProfession];
-    if (celeb) {
-      const passiveIncome = Math.floor(celeb.fame * 40 + celeb.level * 500);
-      player.money += passiveIncome;
-      showToast(`💰 You earned $${passiveIncome.toLocaleString()} from endorsements and royalties!`);
-    }
-  }
-
-  // 7️⃣ Profession income (athlete/entrepreneur/licensed/celebrity)
-  if (player.profession) applyYearlyProfessionIncome();
-
-  // 8️⃣ Business environment & expenses
-  applyYearlyBusinessChanges();
-  updateExpensesTab?.();
-
-  // 9️⃣ Random yearly event
-  if (Math.random() < 0.85) generateScenario();
-
-  // 🔄 Final UI update
-  updateStats();
-
-  // ⚠️ Note: High school / college graduation modals are now ONLY triggered
-  // inside advanceTime() when educationStage changes, to avoid double modal.
+  if (msg) showToast(msg);
 }
-
-
