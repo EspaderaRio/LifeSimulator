@@ -2102,13 +2102,23 @@ function handleLifeProgression() {
     { age: 3, message: `You learned to talk and play with ${family.siblings[0]?.name || "your toys"}.` },
     { age: 6, message: "You started school!" },
     { age: 12, message: "You discovered a hobby — maybe sports or studying!" },
-    // You can add more milestones here easily
-    // Example: { age: 16, message: "You got your first part-time job!" }
+    {
+      age: 18,
+      action: () => {
+        showToast("You’ve finished high school! Time to plan your next step.");
+        if (typeof onHighSchoolGraduation === "function") onHighSchoolGraduation();
+      }
+    }
   ];
 
   // Find an event that matches the player's current age
   const event = lifeEvents.find(ev => ev.age === player.age);
-  if (event) showToast(event.message);
+  if (!event) return;
+
+  // Trigger either a message or a custom action
+  if (event.message) showToast(event.message);
+  if (event.action) event.action();
+}
 }
 
 // ===================== ADVANCE TIME ===================== //
