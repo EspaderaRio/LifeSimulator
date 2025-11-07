@@ -2104,15 +2104,6 @@ function handleLifeProgression() {
     showToast("You started school!");
   } else if (player.age === 12) {
     showToast("You discovered a hobby — maybe sports or studying!");
-  } else if (player.age === 18) {
-    showToast("You’ve finished high school! Time to plan your next step.");
-
-    // 🏫 Show college scholarship modal instead of profession
-    if (typeof onHighSchoolGraduation === "function") {
-      setTimeout(() => {
-        onHighSchoolGraduation();
-      }, 500);
-    }
   }
 }
 
