@@ -2096,6 +2096,7 @@ if (savedOutfitSrc) {
 
 // ===================== LIFE EVENTS ===================== //
 function handleLifeProgression() {
+  // Trigger age-based events
   if (player.age === 0) {
     showToast(`You were born into the ${family.surname} family!`);
   } else if (player.age === 3) {
@@ -2105,8 +2106,8 @@ function handleLifeProgression() {
   } else if (player.age === 12) {
     showToast("You discovered a hobby — maybe sports or studying!");
   }
+  // High school graduation is now handled in advanceTime()
 }
-
 
 
 // ===================== TIME PROGRESSION ===================== //
@@ -2117,37 +2118,34 @@ function advanceTime(type) {
   // ===================== MONTH ROLLOVER ===================== //
   if (player.month > 12) {
     player.month = 1;
+    const previousStage = player.educationStage; // save stage before increment
     player.age++;
-    handleLifeProgression(); // optional: trigger age-based events
-  }
 
-  // ===================== EDUCATION STAGE DYNAMIC SYNC ===================== //
-  const previousStage = player.educationStage;
+    // Trigger normal life events
+    handleLifeProgression();
 
-  // Elementary → Middle → High → College → Graduate → Finished
-  if (player.age <= 6) {
-    player.educationStage = "none";
-  } else if (player.age <= 12) {
-    player.educationStage = "elementary";
-  } else if (player.age <= 15) {
-    player.educationStage = "middle";
-  } else if (player.age <= 18) {
-    player.educationStage = "high";
-  } else if (player.age <= 22) {
-    player.educationStage = player.choseCollege ? "college" : "finished";
-  } else if (player.age === 23 && previousStage === "college") {
-    player.educationStage = "graduate";
-  } else {
-    player.educationStage = "finished";
-  }
+    // ===================== EDUCATION STAGE DYNAMIC SYNC ===================== //
+    if (player.age <= 6) player.educationStage = "none";
+    else if (player.age <= 12) player.educationStage = "elementary";
+    else if (player.age <= 15) player.educationStage = "middle";
+    else if (player.age <= 18) player.educationStage = "high";
+    else if (player.age <= 22) {
+      player.educationStage = player.choseCollege ? "college" : "finished";
+    } else if (player.age === 23 && player.educationStage === "college") {
+      player.educationStage = "graduate";
+    } else {
+      player.educationStage = "finished";
+    }
 
-  // ===================== STAGE TRANSITION EVENTS ===================== //
-  if (previousStage === "high" && player.educationStage !== "high") {
-    if (typeof onHighSchoolGraduation === "function") onHighSchoolGraduation();
-  }
+    // ===================== TRIGGER GRADUATIONS ===================== //
+    if (previousStage === "high" && player.educationStage !== "high") {
+      // High school → College or Finished
+      if (typeof onHighSchoolGraduation === "function") onHighSchoolGraduation();
+    }
 
-  if (previousStage === "college" && player.educationStage === "graduate") {
-    if (typeof onCollegeGraduation === "function") onCollegeGraduation();
+    if (previousStage === "college" && player.educationStage === "graduate") {
+      if (typeof onCollegeGraduation === "function") onCollegeGraduation();
+    }
   }
 
   // ===================== BUSINESS INCOME ===================== //
@@ -2193,6 +2191,7 @@ function advanceTime(type) {
   clampStats();
   updateStats();
 }
+
 
 
 // ===================== STATS UPDATE ===================== //
