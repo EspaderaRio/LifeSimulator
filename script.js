@@ -854,7 +854,6 @@ function onHighSchoolGraduation() {
 }
 
 // ===================== COLLEGE FUNDING MODAL ===================== //
-
 function showCollegeFundingModal() {
   const modal = document.createElement("div");
   modal.className = "modal-overlay";
@@ -895,7 +894,10 @@ function showCollegeFundingModal() {
     player.tuition = 10000;
     player.collegeFunding = "parttime";
     player.collegeDuration = 5;
+    player.partTimeEarnings = 0;
+    player.collegeStress = 0;
     startCollege("Part-time Job");
+    showToast("💼 You chose to work part-time while studying.");
     modal.remove();
   };
 
@@ -917,15 +919,112 @@ function showCollegeFundingModal() {
   };
 }
 
+// ===================== START COLLEGE ===================== //
 function startCollege(fundingType) {
   player.educationLevel = 3;
   player.inCollege = true;
-  showToast(`You started college through ${fundingType}.`);
+  player.yearsInCollege = 0;
+  showToast(`🎓 You started college through ${fundingType}.`);
   updateStats();
 }
 
+// ===================== COLLEGE YEARLY PROGRESSION ===================== //
+function handleCollegeYearlyProgress() {
+  if (!player.inCollege) return;
+  player.yearsInCollege++;
+
+  switch (player.collegeFunding) {
+    case "athletic":
+      showToast("🏈 Your athletic scholarship covered your tuition this year.");
+      break;
+
+    case "academic":
+      showToast("📚 Your academic scholarship covered your tuition this year.");
+      break;
+
+    case "parents":
+      showToast("👪 Your parents helped cover your college expenses this year.");
+      break;
+
+    case "loan":
+      player.debt = (player.debt || 0) + 2000;
+      showToast("💳 Interest was added to your student loan.");
+      break;
+
+    case "parttime":
+      const earnings = 3000 + Math.floor((player.intelligence + (player.diligence || 50)) / 2);
+      player.money += earnings;
+      player.tuition = Math.max(0, player.tuition - earnings);
+      player.stamina = Math.max(0, (player.stamina || 100) - 5);
+      player.happiness = Math.max(0, (player.happiness || 50) - 2);
+      player.collegeStress = (player.collegeStress || 0) + 10;
+      showToast(`💼 You earned $${earnings.toLocaleString()} from your part-time job this year.`);
+      break;
+  }
+
+  // 🎓 Graduation check
+  if (player.yearsInCollege >= (player.collegeDuration || 4)) {
+    onCollegeGraduation();
+  } else {
+    offerCollegeContinueModal(); // Give the player the choice to continue or drop out
+  }
+
+  updateStats();
+}
+
+// ===================== CONTINUE OR DROP OUT MODAL ===================== //
+function offerCollegeContinueModal() {
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  document.body.appendChild(modal);
+
+  replaceModalContent(modal, `
+    <div class="modal-content">
+      <h3>College Year ${player.yearsInCollege}</h3>
+      <p>You’ve made it another year! You feel ${player.collegeStress > 50 ? "stressed 😩" : "motivated 💪"}.</p>
+      <div class="button-group">
+        <button id="continue-college">Continue College</button>
+        <button id="dropout-college">Drop Out</button>
+      </div>
+    </div>
+  `);
+
+  modal.querySelector("#continue-college").onclick = () => {
+    showToast("📘 You decided to continue your college journey!");
+    modal.remove();
+  };
+
+  modal.querySelector("#dropout-college").onclick = () => {
+    modal.remove();
+    triggerDropout("choice");
+  };
+}
+
+// ===================== DROP OUT SYSTEM (BY CHOICE) ===================== //
+function triggerDropout(reason) {
+  player.inCollege = false;
+  player.educationStage = "none";
+  player.collegeFunding = null;
+
+  let message = "";
+  switch (reason) {
+    case "choice":
+      message = "😔 You decided to drop out of college.";
+      break;
+    default:
+      message = "💤 You left college.";
+  }
+
+  showToast(message);
+  updateStats();
+}
+
+// ===================== ON GRADUATION ===================== //
 function onCollegeGraduation() {
-  showToast("Congratulations! You graduated from college! 🎓");
+  showToast("🎉 Congratulations! You graduated from college!");
+  player.inCollege = false;
+  player.collegeFunding = null;
+  player.partTimeEarnings = 0;
   openProfessionSelection();
 }
 
@@ -2096,7 +2195,6 @@ if (savedOutfitSrc) {
 
 // ===================== LIFE EVENTS (LOOKUP TABLE VERSION) ===================== //
 function handleLifeProgression() {
-  // Define age-based events in a scalable table
   const lifeEvents = [
     { age: 0, message: `You were born into the ${family.surname} family!` },
     { age: 3, message: `You learned to talk and play with ${family.siblings[0]?.name || "your toys"}.` },
@@ -2105,17 +2203,14 @@ function handleLifeProgression() {
     {
       age: 18,
       action: () => {
-        showToast("You’ve finished high school! Time to plan your next step.");
+        showToast("🎓 You’ve finished high school! Time to plan your next step.");
         if (typeof onHighSchoolGraduation === "function") onHighSchoolGraduation();
       }
     }
   ];
 
-  // Find an event that matches the player's current age
   const event = lifeEvents.find(ev => ev.age === player.age);
   if (!event) return;
-
-  // Trigger either a message or a custom action
   if (event.message) showToast(event.message);
   if (event.action) event.action();
 }
@@ -2128,7 +2223,7 @@ function advanceTime(type) {
   // ===================== MONTH ROLLOVER ===================== //
   if (player.month > 12) {
     player.month = 1;
-    const previousStage = player.educationStage; // save stage before age increment
+    const previousStage = player.educationStage;
     player.age++;
 
     // ===================== EDUCATION STAGE DYNAMIC SYNC ===================== //
@@ -2150,7 +2245,10 @@ function advanceTime(type) {
     }
 
     // ===================== AGE-BASED LIFE EVENTS ===================== //
-    handleLifeProgression(); // optional: triggers at ages 0,3,6,12
+    handleLifeProgression();
+
+    // ===================== COLLEGE PROGRESSION ===================== //
+    if (player.inCollege) handleCollegeYearlyProgress();
   }
 
   // ===================== BUSINESS INCOME ===================== //
@@ -2174,7 +2272,19 @@ function advanceTime(type) {
   });
 
   // ===================== PROFESSION INCOME ===================== //
-  if (player.profession) applyYearlyProfessionIncome();
+  if (player.profession) {
+    applyYearlyProfessionIncome();
+  }
+
+  // ===================== COLLEGE PART-TIME INCOME (SPECIAL CASE) ===================== //
+  if (player.collegeFunding === "parttime" && player.inCollege) {
+    // small monthly income instead of yearly
+    const partTimeIncome = Math.round(3000 / 12 * monthsPassed);
+    player.money += partTimeIncome;
+    player.stamina = Math.max(0, player.stamina - 1);
+    player.happiness = Math.max(0, player.happiness - 0.5);
+    showToast(`💼 Earned $${partTimeIncome.toLocaleString()} from part-time work.`);
+  }
 
   // ===================== APPLY BUSINESS INCOME ===================== //
   player.money += Math.round(totalIncome);
