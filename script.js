@@ -523,17 +523,19 @@ function interactWithRomanticInterest(partner) {
       },
       { label: "⚽ Play Sports", action: chooseSport },
       { label: "🎭 Join Club", action: chooseClub },
-      { label: "Classmates", action: () => chooseClassmate(stage) },
+      { label: "💬 Interact with Classmate", action: () => { const classmates = generateClassmates(stage); chooseClassmate(stage, classmates); } },
       ...trainingActivities,
     ];
 
     if (stage === "college") {
       standardActivities.push({
         label: "❤️ Date Someone",
-        action: () => chooseRomanticInterest(stage),
+        action: () => {
+          const candidates = generateClassmates("college");
+          chooseRomanticInterest(stage, candidates);
+        },
       });
     }
-
     standardActivities.forEach((act) => {
       const btn = document.createElement("button");
       btn.textContent = act.label;
