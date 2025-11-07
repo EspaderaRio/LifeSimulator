@@ -2094,23 +2094,24 @@ if (savedOutfitSrc) {
 }
 
 
-// ===================== LIFE EVENTS ===================== //
+// ===================== LIFE EVENTS (LOOKUP TABLE VERSION) ===================== //
 function handleLifeProgression() {
-  // Trigger age-based events
-  if (player.age === 0) {
-    showToast(`You were born into the ${family.surname} family!`);
-  } else if (player.age === 3) {
-    showToast(`You learned to talk and play with ${family.siblings[0]?.name || "your toys"}.`);
-  } else if (player.age === 6) {
-    showToast("You started school!");
-  } else if (player.age === 12) {
-    showToast("You discovered a hobby — maybe sports or studying!");
-  }
-  // High school graduation is now handled in advanceTime()
+  // Define age-based events in a scalable table
+  const lifeEvents = [
+    { age: 0, message: `You were born into the ${family.surname} family!` },
+    { age: 3, message: `You learned to talk and play with ${family.siblings[0]?.name || "your toys"}.` },
+    { age: 6, message: "You started school!" },
+    { age: 12, message: "You discovered a hobby — maybe sports or studying!" },
+    // You can add more milestones here easily
+    // Example: { age: 16, message: "You got your first part-time job!" }
+  ];
+
+  // Find an event that matches the player's current age
+  const event = lifeEvents.find(ev => ev.age === player.age);
+  if (event) showToast(event.message);
 }
 
-
-// ===================== TIME PROGRESSION ===================== //
+// ===================== ADVANCE TIME ===================== //
 function advanceTime(type) {
   const monthsPassed = type === "year" ? 12 : 1;
   player.month += monthsPassed;
@@ -2118,34 +2119,29 @@ function advanceTime(type) {
   // ===================== MONTH ROLLOVER ===================== //
   if (player.month > 12) {
     player.month = 1;
-    const previousStage = player.educationStage; // save stage before increment
+    const previousStage = player.educationStage; // save stage before age increment
     player.age++;
-
-    // Trigger normal life events
-    handleLifeProgression();
 
     // ===================== EDUCATION STAGE DYNAMIC SYNC ===================== //
     if (player.age <= 6) player.educationStage = "none";
     else if (player.age <= 12) player.educationStage = "elementary";
     else if (player.age <= 15) player.educationStage = "middle";
     else if (player.age <= 18) player.educationStage = "high";
-    else if (player.age <= 22) {
-      player.educationStage = player.choseCollege ? "college" : "finished";
-    } else if (player.age === 23 && player.educationStage === "college") {
-      player.educationStage = "graduate";
-    } else {
-      player.educationStage = "finished";
-    }
+    else if (player.age <= 22) player.educationStage = player.choseCollege ? "college" : "finished";
+    else if (player.age === 23 && player.educationStage === "college") player.educationStage = "graduate";
+    else player.educationStage = "finished";
 
-    // ===================== TRIGGER GRADUATIONS ===================== //
+    // ===================== GRADUATION EVENTS ===================== //
     if (previousStage === "high" && player.educationStage !== "high") {
-      // High school → College or Finished
       if (typeof onHighSchoolGraduation === "function") onHighSchoolGraduation();
     }
 
     if (previousStage === "college" && player.educationStage === "graduate") {
       if (typeof onCollegeGraduation === "function") onCollegeGraduation();
     }
+
+    // ===================== AGE-BASED LIFE EVENTS ===================== //
+    handleLifeProgression(); // optional: triggers at ages 0,3,6,12
   }
 
   // ===================== BUSINESS INCOME ===================== //
@@ -2191,7 +2187,6 @@ function advanceTime(type) {
   clampStats();
   updateStats();
 }
-
 
 
 // ===================== STATS UPDATE ===================== //
