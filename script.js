@@ -640,6 +640,98 @@ function interactWithClassmate(classmate) {
   renderActivityButtons();
 }
 
+ // ===================== REFRESH MAIN SCHOOL SCREEN ===================== //
+function refreshSchoolActivities() {
+  // Automatically get the current stage from player
+  const stage = player.educationStage || "middle"; // default to middle if undefined
+  console.log("Current stage:", stage);
+
+  replaceModalContent(
+    modal,
+    `
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>${stage === "college" ? "College Life" : stage === "high" ? "High School Life" : "School Life"}</h2>
+      <p>Choose an activity:</p>
+      <div id="school-activities" class="button-group"></div>
+    </div>
+    `
+  );
+
+  modal.querySelector(".close").onclick = () => modal.remove();
+  const container = modal.querySelector("#school-activities");
+
+  // ===== Training Activities =====
+  const trainingActivities = [];
+  if (player.chosenSport) {
+    trainingActivities.push({
+      label: `🏋️ Train ${player.chosenSport} (${player.sportSkill} skill)`,
+      action: () => {
+        player.sportSkill = Math.min(player.sportSkill + 5, 100);
+        gainSkill("athletic", 3, `You trained ${player.chosenSport}. Sport skill +5!`);
+        updateSportHUD();
+        refreshSchoolActivities(); // recursive call
+      },
+    });
+  }
+
+  player.joinedClubs.forEach((club) => {
+    trainingActivities.push({
+      label: `📚 Train ${club} Club (${player.clubSkills[club]} skill)`,
+      action: () => {
+        player.clubSkills[club] = Math.min(player.clubSkills[club] + 3, 100);
+        gainSkill("creativity", 2, `You practiced in ${club} Club. Club skill +3!`);
+        refreshSchoolActivities();
+      },
+    });
+  });
+
+  // ===== Standard Activities =====
+  const standardActivities = [
+    {
+      label: "📚 Study",
+      action: () =>
+        gainSkill(
+          "academic",
+          stage === "college" ? 5 : stage === "high" ? 4 : stage === "middle" ? 2 : 1,
+          "You studied and improved your skills!"
+        ),
+    },
+    { label: "⚽ Play Sports", action: chooseSport },
+    { label: "🎭 Join Club", action: chooseClub },
+    { label: "💬 Interact with Classmate", action: () => {
+        const classmates = generateClassmates(stage);
+        chooseClassmate(stage, classmates);
+      }
+    },
+    ...trainingActivities,
+  ];
+
+  // ===== College-only Romantic Activity =====
+  if (stage === "college") {
+    standardActivities.push({
+      label: "❤️ Date Someone",
+      action: () => {
+        const candidates = generateClassmates(stage);
+        chooseRomanticInterest(stage, candidates);
+      },
+    });
+  }
+
+  // ===== Render Buttons =====
+  standardActivities.forEach((act) => {
+    const btn = document.createElement("button");
+    btn.textContent = act.label;
+    btn.onclick = act.action;
+    container.appendChild(btn);
+  });
+}
+
+// ===== Initialize Menu Automatically =====
+refreshSchoolActivities();
+
+}
+
 // ===================== ADD FRIEND TO RELATIONSHIP TAB ===================== //
 function addOrUpdateFriend(classmate) {
   ensureRelationships();
