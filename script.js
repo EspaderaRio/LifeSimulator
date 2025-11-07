@@ -419,6 +419,7 @@ function interactWithRomanticInterest(partner) {
         action: () => {
           partner.relationshipScore += 10;
           player.happiness += 5;
+          startRomanticRelationship(partner, partner.gender === "male" ? "boyfriend" : "girlfriend");
           showToast(`You had a nice chat with ${partner.name}! Relationship +10`);
           renderActivityButtons();
         },
@@ -428,6 +429,7 @@ function interactWithRomanticInterest(partner) {
         action: () => {
           gainSkill("academic", 3, `You studied with ${partner.name}.`);
           partner.relationshipScore += 7;
+          startRomanticRelationship(partner, partner.gender === "male" ? "boyfriend" : "girlfriend");
           showToast(`You studied together. Relationship +7`);
           renderActivityButtons();
         },
@@ -437,6 +439,7 @@ function interactWithRomanticInterest(partner) {
         action: () => {
           partner.relationshipScore += 15;
           player.happiness += 8;
+          startRomanticRelationship(partner, partner.gender === "male" ? "boyfriend" : "girlfriend");
           showToast(`You hung out with ${partner.name}. Relationship +15`);
           renderActivityButtons();
         },
@@ -446,6 +449,7 @@ function interactWithRomanticInterest(partner) {
         action: () => {
           partner.relationshipScore += 12;
           player.happiness += 5;
+          startRomanticRelationship(partner, partner.gender === "male" ? "boyfriend" : "girlfriend");
           showToast(`You gave a gift to ${partner.name}. Relationship +12`);
           renderActivityButtons();
         },
@@ -459,6 +463,7 @@ function interactWithRomanticInterest(partner) {
           }
           partner.relationshipScore += 20;
           player.happiness += 10;
+          startRomanticRelationship(partner, partner.gender === "male" ? "boyfriend" : "girlfriend");
           showToast(`You flirted with ${partner.name}. Relationship +20`);
           renderActivityButtons();
         },
@@ -476,81 +481,7 @@ function interactWithRomanticInterest(partner) {
   renderActivityButtons();
 }
 
- // ===================== REFRESH MAIN SCHOOL SCREEN ===================== //
-  function refreshSchoolActivities() {
-    replaceModalContent(
-      modal,
-      `
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>${stage === "college" ? "College Life" : "School Life"}</h2>
-        <p>Choose an activity:</p>
-        <div id="school-activities" class="button-group"></div>
-      </div>
-      `
-    );
-    modal.querySelector(".close").onclick = () => modal.remove();
-    const container = modal.querySelector("#school-activities");
 
-    const trainingActivities = [];
-    if (player.chosenSport) {
-      trainingActivities.push({
-        label: `🏋️ Train ${player.chosenSport} (${player.sportSkill} skill)`,
-        action: () => {
-          player.sportSkill = Math.min(player.sportSkill + 5, 100);
-          gainSkill("athletic", 3, `You trained ${player.chosenSport}. Sport skill +5!`);
-          updateSportHUD();
-          refreshSchoolActivities();
-        },
-      });
-    }
-    player.joinedClubs.forEach((club) => {
-      trainingActivities.push({
-        label: `📚 Train ${club} Club (${player.clubSkills[club]} skill)`,
-        action: () => {
-          player.clubSkills[club] = Math.min(player.clubSkills[club] + 3, 100);
-          gainSkill("creativity", 2, `You practiced in ${club} Club. Club skill +3!`);
-          refreshSchoolActivities();
-        },
-      });
-    });
-
-    const standardActivities = [
-      {
-        label: "📚 Study",
-        action: () =>
-          gainSkill(
-            "academic",
-            stage === "college" ? 5 : stage === "high" ? 4 : stage === "middle" ? 2 : 1,
-            "You studied and improved your skills!"
-          ),
-      },
-      { label: "⚽ Play Sports", action: chooseSport },
-      { label: "🎭 Join Club", action: chooseClub },
-      { label: "💬 Interact with Classmate", action: () => { const classmates = generateClassmates(stage); chooseClassmate(stage, classmates); } },
-      ...trainingActivities,
-    ];
-
-    if (stage === "college") {
-      standardActivities.push({
-        label: "❤️ Date Someone",
-        action: () => {
-          const candidates = generateClassmates("college");
-          chooseRomanticInterest(stage, candidates);
-        },
-      });
-    }
-    standardActivities.forEach((act) => {
-      const btn = document.createElement("button");
-      btn.textContent = act.label;
-      btn.onclick = act.action;
-      container.appendChild(btn);
-    });
-  }
-
-  // Initialize menu
-  refreshSchoolActivities();
-}
 
 
 // ===================== CLASSMATE GENERATOR ===================== //
@@ -711,17 +642,24 @@ function interactWithClassmate(classmate) {
 
 // ===================== ADD FRIEND TO RELATIONSHIP TAB ===================== //
 function addOrUpdateFriend(classmate) {
-  if (!player.relationships.friends) player.relationships.friends = [];
+  ensureRelationships();
+
+  // Check if friend already exists
   const existing = player.relationships.friends.find(f => f.name === classmate.name);
   if (existing) {
-    existing.relationshipScore = Math.min(existing.relationshipScore + 10, 100);
+    existing.relationshipScore = classmate.relationshipScore;
   } else {
-    player.relationships.friends.push({ name: classmate.name, relationshipScore: classmate.relationshipScore });
+    player.relationships.friends.push({
+      name: classmate.name,
+      type: "friend",
+      relationshipScore: classmate.relationshipScore
+    });
   }
 
-  // Refresh modal if open
+  // Refresh relationships tab if it's open
   refreshRelationshipsTab();
 }
+
 
 
 // ===================== REFRESH RELATIONSHIP TAB ===================== //
@@ -2260,28 +2198,27 @@ function addFriend(name) {
   updateStats();
 }
 
-function startRomanticRelationship(partnerObj) {
+function startRomanticRelationship(partnerObj, type = "girlfriend") {
   ensureRelationships();
 
-  // Determine relationship type based on gender
-  let type;
-  if (partnerObj.gender === "male") {
-    type = "boyfriend";
-  } else if (partnerObj.gender === "female") {
-    type = "girlfriend";
-  } else {
-    type = "partner"; // fallback
+  // Automatically determine type based on gender
+  if (!type) {
+    type = partnerObj.gender === "male" ? "boyfriend" : "girlfriend";
   }
 
   player.relationships.romantic = {
-    ...partnerObj,  // full partner object
+    ...partnerObj,
     type,
     relationshipScore: partnerObj.relationshipScore || 50
   };
 
   showToast(`You are now in a relationship with ${partnerObj.name} (${type})!`);
   updateStats();
+
+  // Refresh relationships tab if it's open
+  refreshRelationshipsTab();
 }
+
 
 function addOtherRelationship(name, type = "coworker") {
   ensureRelationships();
